@@ -1,0 +1,99 @@
+import React, { useState, useMemo } from "react";
+import { Box, Typography } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/thumbnails.css";
+
+const useStyles = makeStyles((theme) => ({
+  sale: {
+    position: "absolute",
+    top: 20,
+    left: 20,
+    padding: "2px 8px",
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: 500,
+    textTransform: "uppercase",
+    lineHeight: 1.5,
+    backgroundColor: theme.palette.secondary.main,
+    zIndex: 1,
+  },
+}));
+
+const ProductImageGallery = React.memo(({ product }) => {
+  const classes = useStyles();
+  const [index, setIndex] = useState(0);
+  const [open, setOpen] = useState(false);
+
+  const slides = useMemo(
+    () =>
+      product.images?.map((image) => ({
+        src: image,
+        alt: product.name,
+        thumbnail: image,
+      })),
+    [product.images, product.name]
+  );
+
+  return (
+    <>
+      {product.images?.length > 0 ? (
+        <>
+          <Box onClick={() => setOpen(true)} style={{ cursor: "pointer" }}>
+            <img
+              src={product.images[index]}
+              alt={product.name}
+              style={{ width: "100%" }}
+            />
+          </Box>
+          {product.sale > 0 && (
+            <div className={classes.sale}>{`- ${product.sale}% `}</div>
+          )}
+
+          {/* Thumbnails outside Lightbox */}
+          <Box display="flex" mt={2}>
+            {product.images.map((image, i) => (
+              <img
+                key={i}
+                src={image}
+                alt={`${product.name} thumbnail ${i + 1}`}
+                style={{
+                  width: "auto",
+                  height: "80px",
+                  marginRight: "10px",
+                  border: index === i ? "1px solid #f50057" : "none",
+                  cursor: "pointer",
+                }}
+                onClick={() => setIndex(i)}
+              />
+            ))}
+          </Box>
+
+          <Lightbox
+            open={open}
+            close={() => setOpen(false)}
+            index={index}
+            slides={slides}
+            plugins={[Zoom, Thumbnails]}
+            on={{
+              view: ({ index: current }) => setIndex(current),
+            }}
+            thumbnails={{
+              border: "1px solid #f50057",
+              borderRadius: 8,
+              padding: 4,
+              gap: 18,
+            }}
+          />
+        </>
+      ) : (
+        <Typography>No images available</Typography>
+      )}
+    </>
+  );
+});
+
+export default ProductImageGallery;

@@ -1,0 +1,140 @@
+export interface IUser {
+	_id: string;
+	name: string;
+	email: string;
+	isAdmin?: boolean;
+	height?: number;
+	weight?: number;
+	gender?: string;
+	avatar?: string;
+}
+
+export interface IRegisterResponse {
+	message: string;
+	data: IUser;
+}
+
+export interface ILoginResponse {
+	message: string;
+	data: IUser & {
+		token: string;
+	};
+}
+
+export interface IForgotPasswordResponse {
+	message: string;
+}
+
+export interface IVerifyCodeResponse {
+	message: string;
+	data: {
+		resetToken: string;
+	};
+}
+
+export interface IResetPasswordResponse {
+	message: string;
+}
+
+export interface IGetProfileResponse {
+	message: string;
+	data: IUser;
+}
+
+export interface IUpdateProfileResponse {
+	message: string;
+	data: IUser & {
+		token?: string;
+	};
+}
+
+export interface IGetUsersResponse {
+	message: string;
+	data: {
+		users: IUser[];
+		page: number;
+		pages: number;
+		count: number;
+	};
+}
+
+export interface IGetUserByIdResponse {
+	message: string;
+	data: {
+		user: IUser;
+	};
+}
+
+export interface IUpdateUserResponse {
+	message: string;
+	data: {
+		user: IUser;
+	};
+}
+
+export interface IDeleteUserResponse {
+	message: string;
+}
+
+export interface IAddFavoriteResponse {
+	message: string;
+}
+
+export interface IRemoveFavoriteResponse {
+	message: string;
+}
+
+export interface IGetFavoritesResponse {
+	message: string;
+	data: {
+		favorites: any[];
+		page: number;
+		pages: number;
+		count: number;
+	};
+}
+
+export interface ICheckPurchaseHistoryResponse {
+	message: string;
+	data: {
+		hasPurchaseHistory: boolean;
+		orderCount: number;
+	};
+}
+
+export interface ICheckGenderResponse {
+	message: string;
+	data: {
+		hasGender: boolean;
+		gender?: string;
+	};
+}
+
+export interface ICheckStylePreferenceResponse {
+	message: string;
+	data: {
+		hasStylePreference: boolean;
+		style?: string;
+	};
+}
+
+export interface IGetUsersForTestingQuery {
+	type: "personalization" | "outfit-suggestions";
+	pageNumber?: number;
+	perPage?: number;
+}
+
+export interface IGetUsersForTestingResponse {
+	message: string;
+	data: {
+		type: string;
+		users: IUser[];
+		pagination: {
+			page: number;
+			pages: number;
+			count: number;
+			perPage: number;
+		};
+	};
+}
+

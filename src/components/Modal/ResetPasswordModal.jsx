@@ -1,0 +1,134 @@
+import React, { useState, useEffect } from "react";
+import { useResetPassword } from "../../hooks/api/useUser"; 
+import { useLocation, useHistory } from "react-router-dom";
+import {
+  Button,
+  TextField,
+  Typography,
+  Container,
+  Modal,
+  Backdrop,
+  Fade,
+} from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
+import { makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles((theme) => ({
+  modal: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  root: {
+    marginTop: theme.spacing(8),
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    backgroundColor: theme.palette.background.paper,
+    border: "2px solid #000",
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2, 4, 3),
+    outline: "none",
+  },
+}));
+
+const ResetPasswordModal = ({ open, onClose, resetTokenFromProp }) => {
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [message, setMessage] = useState(null);
+  const classes = useStyles();
+  const location = useLocation();
+  const history = useHistory();
+
+  const resetToken = resetTokenFromProp || (location.state && location.state.resetToken);
+  
+  const resetPasswordMutation = useResetPassword();
+  const { isLoading: loading, error, isSuccess } = resetPasswordMutation;
+
+  useEffect(() => {
+    if (isSuccess) {
+      onClose(); 
+    }
+  }, [isSuccess, history, onClose]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      setMessage("Passwords do not match");
+    } else {
+      if (resetToken) {
+        try {
+          await resetPasswordMutation.mutateAsync({ body: { password }, token: resetToken });
+        } catch (error) {
+          console.error("Reset password failed:", error);
+        }
+      } else {
+        setMessage("Reset token not found. Please go back to forgot password and try again.");
+      }
+    }
+  };
+
+  return (
+    <Modal
+      aria-labelledby="transition-modal-title"
+      aria-describedby="transition-modal-description"
+      className={classes.modal}
+      open={open}
+      onClose={onClose}
+      closeAfterTransition
+      BackdropComponent={Backdrop}
+      BackdropProps={{
+        timeout: 500,
+      }}
+    >
+      <Fade in={open}>
+        <Container component="main" maxWidth="xs">
+          <div className={classes.root}>
+            <Typography component="h1" variant="h5">
+              Reset Password
+            </Typography>
+            {error && <Alert severity="error">{error}</Alert>}
+            {message && <Alert severity="error">{message}</Alert>}
+            <form onSubmit={handleSubmit}>
+              <TextField
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="New Password"
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <TextField
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                name="confirmPassword"
+                label="Confirm New Password"
+                type="password"
+                id="confirmPassword"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="secondary"
+                disabled={loading}
+              >
+                {loading ? "Updating..." : "Update Password"}
+              </Button>
+            </form>
+          </div>
+        </Container>
+      </Fade>
+    </Modal>
+  );
+};
+
+export default ResetPasswordModal;
