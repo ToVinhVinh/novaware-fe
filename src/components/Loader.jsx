@@ -1,7 +1,7 @@
 import React from 'react';
 import { CircularProgress } from '@material-ui/core';
 
-const Loader = ({ my }) => {
+const Loader = ({ my = 40 }) => {
   return (
     <div
       style={{
@@ -15,10 +15,6 @@ const Loader = ({ my }) => {
       <CircularProgress color='secondary' />
     </div>
   );
-};
-
-Loader.defaultProps = {
-  my: 40,
 };
 
 export default Loader;

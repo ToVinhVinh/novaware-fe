@@ -11,6 +11,7 @@ import { logout } from "../actions/userActions";
 import { openChatDrawer } from "../actions/chatActions";
 import { useGetCategories } from "../hooks/api/useCategory";
 import { useGetBrands } from "../hooks/api/useBrand";
+import { useGetFavorites } from "../hooks/api/useUser";
 import { FaHeart } from 'react-icons/fa';
 import { openFavoriteDrawer } from "../actions/favoriteActions";
 import {
@@ -193,10 +194,12 @@ const Header = ({
   // Hooks for API data
   const { data: categoriesResponse, isLoading: loadingCategories, error: errorCategories } = useGetCategories();
   const { data: brandsResponse, isLoading: loadingBrands, error: errorBrands } = useGetBrands();
+  const { data: favoritesResponse } = useGetFavorites(userInfo?._id || "");
   
   const categoriesRaw = categoriesResponse?.data?.categories || [];
   const categories = Array.isArray(categoriesRaw) ? categoriesRaw : [];
   const brands = brandsResponse?.data?.brands || [];
+  const favoriteItems = favoritesResponse?.data?.favoriteItems || [];
 
   // scroll effect
   const trigger = useScrollTrigger({
@@ -265,9 +268,6 @@ const Header = ({
     dispatch(filterClearAll());
     handleCloseDrawer();
   };
-
-  const favoriteList = useSelector((state) => state.favoriteList);
-  const { favoriteItems = [] } = favoriteList;
 
   const handleFavoriteClick = () => {
     dispatch(openFavoriteDrawer());

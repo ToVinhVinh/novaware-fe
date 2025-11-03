@@ -5,6 +5,7 @@ import store from './store.js';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { ThemeProvider } from '@material-ui/core/styles';
 import theme from './themes/theme';
+import './index.css';
 import './assets/scss/style.scss';
 import App from './App.jsx';
 import axios from 'axios';

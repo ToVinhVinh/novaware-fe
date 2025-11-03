@@ -76,7 +76,8 @@ const FavoritePreview = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
 
-  const isOpenDrawer = useSelector((state) => state.favoriteDrawer);
+  const favoriteDrawer = useSelector((state) => state.favoriteDrawer || { open: false });
+  const isOpenDrawer = favoriteDrawer.open || false;
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 

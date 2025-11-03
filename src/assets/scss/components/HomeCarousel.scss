@@ -1,123 +1,80 @@
-.carousel .slide {
-  z-index: 1 !important; /* Đảm bảo các slide khác nằm dưới */
-}
-
-.carousel .slide.selected {
-  z-index: 2 !important; /* Slide hiện tại nằm trên các slide khác */
-}
-
-.banner__link {
-  cursor: pointer;
-  z-index: 10;
-  position: relative;
-  font-size: 36px !important;
-  font-weight: bold;
-  color: #ff4081 !important;
-}
-
-.control-arrow {
-  padding: 0 24px !important;
+// Swiper Navigation Buttons
+.swiper-button-next,
+.swiper-button-prev {
+  color: white !important;
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 50% !important;
+  transition: all 0.3s ease !important;
+  
   &:hover {
-    background: none !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
   }
-
-  &.control-prev {
-    &::before {
-      border-right-color: #eea8a9 !important;
-    }
-  }
-
-  &.control-next {
-    &::before {
-      border-left-color: #eea8a9 !important;
-    }
+  
+  &::after {
+    font-size: 20px !important;
+    font-weight: bold !important;
   }
 }
 
-.control-dots {
-  .dot.selected {
-    background-color: #ff4081 !important;
-    width: 10px !important;
-    height: 10px !important;
+// Custom Pagination Bullets - Override tất cả pagination bullets
+.swiper-pagination .swiper-pagination-bullet,
+.swiper-pagination-bullet,
+.swiper-pagination-bullet-custom {
+  width: 12px !important;
+  height: 12px !important;
+  background: rgba(156, 163, 175, 0.6) !important; // gray nhạt
+  border-radius: 50% !important; // Đảm bảo là hình tròn
+  margin: 0 6px !important;
+  transition: all 0.3s ease !important;
+  opacity: 1 !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  border: none !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  cursor: pointer !important; // Hiển thị cursor pointer khi hover
+}
+
+.swiper-pagination .swiper-pagination-bullet-active,
+.swiper-pagination-bullet-active,
+.swiper-pagination-bullet-custom-active {
+  background: white !important;
+  outline: 2px solid white !important;
+  outline-offset: 3px !important;
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 50% !important; // Đảm bảo là hình tròn
+  display: inline-block !important;
+  vertical-align: middle !important;
+  border: none !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+}
+
+.swiper-pagination {
+  bottom: 30px !important;
+  
+  // Đảm bảo tất cả bullets là hình tròn
+  * {
+    border-radius: 50% !important;
   }
 }
 
-.carousel {
-  &__slide {
-    position: relative;
-    height: 100vh;
-  }
-
-  &__img {
-    min-height: 60vh;
-    height: 100vh;
-    width: 100% !important;
-    object-fit: cover;
-  }
-
-  &__banner {
-    position: absolute;
-    top: 50%;
-    text-transform: capitalize;
-    transform: translateY(-50%);
-    width: 50%;
-
-    &--right {
-      right: 0;
-      padding-right: 10%;
-      text-align: right;
-    }
-
-    &--left {
-      left: 0;
-      padding-left: 10%;
-      text-align: left;
-    }
-
-    .banner__subtitle {
-      display: inline-block;
-      text-transform: uppercase;
-      background-color: rgba(0, 0, 0, 0.8);
-      color: #fff;
-      font-size: 11.4px;
-      font-weight: 600;
-      line-height: 24px;
-      letter-spacing: 0.1em;
-      padding: 2px 8px;
-      border-radius: 3px;
-      margin: 0 0 20px;
-    }
-
-    .banner__title {
-      color: #282828;
-      font-size: 50px;
-      font-weight: 400;
-      line-height: 1.1;
-      margin: 0 0 28px;
-    }
-
-    .banner__link {
-      color: #fa0a0a !important;
-      font-size: 36px !important;
-      z-index: 10;
-      position: relative;
-      font-weight: bold;
-    }
-  }
-}
-
+// Responsive adjustments
 @media (max-width: 767px) {
-  .banner__title {
-    font-size: 1.8rem !important;
+  .swiper-button-next,
+  .swiper-button-prev {
+    width: 40px !important;
+    height: 40px !important;
+    
+    &::after {
+      font-size: 16px !important;
+    }
   }
-
-  .carousel__banner .banner__link {
-    font-size: 13px !important;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 991px) {
-  .banner__title {
-    font-size: 2.6rem !important;
+  
+  .swiper-pagination {
+    bottom: 20px !important;
   }
 }

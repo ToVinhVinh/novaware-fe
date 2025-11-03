@@ -98,7 +98,7 @@ const ForgotPasswordModal = ({ open, onClose }) => {
               Forgot Password
             </Typography>
             {error && <Alert severity="error">{error}</Alert>}
-            {success && <Alert severity="success">{message.message}</Alert>}
+            {isSuccess && message && <Alert severity="success">{message}</Alert>}
             {!showCodeInput ? (
               <form onSubmit={handleEmailSubmit}>
                 <TextField
