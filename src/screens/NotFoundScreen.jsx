@@ -24,7 +24,7 @@ const NotFoundScreen = () => {
   const classes = useStyles();
 
   return (
-    <Container className={classes.root}>
+    <Container style={{ marginBottom: 140, maxWidth: "100%" }}>
       <Typography variant="h1" className={classes.title}>
         404
       </Typography>

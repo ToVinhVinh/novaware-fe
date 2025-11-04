@@ -339,7 +339,7 @@ const ProductEditScreen = ({ match, history }) => {
 
   // Render
   return (
-    <Container maxWidth="xl" className={classes.container}>
+    <Container style={{ marginBottom: 140, maxWidth: "100%" }}>
       <Meta title="Edit Product" />
       <Grid
         container

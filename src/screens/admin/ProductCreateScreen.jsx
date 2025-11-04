@@ -289,7 +289,7 @@ const ProductCreateScreen = ({ history }) => {
 
   // Render
   return (
-    <Container maxWidth="xl" style={{ marginBottom: 48 }}>
+    <Container style={{ marginBottom: 140, maxWidth: "100%" }}>
       <Meta title="Create Product" />
       <Grid
         container

@@ -1,4 +1,3 @@
-import React from "react";
 import { Button } from "@material-ui/core";
 import { Link as RouterLink } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -8,7 +7,6 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "../../assets/scss/components/HomeCarousel.scss";
 
-// Import banner images
 import banner1 from "../../assets/images/banner1.webp";
 import banner2 from "../../assets/images/banner2.webp";
 import banner3 from "../../assets/images/banner3.webp";

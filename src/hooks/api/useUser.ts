@@ -17,14 +17,6 @@ import {
 import * as UserTypes from '../../interface/response/user';
 import * as UserRequestTypes from '../../interface/request/user';
 
-// Queries
-export const useGetProfile = () => {
-	return useQuery<UserTypes.IGetProfileResponse, Error>({
-		queryKey: ['users', 'profile'],
-		queryFn: getProfile,
-	});
-};
-
 export const useGetUsers = (query?: UserRequestTypes.IGetUsersQuery) => {
 	return useQuery<UserTypes.IGetUsersResponse, Error>({
 		queryKey: ['users', 'list', query],

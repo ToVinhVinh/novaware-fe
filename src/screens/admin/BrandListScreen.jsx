@@ -192,7 +192,7 @@ const BrandListScreen = ({ history }) => {
   ];
 
   return (
-    <Container className={classes.container}>
+    <Container style={{ marginBottom: 140, maxWidth: "100%" }}>
       <SnackbarMessage />
       <Grid container className={classes.breadcrumbsContainer}>
         <Grid item xs={12}>

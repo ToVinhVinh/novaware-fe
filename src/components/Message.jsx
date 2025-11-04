@@ -1,7 +1,31 @@
 import Alert from '@material-ui/lab/Alert';
-import React from 'react';
 
 const Message = ({ severity = 'error', children, mt = 16, mb = 16, ml, mr, m }) => {
+  const renderContent = () => {
+    if (children === null || children === undefined) {
+      return 'An error occurred';
+    }
+    
+    if (children instanceof Error) {
+      return children.message || String(children);
+    }
+    
+    if (typeof children === 'object') {
+      if (children.response?.data?.message) {
+        return children.response.data.message;
+      }
+      if (children.message) {
+        return children.message;
+      }
+      if (children.error) {
+        return typeof children.error === 'string' ? children.error : String(children.error);
+      }
+      return String(children);
+    }
+    
+    return children;
+  };
+
   return (
     <Alert
       style={{
@@ -14,7 +38,7 @@ const Message = ({ severity = 'error', children, mt = 16, mb = 16, ml, mr, m }) 
       }}
       severity={severity}
     >
-      {children}
+      {renderContent()}
     </Alert>
   );
 };

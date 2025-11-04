@@ -15,7 +15,7 @@ import ProductRelated from "../../components/Product/ProductRelated.jsx";
 import ProductInfo from "../../components/Product/ProductInfo.jsx";
 import ProductImageGallery from "../../components/Product/ProductImageGallery.jsx";
 import { useGetProduct, useRecommendSize } from "../../hooks/api/useProduct";
-import { useGetProfile } from "../../hooks/api/useUser";
+import { useGetUserById } from "../../hooks/api/useUser";
 import { useGetFavorites } from "../../hooks/api/useUser";
 import { useAddFavorite, useRemoveFavorite } from "../../hooks/api/useUser";
 
@@ -40,10 +40,11 @@ const ProductScreen = ({ match, setLoginModalOpen }) => {
   const { data: productResponse, isLoading: loading, error: productError } = useGetProduct(productId);
   const product = productResponse?.data?.product;
   
-  const { data: userResponse } = useGetProfile();
-  const user = userResponse?.data?.user;
-  
   const userInfo = useSelector((state) => state.userLogin?.userInfo);
+  const currentUserId = userInfo?._id || "";
+  
+  const { data: userResponse } = useGetUserById(currentUserId);
+  const user = userResponse?.data?.user;
   
   const { data: sizeResponse } = useRecommendSize(user?._id || "");
   const recommendedSize = sizeResponse?.data?.recommendedSize;
@@ -115,7 +116,7 @@ const ProductScreen = ({ match, setLoginModalOpen }) => {
   };
 
   return (
-    <Container maxWidth="xl" className={classes.wrapper}>
+    <Container style={{ marginBottom: 140, maxWidth: "100%" }}>
       {loading ? (
         <Loader my={200} />
       ) : error ? (

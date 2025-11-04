@@ -143,7 +143,7 @@ const OrderListScreen = ({ history }) => {
   }, [history, userInfo]);
 
   return (
-    <Container maxWidth="xl" className={classes.container}>
+    <Container style={{ marginBottom: 140, maxWidth: "100%" }}>
       <Meta title="Dashboard | Orders" />
       <Grid container className={classes.breadcrumbsContainer}>
         <Grid item xs={12}>

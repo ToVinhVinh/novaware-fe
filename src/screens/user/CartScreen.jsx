@@ -124,7 +124,7 @@ const CartScreen = ({ history }) => {
   };
 
   return (
-    <Container maxWidth="xl" style={{ marginBottom: 48 }}>
+    <Container style={{ marginBottom: 140, maxWidth: "100%" }}>
       <Meta title="Shopping Cart | FashionShop" />
       <Grid container className={classes.breadcrumbsContainer}>
         <Grid item>

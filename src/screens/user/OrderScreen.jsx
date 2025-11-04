@@ -223,7 +223,7 @@ const UserOrderScreen = ({ match, history }) => {
     <Message mt={100}>{error}</Message>
   ) : (
     order && (
-      <Container maxWidth="xl" style={{ marginBottom: 48 }}>
+      <Container style={{ marginBottom: 140, maxWidth: "100%" }}>
         <Meta title="Order | FashionShop" />
         <Grid container className={classes.breadcrumbsContainer}>
           <Grid item xs={12}>

@@ -7,7 +7,10 @@ import { makeStyles } from '@material-ui/core/styles';
 const useStyles = makeStyles(() => ({
   root: {
     '& label': {
-      fontSize: 14,
+      fontSize: 18,
+    },
+    '& .MuiInputBase-input': {
+      fontSize: '16px !important',
     },
   },
 }));
@@ -40,7 +43,7 @@ const InputController = ({
           onChange={onChange}
           error={!!error}
           helperText={error ? error.message : null}
-          InputProps={value ? InputProps : undefined}
+          InputProps={InputProps}
           className={classes.root}
           select={select} 
           {...props}
