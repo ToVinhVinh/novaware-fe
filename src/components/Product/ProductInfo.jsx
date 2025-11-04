@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef } from "react";
+import React, { useMemo, useState, useRef, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { FiShoppingBag } from "react-icons/fi";
 import { FaTags, FaShareAlt, FaHeart, FaRegHeart, FaTrademark, FaBoxOpen, FaTshirt } from "react-icons/fa";
@@ -34,6 +34,7 @@ import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormControl from "@material-ui/core/FormControl";
 import FormLabel from "@material-ui/core/FormLabel";
+import { toast } from "react-toastify";
 import ShareButtons from "../ShareButtons.jsx";
 import ShippingPolicy from "../Modal/ShippingPolicy.jsx";
 import ReturnPolicy from "../Modal/ReturnPolicy.jsx";
@@ -257,6 +258,17 @@ const ProductInfo = React.memo(
       { k: 5 }
     );
     const likeScrollerRef = useRef(null);
+
+    useEffect(() => {
+      if (!likeModalOpen) return;
+      if (!currentUserId) {
+        toast.info("Please sign in to see personalized recommendations.");
+        return;
+      }
+      if (likeError) {
+        toast.error("Failed to load recommendations.");
+      }
+    }, [likeModalOpen, currentUserId, likeError]);
 
     const sizeOptions = useMemo(() => ["S", "M", "L", "XL"], []);
     const colorOptions = useMemo(
@@ -650,14 +662,8 @@ const ProductInfo = React.memo(
           BackdropProps={{ style: { backgroundColor: "rgba(0,0,0,0.4)" } }}
         >
           <DialogContent style={{ padding: 0 }}>
-            {!currentUserId && (
-              <Typography color="textSecondary" style={{ padding: 16 }}>Please sign in to see personalized recommendations.</Typography>
-            )}
             {currentUserId && likeLoading && (
               <LottieLoading />
-            )}
-            {currentUserId && likeError && (
-              <Typography color="error" style={{ padding: 16 }}>Failed to load recommendations.</Typography>
             )}
             {currentUserId && !likeLoading && !likeError && likeData?.data?.products?.length > 0 && (
               <Swiper
