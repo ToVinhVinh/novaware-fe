@@ -116,7 +116,7 @@ const ProductScreen = ({ match, setLoginModalOpen }) => {
   };
 
   return (
-    <Container style={{ marginBottom: 140, maxWidth: "100%" }}>
+    <Container style={{ marginBottom: 140, maxWidth: "100%"}}>
       {loading ? (
         <Loader my={200} />
       ) : error ? (
@@ -144,11 +144,11 @@ const ProductScreen = ({ match, setLoginModalOpen }) => {
             </Grid>
           </Grid>
 
-          <Grid container spacing={8}>
-            <Grid item xs={12} md={6}>
+          <Grid container spacing={8} style={{ paddingLeft: 64, paddingRight: 64 }}>
+            <Grid item xs={12} md={6} style={{ paddingLeft: 0, paddingRight: 0 }}>
               <ProductImageGallery product={product} />
             </Grid>
-            <Grid item xs={12} md={6} className={classes.productInfo}>
+            <Grid item xs={12} md={6} className={classes.productInfo} style={{ paddingRight: 0 }}>
               <ProductInfo
                 product={product}
                 recommendedSize={recommendedSize}

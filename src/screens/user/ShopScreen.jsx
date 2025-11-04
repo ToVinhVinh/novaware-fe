@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
   },
   container: {
     marginBottom: 64,
-    boxShadow: "0 10px 31px 0 rgba(0,0,0,0.05)",
+    border: "1px solid rgba(0, 0, 0, 0.1)",
     backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.primary,
   },
@@ -88,15 +88,11 @@ const useStyles = makeStyles((theme) => ({
       "row",
       "wrap"
     ),
-    boxShadow:
-      "rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px",
+    border: "1px solid rgba(0, 0, 0, 0.1)",
     padding: 22,
     marginBottom: theme.spacing(5),
     backgroundColor: theme.palette.background.paper, // Màu nền từ theme
     color: theme.palette.text.primary, // Văn bản từ theme
-    // '& .MuiChip-root + .MuiChip-root': {
-    //   marginLeft: 12,
-    // },
     "& .MuiChip-root": {
       margin: 4,
     },
@@ -162,7 +158,7 @@ const ShopScreen = ({ location, history }) => {
   };
 
   return (
-    <Container style={{ marginBottom: 140, maxWidth: "100%" }}>
+    <Container style={{ marginBottom: 140, maxWidth: "100%", paddingLeft: 64, paddingRight: 64 }}>
       <Meta title="Shop" />
       <Grid container className={classes.breadcrumbsContainer} ref={ref}>
         <Grid item xs={12}>
