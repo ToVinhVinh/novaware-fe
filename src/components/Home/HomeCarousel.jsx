@@ -9,45 +9,45 @@ import "swiper/css/pagination";
 import "../../assets/scss/components/HomeCarousel.scss";
 
 // Import banner images
-import banner1 from "../../assets/images/banner1.png";
-import banner2 from "../../assets/images/banner2.png";
-import banner3 from "../../assets/images/banner3.png";
-import banner4 from "../../assets/images/banner4.png";
+import banner1 from "../../assets/images/banner1.webp";
+import banner2 from "../../assets/images/banner2.webp";
+import banner3 from "../../assets/images/banner3.webp";
+import banner4 from "../../assets/images/banner4.webp";
 
 const banners = [
   {
     id: 1,
     image: banner1,
-    title: "Bộ sưu tập mới",
-    description: "Khám phá những xu hướng và phong cách thời trang mới nhất của chúng tôi, được tuyển chọn kỹ lưỡng cho mọi dịp và cá tính của bạn.",
-    buttonText: "Mua ngay",
+    title: "New Collection",
+    description: "Discover the latest fashion trends and styles from our collection, carefully selected for every occasion and your personal style.",
+    buttonText: "Buy Now",
     buttonLink: "/shop",
     position: "left", // left, right, center, center-top
   },
   {
     id: 2,
     image: banner3,
-    title: "Ưu đãi mùa hè",
-    description: "Giảm giá đến 50% cho các sản phẩm chọn lọc, cơ hội tuyệt vời để làm mới tủ đồ với mức giá siêu tiết kiệm và ưu đãi hấp dẫn.",
-    buttonText: "Khám phá",
+    title: "Special Offer",
+    description: "Get up to 50% off on selected products, a great opportunity to refresh your wardrobe with super affordable prices and attractive offers.",
+    buttonText: "Discover",
     buttonLink: "/shop",
     position: "center",
   },
   {
     id: 3,
     image: banner4,
-    title: "Phiên bản giới hạn",
-    description: "Thiết kế độc quyền chỉ có trong thời gian ngắn, số lượng có hạn — đừng bỏ lỡ cơ hội sở hữu trước khi hết hàng.",
-    buttonText: "Xem bộ sưu tập",
+    title: "Limited Edition",
+    description: "Exclusive design only available for a limited time, limited quantity — don't miss the opportunity to own before it runs out.",
+    buttonText: "View Collection",
     buttonLink: "/shop",
     position: "center-top",
   },
   {
     id: 4,
     image: banner2,
-    title: "Chất lượng cao cấp",
-    description: "Trải nghiệm sự tinh tế của bộ sưu tập cao cấp, chú trọng từng chi tiết từ chất liệu đến đường may để mang lại cảm giác thoải mái và bền bỉ.",
-    buttonText: "Tìm hiểu thêm",
+    title: "High Quality",
+    description: "Experience the refined collection of high quality, paying attention to every detail from material to sewing to provide a comfortable and durable feel.",
+    buttonText: "Learn More",
     buttonLink: "/shop",
     position: "left",
   },
@@ -99,7 +99,7 @@ const HomeCarousel = () => {
               />
               
               {/* Overlay - black/10 */}
-              <div className="absolute inset-0 bg-black/30" />
+              <div className="absolute inset-0 bg-black/40" />
               
               {/* Content */}
               <div

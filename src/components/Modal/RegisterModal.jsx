@@ -222,7 +222,6 @@ const RegisterModal = ({
                     </Link>
                   </Box>
                   {loading && <Loader my={0} />}
-                  {error && <Message mt={0}>{error}</Message>}
                 </Box>
               </Grid>
             </Grid>

@@ -5,6 +5,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { logout } from "../actions/userActions";
 import { useDispatch, useSelector } from "react-redux";
 import { FiLogIn } from "react-icons/fi";
+import { FaUser, FaSignOutAlt, FaSignInAlt, FaUserPlus, FaLock, FaComments } from 'react-icons/fa';
 import { openAdminChatDrawer } from "../actions/chatActions";
 import IconButton from "@material-ui/core/IconButton";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
@@ -20,6 +21,12 @@ const useStyles = makeStyles((theme) => ({
   },
   paper: {
     marginRight: theme.spacing(2),
+  },
+  menuItemIcon: {
+    display: "inline-flex",
+    alignItems: "center",
+    marginRight: theme.spacing(1) + 4,
+    color: theme.palette.text.secondary,
   },
 }));
 
@@ -108,10 +115,17 @@ export default function HeaderUser({
                         onKeyDown={handleListKeyDown}
                       >
                         <MenuItem component={RouterLink} to="/profile" divider>
+                          <FaUser className={classes.menuItemIcon} />
                           {userInfo.name ? userInfo.name : "Profile"}
                         </MenuItem>
-                        <MenuItem onClick={handleChat}>Chat</MenuItem>                      
-                        <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                        <MenuItem onClick={handleChat}>
+                          <FaComments className={classes.menuItemIcon} />
+                          Chat
+                        </MenuItem>                      
+                        <MenuItem onClick={handleLogout}>
+                          <FaSignOutAlt className={classes.menuItemIcon} />
+                          Logout
+                        </MenuItem>
                       </MenuList>
                     </ClickAwayListener>
                   </Paper>
@@ -146,11 +160,16 @@ export default function HeaderUser({
                         id="menu-list-grow"
                         onKeyDown={handleListKeyDown}
                       >
-                        <MenuItem onClick={handleLoginClick}>Login</MenuItem>
+                        <MenuItem onClick={handleLoginClick}>
+                          <FaSignInAlt className={classes.menuItemIcon} />
+                          Login
+                        </MenuItem>
                         <MenuItem onClick={handleRegisterClick}>
+                          <FaUserPlus className={classes.menuItemIcon} />
                           Register
                         </MenuItem>
                         <MenuItem onClick={handleForgotPassword}>
+                          <FaLock className={classes.menuItemIcon} />
                           Forgot Password
                         </MenuItem>
                       </MenuList>

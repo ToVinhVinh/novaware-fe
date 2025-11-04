@@ -83,7 +83,7 @@ const ProductTabs = () => {
   const [value, setValue] = React.useState(0);
   const classes = useStyles();
   const matches = useMediaQuery('(max-width:600px)');
-  const titles = ['Sản phẩm mới nhất', 'Sản phẩm giảm giá', 'Tất cả sản phẩm'];
+  const titles = ['Latest Products', 'Sale Products', 'All Products'];
 
   const { data: productLatestResponse, isLoading: loadingProductLatest, error: errorProductLatest } = useGetLatestProducts({ pageNumber: 1, perPage: 15 });
   const productsLatestRaw = productLatestResponse?.data?.products || [];

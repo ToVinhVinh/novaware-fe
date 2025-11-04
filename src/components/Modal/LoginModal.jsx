@@ -68,7 +68,7 @@ const useStyles = makeStyles((theme) => ({
   content: {
     position: "relative",
     ...theme.mixins.customize.flexMixin("flex-start", "center", "column"),
-    padding: "24px 20%",
+    padding: "32px",
     height: "100%",
     [theme.breakpoints.down("xs")]: {
       padding: "24px 10%",
@@ -351,9 +351,6 @@ const LoginModal = ({
                       Create Account
                     </Link>
                   </Box>
-
-                  {(loading || isLoadingUserDetails) && <Loader my={0} />}
-                  {error && <Message mt={0}>{error}</Message>}
                   <p>Or login with</p>
                   <Box className={classes.socialButtonsContainer}>
                     <Button

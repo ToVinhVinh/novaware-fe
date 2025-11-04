@@ -10,10 +10,9 @@ import { setOpenCartDrawer } from "../actions/cartActions";
 import { logout } from "../actions/userActions";
 import { openChatDrawer } from "../actions/chatActions";
 import { useGetFavorites } from "../hooks/api/useUser";
-import { FaHeart } from 'react-icons/fa';
+import { FaHeart, FaUser, FaSignOutAlt, FaSignInAlt, FaUserPlus, FaLock } from 'react-icons/fa';
 import { openFavoriteDrawer } from "../actions/favoriteActions";
 import {
-  filterByCategory,
   filterClearAll,
 } from "../actions/filterActions";
 import {
@@ -25,8 +24,6 @@ import {
   Badge,
   MenuItem,
   MenuList,
-  Typography,
-  Menu,
 } from "@material-ui/core";
 import clsx from "clsx";
 import MenuIcon from "@material-ui/icons/Menu";
@@ -36,7 +33,6 @@ import useScrollTrigger from "@material-ui/core/useScrollTrigger";
 import HeaderUser from "./HeaderUser.jsx";
 import SearchBox from "./SearchBox.jsx";
 import FavoritePreview from '../components/Drawer/FavoritePreview';
-import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import BrandDropdown from "./Header/BrandDropdown";
 import CategoryDropdown from "./Header/CategoryDropdown";
 
@@ -197,6 +193,12 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: 'nowrap',
     maxWidth: '100%',
     display: 'block',
+  },
+  menuItemIcon: {
+    display: "inline-flex",
+    alignItems: "center",
+    marginRight: theme.spacing(1) + 4,
+    color: theme.palette.text.secondary,
   },
 }));
 
@@ -417,17 +419,26 @@ const Header = ({
                       to="/profile"
                       onClick={handleCloseDrawer}
                     >
+                      <FaUser className={classes.menuItemIcon} />
                       {userInfo.name || "Profile"}
                     </MenuItem>
                     <MenuItem onClick={() => dispatch(logout())}>
+                      <FaSignOutAlt className={classes.menuItemIcon} />
                       Logout
                     </MenuItem>
                   </div>
                 ) : (
                   <>
-                    <MenuItem onClick={handleLoginClick}>Login</MenuItem>
-                    <MenuItem onClick={handleRegisterClick}>Register</MenuItem>
+                    <MenuItem onClick={handleLoginClick}>
+                      <FaSignInAlt className={classes.menuItemIcon} />
+                      Login
+                    </MenuItem>
+                    <MenuItem onClick={handleRegisterClick}>
+                      <FaUserPlus className={classes.menuItemIcon} />
+                      Register
+                    </MenuItem>
                     <MenuItem onClick={handleForgotPassword}>
+                      <FaLock className={classes.menuItemIcon} />
                       Forgot Password
                     </MenuItem>
                   </>

@@ -12,7 +12,7 @@ const TopProducts: React.FC = () => {
   return (
     <div className="mx-auto px-16">
       <h2 className="my-16 mb-8 text-center text-4xl font-normal leading-[1.235]">
-        Sản phẩm bán chạy
+        Top Products
       </h2>
       {loadingProductTop ? (
         <Loader />

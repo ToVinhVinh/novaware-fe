@@ -337,7 +337,6 @@ const PlaceOrderScreen = ({ history }) => {
                   <Typography color="secondary">${cart.totalPrice}</Typography>
                 </ListItem>
               </List>
-              {error && <Message mb={16}>{error}</Message>}
               <Button
                 variant="contained"
                 color="secondary"
