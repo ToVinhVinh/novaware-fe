@@ -8,6 +8,7 @@ import { useGetCategories } from "../../hooks/api/useCategory";
 import { filterByCategory } from "../../actions/filterActions";
 import { FaEllipsisH, FaTshirt, FaGem, FaFemale, FaShoePrints } from "react-icons/fa";
 import { PiPants } from "react-icons/pi";
+import LottieLoading from "../LottieLoading";
 
 type Category = { _id: string; name: string };
 
@@ -110,7 +111,7 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ menuItemClassName }
         }}
       >
         {isLoading ? (
-          <MenuItem>Loading...</MenuItem>
+          <LottieLoading />
         ) : error ? (
           <MenuItem>{error instanceof Error ? error.message : String(error)}</MenuItem>
         ) : (

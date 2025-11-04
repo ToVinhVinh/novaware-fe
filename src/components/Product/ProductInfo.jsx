@@ -42,6 +42,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import clsx from "clsx";
 import { formatPriceVN } from "../../utils/formatPrice.js";
 import { useGNNPersonalizedProducts } from "../../hooks/api/useRecommend";
+import LottieLoading from "../LottieLoading.jsx";
 
 const useStyles = makeStyles((theme) => ({
   price: {
@@ -144,7 +145,7 @@ const useStyles = makeStyles((theme) => ({
   navLeft: { left: -8 },
   navRight: { right: -8 },
   card: { width: 320, height: "auto", borderRadius: 8 },
-  media: { height: 300, backgroundSize: "cover" },
+  media: { height: 300, backgroundSize: "contain", objectFit: "contain" },
   transparentPaper: {
     background: "transparent",
     boxShadow: "none",
@@ -653,7 +654,7 @@ const ProductInfo = React.memo(
               <Typography color="textSecondary" style={{ padding: 16 }}>Please sign in to see personalized recommendations.</Typography>
             )}
             {currentUserId && likeLoading && (
-              <Typography color="textSecondary" style={{ padding: 16 }}>Loading...</Typography>
+              <LottieLoading />
             )}
             {currentUserId && likeError && (
               <Typography color="error" style={{ padding: 16 }}>Failed to load recommendations.</Typography>

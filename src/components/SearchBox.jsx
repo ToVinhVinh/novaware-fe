@@ -6,6 +6,7 @@ import { IconButton, InputBase } from '@material-ui/core';
 import { IoSearchOutline } from 'react-icons/io5';
 import { addSearchTerm } from '../actions/filterActions';
 import { useFilterProducts } from '../hooks/api/useProduct';
+import LottieLoading from './LottieLoading';
 
 const useStyles = makeStyles((theme) => ({
   search: {
@@ -212,7 +213,7 @@ const SearchBox = (props) => {
       {debouncedKeyword && (
         <div className={classes.productList}>
           {loading ? (
-            <p style={{ padding: 10 }}>Loading...</p>
+            <LottieLoading />
           ) : products.length > 0 ? (
             products.slice(0, 15).map((product) => (
               <div

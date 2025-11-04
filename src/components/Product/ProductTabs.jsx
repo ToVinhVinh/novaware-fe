@@ -9,8 +9,9 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
 import ProductCard from './ProductCard';
-import { Button, CircularProgress, Typography } from '@material-ui/core';
+import { Button, Typography } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
+import LottieLoading from '../LottieLoading';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -130,21 +131,19 @@ const ProductTabs = () => {
         </Tabs>
       </AppBar>
       <TabPanel value={value} index={0}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
-          {loadingProductLatest ? (
-            <div className={classes.loading}>
-              <CircularProgress color='secondary' />
-            </div>
-          ) : errorProductLatest ? (
-            <Alert severity='error'>{errorProductLatest.message || String(errorProductLatest)}</Alert>
-          ) : (
-            productsLatest && productsLatest.map((product) => (
+        {loadingProductLatest ? (
+          <LottieLoading className="flex justify-center my-10" />
+        ) : errorProductLatest ? (
+          <Alert severity='error'>{errorProductLatest.message || String(errorProductLatest)}</Alert>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
+            {productsLatest && productsLatest.map((product) => (
               <div key={product._id}>
                 <ProductCard {...product} />
               </div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
         <div className={classes.buttonMore}>
           <Button
             variant='contained'
@@ -158,21 +157,19 @@ const ProductTabs = () => {
         </div>
       </TabPanel>
       <TabPanel value={value} index={1}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
-          {loadingProductSale ? (
-            <div className={classes.loading}>
-              <CircularProgress color='secondary' />
-            </div>
-          ) : errorProductSale ? (
-            <Alert severity='error'>{errorProductSale.message || String(errorProductSale)}</Alert>
-          ) : (
-            productsSale && productsSale.map((product) => (
+        {loadingProductSale ? (
+          <LottieLoading className="flex justify-center my-10" />
+        ) : errorProductSale ? (
+          <Alert severity='error'>{errorProductSale.message || String(errorProductSale)}</Alert>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
+            {productsSale && productsSale.map((product) => (
               <div key={product._id}>
                 <ProductCard {...product} />
               </div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
         <div className={classes.buttonMore}>
           <Button
             variant='contained'

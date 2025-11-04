@@ -1,7 +1,7 @@
 import React from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { Button, Typography } from "@material-ui/core";
-import Loader from "../Loader";
+import LottieLoading from "../LottieLoading";
 import ProductCard from "../Product/ProductCard";
 import { useGetTopProducts } from "../../hooks/api/useProduct";
 const TopProducts: React.FC = () => {
@@ -17,7 +17,7 @@ const TopProducts: React.FC = () => {
         <div className='h-[1px] bg-primary flex-1'></div>
       </div>
       {loadingProductTop ? (
-        <Loader />
+        <LottieLoading className="flex justify-center my-10" />
       ) : errorProductTop ? (
         <div className="p-4 mb-4 bg-red-50 text-red-700 rounded border border-red-300">
           {errorProductTop.message || String(errorProductTop)}

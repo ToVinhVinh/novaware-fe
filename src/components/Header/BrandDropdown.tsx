@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useGetGroupedBrands } from "../../hooks/api/useBrand";
 import { filterByBrand } from "../../actions/filterActions";
+import LottieLoading from "../LottieLoading";
 
 type Brand = { _id: string; name: string };
 type BrandGroup = { letter: string; brands: Brand[] };
@@ -126,7 +127,7 @@ const BrandDropdown: React.FC<BrandDropdownProps> = ({ menuItemClassName }) => {
         }}
       >
         {loadingBrands ? (
-          <MenuItem>Loading...</MenuItem>
+          <LottieLoading />
         ) : errorBrands ? (
           <MenuItem>{errorBrands instanceof Error ? errorBrands.message : String(errorBrands)}</MenuItem>
         ) : (
