@@ -136,7 +136,7 @@ const ProductTabs = () => {
         ) : errorProductLatest ? (
           <Alert severity='error'>{errorProductLatest.message || String(errorProductLatest)}</Alert>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
             {productsLatest && productsLatest.map((product) => (
               <div key={product._id}>
                 <ProductCard {...product} />
@@ -162,7 +162,7 @@ const ProductTabs = () => {
         ) : errorProductSale ? (
           <Alert severity='error'>{errorProductSale.message || String(errorProductSale)}</Alert>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
             {productsSale && productsSale.map((product) => (
               <div key={product._id}>
                 <ProductCard {...product} />

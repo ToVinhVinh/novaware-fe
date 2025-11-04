@@ -33,7 +33,7 @@ const ProductCard = (props) => {
   return (
     <>
       <motion.div
-        className="group h-full overflow-hidden bg-white border border-gray-300 transition-all duration-300"
+        className="group h-full overflow-hidden bg-white border border-pink-500 transition-all duration-300"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -41,38 +41,10 @@ const ProductCard = (props) => {
           {/* Image Container with proper aspect ratio */}
           <div className="relative w-full pb-[100%] overflow-hidden bg-gray-50">
             {sale > 0 && (
-              <div className="absolute top-3 left-3 z-20 bg-primary px-2 py-1 text-xs font-semibold uppercase text-white">
+              <div className="absolute top-3 left-3 z-20 bg-pink-600 px-2 py-1 text-xs font-semibold uppercase text-white">
                 -{sale}%
               </div>
             )}
-            
-            {/* Desktop Action Buttons */}
-            <motion.div
-              className="absolute top-1/2 right-3 z-20 hidden flex-col items-center gap-2 md:flex"
-              initial={{ x: "150%", opacity: 0 }}
-              animate={{
-                x: isHovered ? "0%" : "150%",
-                opacity: isHovered ? 1 : 0,
-              }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
-              <Tooltip title="Quick view" placement="left" arrow>
-                <button
-                  onClick={handleOpenQuickView}
-                  className="flex items-center justify-center bg-white p-2.5 text-gray-600 border border-gray-300 transition-all duration-200 hover:bg-primary hover:text-white hover:border-primary hover:scale-110"
-                >
-                  <VisibilityOutlinedIcon fontSize="small" />
-                </button>
-              </Tooltip>
-              <Tooltip title="Add to cart" placement="left" arrow>
-                <button
-                  onClick={(e) => handleAddToCart(e, _id)}
-                  className="flex items-center justify-center bg-white p-2.5 text-gray-600 border border-gray-300 transition-all duration-200 hover:bg-primary hover:text-white hover:border-primary hover:scale-110"
-                >
-                  <AddShoppingCartOutlinedIcon fontSize="small" />
-                </button>
-              </Tooltip>
-            </motion.div>
 
             {/* Back Image */}
             {images && images[1] && (
@@ -88,11 +60,11 @@ const ProductCard = (props) => {
                 }}
               />
             )}
-            
+
             {/* Front Image with fade on hover */}
             {images && images[0] && (
               <motion.img
-                className="absolute inset-0 h-full w-full object-contain"
+                className="absolute inset-0 h-full w-full object-contain bg-white"
                 src={images[0]}
                 alt={name}
                 initial={{ opacity: 1 }}
@@ -104,26 +76,26 @@ const ProductCard = (props) => {
               />
             )}
           </div>
-          
+
           {/* Product Info */}
-          <div className="flex flex-1 flex-col p-3 bg-pink-50 border-t border-t-gray-300">
+          <div className="flex flex-1 flex-col p-3 bg-primary border-t rounded-t-xl">
             <Tooltip title={name || ""} arrow>
-              <h3 className="mb-2 line-clamp-2 text-base font-medium leading-6 text-gray-800 transition-colors group-hover:text-primary">
+              <h3 className="mb-2 line-clamp-2 text-base font-light leading-6 text-white">
                 {name}
               </h3>
             </Tooltip>
             <div className="mt-auto flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <span className={`text-lg font-bold ${sale > 0 ? "text-primary" : "text-gray-900"}`}>
+                <span className={`text-2xl font-bold ${sale > 0 ? "text-white" : "text-white"}`}>
                   {formatPriceDollar(finalPrice)}
                 </span>
                 {sale > 0 && (
-                  <span className="text-sm text-gray-500 line-through">
+                  <span className="text-base italic text-white line-through">
                     {formatPriceDollar(price)}
                   </span>
                 )}
               </div>
-              
+
               {/* Mobile Add to Cart Button */}
               <div className="w-full md:hidden">
                 <button
@@ -136,6 +108,25 @@ const ProductCard = (props) => {
                   </span>
                 </button>
               </div>
+            </div>
+            {/* Desktop Action Buttons */}
+            <div
+              className="grid grid-cols-2 gap-2 mt-4"
+            >
+              <button
+                onClick={handleOpenQuickView}
+                className="h-10 flex items-center gap-2 justify-center border border-white text-white hover:bg-pink-600"
+              >
+                <VisibilityOutlinedIcon fontSize="small" className="text-white" />
+                View
+              </button>
+              <button
+                onClick={(e) => handleAddToCart(e, _id)}
+                className="h-10 flex items-center gap-2 justify-center border border-white text-white hover:bg-pink-600"
+              >
+                <AddShoppingCartOutlinedIcon fontSize="small" className="text-white" />
+                Add
+              </button>
             </div>
           </div>
         </RouterLink>

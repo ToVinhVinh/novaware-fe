@@ -24,7 +24,7 @@ const TopProducts: React.FC = () => {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
             {productTop && productTop.map((product) => (
               <div key={product._id}>
                 <ProductCard {...product} />

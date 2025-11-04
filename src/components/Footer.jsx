@@ -101,12 +101,12 @@ const Footer = () => {
         <div className={classes.contentContainer}>
           <div className={classes.leftSection}>
             <Typography className={classes.title}>
-              NOVAWEAR lắng nghe bạn!
+              NOVAWEAR listens to you!
             </Typography>
             <Typography className={classes.desc}>
-              Chúng tôi luôn trân trọng và mong đợi nhận được mọi ý kiến đóng
-              góp từ khách hàng để có thể nâng cấp trải nghiệm dịch vụ và sản
-              phẩm tốt hơn nữa.
+              We always appreciate and look forward to receiving all feedback
+              from customers to further improve our service and product
+              experience.
             </Typography>
           </div>
           <div className={classes.rightSection}>
@@ -122,9 +122,9 @@ const Footer = () => {
               <div className={classes.contactItem}>
                 <MdAccessTime className={classes.icon} />
                 <div>
-                  <strong>Thời gian làm việc</strong>
+                  <strong>Working Hours</strong>
                   <br />
-                  8:30 - 22:00 (Tất cả các ngày trong tuần)
+                  8:30 - 22:00 (Every day of the week)
                 </div>
               </div>
               <div className={classes.contactItem}>
