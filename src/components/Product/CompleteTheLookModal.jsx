@@ -18,7 +18,8 @@ import {
     Paper,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
-import { FaTshirt, FaChartLine, FaVenusMars, FaInfoCircle, FaDollarSign } from "react-icons/fa";
+import { FaTshirt, FaChartLine, FaVenusMars, FaInfoCircle, FaDollarSign, FaGem, FaFemale, FaShoePrints } from "react-icons/fa";
+import { PiPants } from "react-icons/pi";
 import { makeStyles } from "@material-ui/core/styles";
 import { formatPriceDollar } from "../../utils/formatPrice.js";
 import { useGNNOutfitPerfect } from "../../hooks/api/useRecommend";
@@ -135,6 +136,18 @@ const useStyles = makeStyles((theme) => ({
             zIndex: 10,
             backgroundColor: "#E8F4FD",
         },
+    },
+    headerIcon: {
+        marginRight: 8,
+        fontSize: "1.2rem",
+        verticalAlign: "middle",
+        color: "#0ea5e9",
+    },
+    headerContent: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
     },
     tableCell: {
         padding: "0px",
@@ -297,6 +310,24 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId }) => {
         perPage: 9,
     });
 
+    const getCategoryIcon = (categoryName) => {
+        const key = categoryName.trim().toLowerCase();
+        switch (key) {
+            case "tops":
+                return <FaTshirt className={classes.headerIcon} />;
+            case "dresses":
+                return <FaFemale className={classes.headerIcon} />;
+            case "bottoms":
+                return <PiPants className={classes.headerIcon} />;
+            case "shoes":
+                return <FaShoePrints className={classes.headerIcon} />;
+            case "accessories":
+                return <FaGem className={classes.headerIcon} />;
+            default:
+                return null;
+        }
+    };
+
     useEffect(() => {
         if (!open) return;
         if (!userId) {
@@ -341,7 +372,12 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId }) => {
                                     <TableRow>
                                         {["Tops", "Dresses", "Bottoms", "Shoes", "Accessories"].map((category) => (
                                             <TableCell key={category} align="center">
-                                                {category}
+                                                <Box className={classes.headerContent}>
+                                                    {getCategoryIcon(category)}
+                                                    <Typography variant="body1" component="span">
+                                                        {category}
+                                                    </Typography>
+                                                </Box>
                                             </TableCell>
                                         ))}
                                     </TableRow>

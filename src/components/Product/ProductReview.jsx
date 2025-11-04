@@ -70,6 +70,12 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(1, 3),
     width: "100px",
   },
+  cardContent: {
+    padding: "0 !important",
+    "&:last-child": {
+      paddingBottom: "0 !important",
+    },
+  },
 }));
 
 const ProductReview = ({ reviews, productId }) => {
@@ -137,7 +143,7 @@ const ProductReview = ({ reviews, productId }) => {
             )}
             {reviews.map((review) => (
               <Card className={classes.card} key={review._id} elevation={0}>
-                <CardContent>
+                <CardContent className={classes.cardContent}>
                   <Grid container spacing={2}>
                     <Grid item>
                       <Avatar
@@ -185,7 +191,7 @@ const ProductReview = ({ reviews, productId }) => {
         <AccordionDetails>
           <Box width="100%">
             <Card className={classes.card} elevation={0}>
-              <CardContent>
+              <CardContent className={classes.cardContent}>
                 <Grid container>
                   <Grid item xs={12}>
                     {loadingProductReview && <Loader />}
