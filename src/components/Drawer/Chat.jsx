@@ -16,7 +16,6 @@ import {
 import moment from "moment";
 import CloseIcon from "@material-ui/icons/Close";
 import SendIcon from "@material-ui/icons/Send";
-import useSocket from "../../hooks/useSocket";
 import AdminChatScreen from "../../screens/admin/AdminChatScreen";
 
 const useStyles = makeStyles((theme) => ({
@@ -119,7 +118,6 @@ const Chat = ({ setHasNewMessageRef }) => {
   );
   const userInfo = useSelector((state) => state.userLogin.userInfo);
 
-  const socket = useSocket("http://localhost:5000");
 
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
@@ -147,11 +145,6 @@ const Chat = ({ setHasNewMessageRef }) => {
     }
   }, []);
 
-  useEffect(() => {
-    if (userInfo && socket) {
-      socket.emit("userLogin", userInfo._id);
-    }
-  }, [userInfo, socket]);
 
   // Gửi tin nhắn (user)
   const handleSendMessage = useCallback(async () => {
@@ -176,8 +169,7 @@ const Chat = ({ setHasNewMessageRef }) => {
     setMessages((prevMessages) => [...prevMessages, newMessage]);
 
     try {
-      if (!socket) return;
-      socket.emit("sendMessage", { ...newMessage, receiver: "admin" }); // Thêm receiver khi user gửi tin nhắn
+      // Socket removed
     } catch (error) {
       console.error("Error sending:", error);
       // Nếu gửi lỗi, xóa tin nhắn vừa thêm khỏi state
@@ -187,50 +179,9 @@ const Chat = ({ setHasNewMessageRef }) => {
     } finally {
       setLoading(false);
     }
-  }, [inputMessage, userId, socket]);
+  }, [inputMessage, userId]);
 
-  // Nhận tin nhắn mới qua socket cho user thường
-  useEffect(() => {
-    if (!socket || userInfo?.isAdmin) return;
 
-    const handleNewMessage = (newMessage) => {
-      // Chỉ cập nhật tin nhắn nếu tin nhắn đó là của admin gửi cho user và đúng room
-      if (
-        newMessage.sender === "admin" &&
-        newMessage.room === `admin-${userId}`
-      ) {
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
-        if (!openAdminChatDrawer) {
-          toast.info("Bạn có tin nhắn mới!");
-          if (setHasNewMessageRef.current) {
-            setHasNewMessageRef.current(true);
-          }
-        }
-      }
-    };
-
-    socket.on("messageReceived", handleNewMessage);
-
-    return () => {
-      socket.off("messageReceived", handleNewMessage);
-    };
-  }, [
-    socket,
-    userInfo,
-    dispatch,
-    openAdminChatDrawer,
-    setHasNewMessageRef,
-    userId,
-  ]);
-
-  // Join room khi user đăng nhập
-  useEffect(() => {
-    if (userInfo && socket && !userInfo.isAdmin) {
-      socket.emit("userLogin", userInfo._id);
-      const room = `admin-${userInfo._id}`;
-      socket.emit("joinRoom", room);
-    }
-  }, [userInfo, socket]);
 
   if (!userInfo) {
     return <div></div>;
@@ -247,7 +198,6 @@ const Chat = ({ setHasNewMessageRef }) => {
           <AdminChatScreen
             setHasNewMessageRef={setHasNewMessageRef}
             handleCloseChatDrawer={handleCloseChatDrawer}
-            socket={socket}
           />
         )}
 

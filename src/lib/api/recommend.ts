@@ -20,7 +20,7 @@ import {
 // 9.1 Personalized Products (GNN)
 export const getGNNPersonalizedRecommendations = async (
 	userId: string,
-	query?: IGetPersonalizedQuery
+    query: IGetPersonalizedQuery
 ): Promise<IPersonalizedGNNResponse> => {
 	return await sendGet(`/recommend/gnn/personalize/${userId}`, query);
 };

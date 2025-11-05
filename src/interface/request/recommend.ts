@@ -18,7 +18,8 @@ export interface IGetSimilarProductsQuery {
 }
 
 export interface IGetPersonalizedQuery {
-	k?: number;
+    k?: number;
+    productId: string;
 }
 
 export interface IGetOutfitPerfectQuery extends IGetRecommendationsQuery {

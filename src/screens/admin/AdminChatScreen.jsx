@@ -22,7 +22,6 @@ import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import moment from "moment";
 import SendIcon from "@material-ui/icons/Send";
 import axios from "axios";
-import useSocket from "../../hooks/useSocket";
 
 const StyledBadge = withStyles((theme) => ({
   badge: {
@@ -195,7 +194,6 @@ const AdminChatScreen = ({ setHasNewMessageRef }) => {
   const dispatch = useDispatch();
   const history = useHistory();
   const userInfo = useSelector((state) => state.userLogin.userInfo);
-  const socket = useSocket("http://localhost:5000");
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -219,11 +217,6 @@ const AdminChatScreen = ({ setHasNewMessageRef }) => {
   // Hàm chọn user
   const handleSelectUser = (user) => {
     setSelectedUser(user);
-    if (socket) {
-      const room = `admin-${user._id}`;
-      socket.emit("joinRoom", room);
-      socket.emit("markAsRead", { userId: user._id, room: room });
-    }
     setUsers((prevUsers) =>
       prevUsers.map((u) =>
         u._id === user._id
@@ -284,8 +277,7 @@ const AdminChatScreen = ({ setHasNewMessageRef }) => {
     setMessages((prevMessages) => [...prevMessages, msg]);
 
     try {
-      if (!socket) return;
-      socket.emit("sendMessage", { ...msg, receiver: selectedUser._id }); 
+      // Socket removed
     } catch (error) {
       setMessages((prevMessages) =>
         prevMessages.filter((m) => m.timestamp !== msg.timestamp)
@@ -293,132 +285,11 @@ const AdminChatScreen = ({ setHasNewMessageRef }) => {
     } finally {
       setLoading(false);
     }
-  }, [newMessage, selectedUser, socket]);
+  }, [newMessage, selectedUser]);
 
-  // Effect để nhận tin nhắn mới qua socket (Realtime chat)
-  useEffect(() => {
-    if (!socket) return;
 
-    const handleNewMessage = (newMessage) => {
-      if (
-        newMessage.sender !== "admin" &&
-        newMessage.room === `admin-${selectedUser._id}`
-      ) {
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
-      }
-    };
-    // read/unread (Realtime chat)
-    const handleMarkedAsRead = (userId) => {
-      setMessages((prevMessages) =>
-        prevMessages.map((msg) =>
-          msg.sender === userId ? { ...msg, read: true } : msg
-        )
-      );
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user._id === userId
-            ? {
-                ...user,
-                lastMessage: { ...user.lastMessage, isUnread: false },
-              }
-            : user
-        )
-      );
-    };
 
-    socket.on("messageReceived", handleNewMessage);
-    socket.on("markedAsRead", handleMarkedAsRead);
 
-    return () => {
-      socket.off("messageReceived", handleNewMessage);
-      socket.off("markedAsRead", handleMarkedAsRead);
-    };
-  }, [socket, userInfo, dispatch, setHasNewMessageRef, selectedUser]);
-
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleAdminNotification = (notification) => {
-      if (notification.type === "newMessage") {
-        setUsers((prevUsers) => {
-          const userIndex = prevUsers.findIndex(
-            (user) => user._id === notification.userId
-          );
-
-          if (userIndex === -1) {
-            return prevUsers;
-          } else {
-            const updatedUser = {
-              ...prevUsers[userIndex],
-              lastMessage: {
-                content: notification.content,
-                isUnread: true,
-                timestamp: notification.timestamp,
-              },
-            };
-
-            const newUsers = [
-              updatedUser,
-              ...prevUsers.filter((_, index) => index !== userIndex),
-            ];
-
-            return newUsers;
-          }
-        });
-
-        if (
-          notification.userId !== selectedUser?._id &&
-          notification.sender !== "admin"
-        ) {
-          setHasNewMessageRef.current = true;
-          toast.info("Bạn có tin nhắn mới!");
-        }
-      } else if (notification.type === "markAsRead") {
-        setMessages((prevMessages) =>
-          prevMessages.map((msg) =>
-            msg.sender === notification.userId ? { ...msg, read: true } : msg
-          )
-        );
-        setUsers((prevUsers) =>
-          prevUsers.map((user) =>
-            user._id === notification.userId
-              ? {
-                  ...user,
-                  lastMessage: { ...user.lastMessage, isUnread: false },
-                }
-              : user
-          )
-        );
-      }
-    };
-
-    socket.on("adminNotification", handleAdminNotification);
-
-    return () => {
-      socket.off("adminNotification", handleAdminNotification);
-    };
-  }, [socket, dispatch, setHasNewMessageRef, selectedUser]);
-
-  // Effect cập nhật trạng thái online/offline
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleUserStatusUpdate = (statuses) => {
-      userStatusesRef.current = statuses;
-    };
-
-    socket.on("userStatusUpdate", handleUserStatusUpdate);
-
-    return () => {
-      socket.off("userStatusUpdate", handleUserStatusUpdate);
-    };
-  }, [socket]);
-
-  useEffect(() => {
-    if (userInfo && userInfo.isAdmin && socket) {
-      socket.emit("userLogin", userInfo._id, userInfo.isAdmin);
-    }
-  }, [userInfo, socket]);
 
   // Chỉ hiển thị component cho admin
   if (!userInfo || !userInfo.isAdmin) {

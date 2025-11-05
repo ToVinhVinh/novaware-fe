@@ -7,7 +7,6 @@ import {
   Redirect,
 } from "react-router-dom";
 import LottieLoading from "./components/LottieLoading";
-import CreateAdminAccount from "./components/CreateAdminAccount"; 
 // Import Layout
 import UserLayout from "./components/Layouts/UserLayout.jsx";
 import AdminLayout from "./components/Layouts/AdminLayout.jsx";
@@ -60,7 +59,6 @@ const App = () => {
 
   return (
     <Router>
-      <CreateAdminAccount />
       <Suspense fallback={<LottieLoading />}>
         <Switch>
           {/* Admin Routes - Must be inside Switch and checked first */}

@@ -617,6 +617,7 @@ const ProductInfo = React.memo(
           open={likeModalOpen}
           onClose={() => setLikeModalOpen(false)}
           userId={currentUserId}
+          productId={productId}
         />
 
         {/* Complete the look Modal */}

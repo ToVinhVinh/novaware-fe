@@ -9,12 +9,12 @@ import {
 import * as RecommendTypes from '../../interface/response/recommend';
 import * as RecommendRequestTypes from '../../interface/request/recommend';
 
-export const useGNNPersonalizedProducts = (userId: string, query?: RecommendRequestTypes.IGetPersonalizedQuery) => {
-	return useQuery<RecommendTypes.IPersonalizedGNNResponse, Error>({
-		queryKey: ['recommend', 'gnn-personalize', userId, query],
-		queryFn: () => getGNNPersonalizedRecommendations(userId, query),
-		enabled: !!userId,
-	});
+export const useGNNPersonalizedProducts = (userId: string, query: RecommendRequestTypes.IGetPersonalizedQuery) => {
+    return useQuery<RecommendTypes.IPersonalizedGNNResponse, Error>({
+        queryKey: ['recommend', 'gnn-personalize', userId, query],
+        queryFn: () => getGNNPersonalizedRecommendations(userId, query),
+        enabled: !!userId && !!query?.productId,
+    });
 };
 
 export const useGetHybridRecommendations = (userId: string, query?: RecommendRequestTypes.IGetRecommendationsQuery) => {

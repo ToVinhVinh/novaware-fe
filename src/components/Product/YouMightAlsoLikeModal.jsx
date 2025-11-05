@@ -54,11 +54,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const YouMightAlsoLikeModal = ({ open, onClose, userId }) => {
+const YouMightAlsoLikeModal = ({ open, onClose, userId, productId }) => {
   const classes = useStyles();
   const { data: likeData, isLoading: likeLoading, error: likeError } = useGNNPersonalizedProducts(
     userId || "",
-    { k: 5 }
+    { k: 5, productId: productId || "" }
   );
 
   useEffect(() => {

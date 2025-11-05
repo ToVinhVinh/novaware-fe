@@ -10,8 +10,8 @@ import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
 import ProductCard from './ProductCard';
 import { Button, Typography } from '@material-ui/core';
-import Alert from '@material-ui/lab/Alert';
 import LottieLoading from '../LottieLoading';
+import LottieEmpty from '../LottieEmpty';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -132,9 +132,9 @@ const ProductTabs = () => {
       </AppBar>
       <TabPanel value={value} index={0}>
         {loadingProductLatest ? (
-          <LottieLoading className="flex justify-center my-10" />
+          <LottieLoading className="flex justify-center" />
         ) : errorProductLatest ? (
-          <Alert severity='error'>{errorProductLatest.message || String(errorProductLatest)}</Alert>
+          <LottieEmpty className="flex justify-center" />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
             {productsLatest && productsLatest.map((product) => (
@@ -158,9 +158,9 @@ const ProductTabs = () => {
       </TabPanel>
       <TabPanel value={value} index={1}>
         {loadingProductSale ? (
-          <LottieLoading className="flex justify-center my-10" />
+          <LottieLoading className="flex justify-center" />
         ) : errorProductSale ? (
-          <Alert severity='error'>{errorProductSale.message || String(errorProductSale)}</Alert>
+          <LottieEmpty className="flex justify-center" />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
             {productsSale && productsSale.map((product) => (

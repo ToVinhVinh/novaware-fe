@@ -4,6 +4,7 @@ import { Button, Typography } from "@material-ui/core";
 import LottieLoading from "../LottieLoading";
 import ProductCard from "../Product/ProductCard";
 import { useGetTopProducts } from "../../hooks/api/useProduct";
+import LottieEmpty from "../LottieEmpty";
 const TopProducts: React.FC = () => {
   const { data: productTopRatedResponse, isLoading: loadingProductTop, error: errorProductTop } = useGetTopProducts({ pageNumber: 1, perPage: 15 });
   const productTopRaw = productTopRatedResponse?.data?.products || [];
@@ -17,11 +18,9 @@ const TopProducts: React.FC = () => {
         <div className='h-[1px] bg-primary flex-1'></div>
       </div>
       {loadingProductTop ? (
-        <LottieLoading className="flex justify-center my-10" />
+        <LottieLoading className="flex justify-center" />
       ) : errorProductTop ? (
-        <div className="p-4 mb-4 bg-red-50 text-red-700 rounded border border-red-300">
-          {errorProductTop.message || String(errorProductTop)}
-        </div>
+        <LottieEmpty className="flex justify-center" />
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
