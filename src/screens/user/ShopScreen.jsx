@@ -106,6 +106,13 @@ const useStyles = makeStyles((theme) => ({
       justifyContent: "flex-end",
     },
   },
+  emptyContainer: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: 400,
+    width: "100%",
+  },
 }));
 
 const ShopScreen = ({ location, history }) => {
@@ -289,10 +296,10 @@ const ShopScreen = ({ location, history }) => {
             <Loader />
           ) : error ? (
             <Message>{error}</Message>
-          ) : (
-            <Grid container spacing={2}>
-              {products.length !== 0 ? (
-                products.map((product) => (
+          ) : products.length !== 0 ? (
+            <>
+              <Grid container spacing={2}>
+                {products.map((product) => (
                   <Grid
                     item
                     xs={activeLayout === "fewCol" ? 12 : 6}
@@ -302,31 +309,31 @@ const ShopScreen = ({ location, history }) => {
                   >
                     <ProductCard {...product} />
                   </Grid>
-                ))
-              ) : (
-                <Grid item xs={12} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                  <LottieEmpty style={{ transform: "scale(1)" }} />
-                </Grid>
-              )}
-              {pages > 1 && (
-                <Pagination
-                  className={classes.pagination}
-                  page={page}
-                  count={pages}
-                  renderItem={(item) => (
-                    <PaginationItem
-                      component={RouterLink}
-                      to={`/shop${
-                        item.page === 0
-                          ? ""
-                          : `?sort_by=${sort_by}&page=${item.page}`
-                      }`}
-                      {...item}
+                ))}
+                {pages > 1 && (
+                  <Grid item xs={12}>
+                    <Pagination
+                      className={classes.pagination}
+                      page={page}
+                      count={pages}
+                      renderItem={(item) => (
+                        <PaginationItem
+                          component={RouterLink}
+                          to={`/shop${
+                            item.page === 0
+                              ? ""
+                              : `?sort_by=${sort_by}&page=${item.page}`
+                          }`}
+                          {...item}
+                        />
+                      )}
                     />
-                  )}
-                />
-              )}
-            </Grid>
+                  </Grid>
+                )}
+              </Grid>
+            </>
+          ) : (
+              <LottieEmpty />
           )}
         </Grid>
       </Grid>
