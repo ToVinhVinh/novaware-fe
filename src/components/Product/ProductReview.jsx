@@ -232,7 +232,7 @@ const ProductReview = ({ reviews, productId }) => {
                         Please{" "}
                         <Link
                           component={RouterLink}
-                          to={`/login?redirect=/product/${productId}`}
+                          to={`/login?redirect=/product?id=${productId}`}
                         >
                           login
                         </Link>{" "}

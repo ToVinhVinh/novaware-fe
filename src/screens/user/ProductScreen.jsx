@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useLocation } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import { addToCart } from "../../actions/cartActions";
 import { toast } from "react-toastify";
@@ -30,11 +30,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ProductScreen = ({ match, setLoginModalOpen }) => {
+const ProductScreen = ({ setLoginModalOpen }) => {
   const dispatch = useDispatch();
   const classes = useStyles();
+  const location = useLocation();
 
-  const productId = match.params.id;
+  // Get product ID from query parameter
+  const searchParams = new URLSearchParams(location.search);
+  const productId = searchParams.get('id');
 
   // Hooks for API data
   const { data: productResponse, isLoading: loading, error: productError } = useGetProduct(productId);
@@ -136,7 +139,7 @@ const ProductScreen = ({ match, setLoginModalOpen }) => {
                 <Link
                   color="textPrimary"
                   component={RouterLink}
-                  to={`/product/${product._id}`}
+                  to={`/product?id=${product._id}`}
                 >
                   {product.name || "Not found product"}
                 </Link>

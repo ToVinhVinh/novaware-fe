@@ -407,7 +407,7 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId }) => {
                                             <Card
                                                 key={product._id}
                                                 className={classes.productCard}
-                                                onClick={() => window.open(`/product/${product._id || ''}`, "_blank")}
+                                                onClick={() => window.open(`/product?id=${product._id || ''}`, "_blank")}
                                             >
                                                 <img
                                                     src={product.images && product.images.length > 0 ? product.images[0] : "https://via.placeholder.com/200"}
@@ -441,7 +441,7 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId }) => {
                                                         style={{ width: "100%", marginTop: 8 }}
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            window.open(`/product/${product._id || ''}`, "_blank");
+                                                            window.open(`/product?id=${product._id || ''}`, "_blank");
                                                         }}
                                                         endIcon={<CallMadeIcon />}
                                                     >

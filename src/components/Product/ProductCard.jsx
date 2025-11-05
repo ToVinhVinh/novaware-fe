@@ -37,7 +37,7 @@ const ProductCard = (props) => {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <RouterLink to={`/product/${_id}`} className="flex h-full flex-col">
+        <RouterLink to={`/product?id=${_id}`} className="flex h-full flex-col">
           {/* Image Container with proper aspect ratio */}
           <div className="relative w-full pb-[100%] overflow-hidden bg-gray-50">
             {sale > 0 && (

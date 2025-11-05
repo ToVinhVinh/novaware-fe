@@ -140,7 +140,7 @@ const FavoritesContent = () => {
   }, [interactionHistory]);
 
   const handleViewProduct = (productId) => {
-    history.push(`/product/${productId}`);
+    history.push(`/product?id=${productId}`);
   };
 
   return (

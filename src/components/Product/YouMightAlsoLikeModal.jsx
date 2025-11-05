@@ -143,7 +143,7 @@ const YouMightAlsoLikeModal = ({ open, onClose, userId }) => {
                           color="primary"
                           size="medium"
                           style={{ width: "100%" }}
-                          onClick={() => window.open(`/product/${p._id || ''}`, "_blank")}
+                          onClick={() => window.open(`/product?id=${p._id || ''}`, "_blank")}
                           endIcon={<CallMadeIcon />}
                         >
                           View details

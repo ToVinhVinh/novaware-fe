@@ -129,7 +129,7 @@ const OutfitSuggestionsContent = () => {
   const outfits = outfitsResponse?.data?.outfits || [];
 
   const handleViewProduct = (productId) => {
-    history.push(`/product/${productId}`);
+    history.push(`/product?id=${productId}`);
   };
 
   if (isLoading) {

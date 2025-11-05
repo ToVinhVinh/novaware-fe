@@ -106,7 +106,7 @@ const App = () => {
               <Switch>
                 <Route path="/shop" component={ShopScreen} />
                 <Route path="/about-us" component={AboutUs} />
-                <Route path="/product/:id" component={ProductScreen} />
+                <Route path="/product" component={ProductScreen} />
                 <Route path="/cart/:id?" component={CartScreen} />
                 <Route path="/profile" component={ProfileScreen} />
                 <Route path="/shipping" component={ShippingScreen} />

@@ -103,7 +103,7 @@ const ProductModalView = (props) => {
             variant='contained'
             color='secondary'
             component={RouterLink}
-            to={`/product/${props._id}`}
+            to={`/product?id=${props._id}`}
           >
             View Details
           </Button>

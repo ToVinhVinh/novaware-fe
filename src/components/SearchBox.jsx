@@ -220,7 +220,7 @@ const SearchBox = (props) => {
                 key={product._id}
                 className={classes.productItem}
                 onClick={() => {
-                  history.push(`/product/${product._id}`);
+                  history.push(`/product?id=${product._id}`);
                   setKeyword('');
                   if (props.setOpenSearchDrawer) {
                     props.setOpenSearchDrawer(false);
