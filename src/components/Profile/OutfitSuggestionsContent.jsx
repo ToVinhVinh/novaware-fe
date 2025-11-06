@@ -139,7 +139,7 @@ const OutfitSuggestionsContent = () => {
   if (isLoading) {
     return (
       <Paper className={classes.paper} elevation={0}>
-        <Typography variant="h5" style={{ marginBottom: 24 }}>
+        <Typography variant="h5" style={{ marginBottom: 24 }} className="tracking-widest">
           Outfit Suggestions
         </Typography>
         <Loader />
@@ -150,7 +150,7 @@ const OutfitSuggestionsContent = () => {
   if (error) {
     return (
       <Paper className={classes.paper} elevation={0}>
-        <Typography variant="h5" style={{ marginBottom: 24 }}>
+        <Typography variant="h5" style={{ marginBottom: 24 }} className="tracking-widest">
           Outfit Suggestions
         </Typography>
         <Message>{error}</Message>
@@ -160,7 +160,7 @@ const OutfitSuggestionsContent = () => {
 
   return (
     <Paper className={classes.paper} elevation={0}>
-      <Typography variant="h5" style={{ marginBottom: 24 }}>
+      <Typography variant="h5" style={{ marginBottom: 24 }} className="tracking-widest">
         Outfit Suggestions
       </Typography>
 

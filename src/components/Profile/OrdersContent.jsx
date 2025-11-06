@@ -30,7 +30,9 @@ const OrdersContent = ({ orders, loadingOrders, errorOrders }) => {
 
   return (
     <TableContainer component={Paper} className={classes.paper} elevation={0}>
-      <Typography variant="h5" style={{ marginBottom: 24 }}>
+      <Typography 
+      className="tracking-widest"
+      variant="h5" style={{ marginBottom: 24 }}>
         My Orders
       </Typography>
       {loadingOrders ? (

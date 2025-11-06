@@ -222,7 +222,9 @@ const ProfileContent = ({ user, onItemClick }) => {
 
   return (
     <Paper className={classes.paper} elevation={0}>
-      <Typography variant="h5" style={{ marginBottom: 24 }}>
+      <Typography 
+      className="tracking-widest"
+      variant="h5" style={{ marginBottom: 24 }}>
         Personal Information
       </Typography>
       <Box className={classes.profile}>
@@ -239,7 +241,9 @@ const ProfileContent = ({ user, onItemClick }) => {
             className={classes.largeAvatar}
           />
         </StyledBadge>
-        <Typography style={{ marginTop: 32, fontSize: 20, color: "#eee" }}>{user?.name}</Typography>
+        <Typography 
+        className="tracking-widest"
+        style={{ marginTop: 40, fontSize: 20, color: "#eee", }}>{user?.name}</Typography>
         <Typography
           variant="caption"
           style={{ color: "#eee", fontSize: 14 }}

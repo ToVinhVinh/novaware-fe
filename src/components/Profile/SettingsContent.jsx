@@ -32,7 +32,7 @@ const SettingsContent = () => {
 
   return (
     <Paper className={classes.paper} elevation={0}>
-      <Typography variant="h5" style={{ marginBottom: 24 }}>
+      <Typography variant="h5" style={{ marginBottom: 24 }} className="tracking-widest">
         Settings
       </Typography>
 
