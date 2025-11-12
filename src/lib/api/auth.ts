@@ -1,4 +1,5 @@
 import axios from "axios";
+import cookies from "js-cookie";
 import { sendPost, sendPut } from "./axios";
 import {
 	IRegisterResponse,
@@ -7,6 +8,7 @@ import {
 	IVerifyCodeResponse,
 	IResetPasswordResponse,
 	IResetPasswordByUserIdResponse,
+	IAuthTokens,
 } from "../../interface/response/auth";
 import {
 	IRegisterBody,
@@ -23,8 +25,48 @@ export const register = async (body: IRegisterBody): Promise<IRegisterResponse> 
 };
 
 // Login
+function persistAuthTokens(tokens?: IAuthTokens) {
+	if (!tokens || typeof window === "undefined") {
+		return;
+	}
+
+	const { access, refresh } = tokens;
+
+	if (access) {
+		localStorage.setItem("accessToken", access);
+		localStorage.setItem("access_token", access);
+		localStorage.setItem("token", JSON.stringify({ token: access, refreshToken: refresh || null }));
+		cookies.set("accessToken", access);
+	}
+
+	if (refresh) {
+		localStorage.setItem("refreshToken", refresh);
+		cookies.set("refreshToken", refresh);
+	}
+
+	const userInfoRaw = localStorage.getItem("userInfo");
+	if (userInfoRaw && userInfoRaw !== "{}") {
+		try {
+			const userInfo = JSON.parse(userInfoRaw);
+			const updatedUserInfo = {
+				...userInfo,
+				token: access || userInfo?.token,
+				accessToken: access || userInfo?.accessToken,
+			};
+			localStorage.setItem("userInfo", JSON.stringify(updatedUserInfo));
+		} catch {
+			// If parsing fails, replace with minimal token info
+			localStorage.setItem("userInfo", JSON.stringify({ token: access }));
+		}
+	}
+}
+
 export const login = async (body: ILoginBody): Promise<ILoginResponse> => {
-	return await sendPost(`/auth/login`, body);
+	const response = await sendPost(`/auth/login`, body);
+	if (response?.data?.tokens) {
+		persistAuthTokens(response.data.tokens);
+	}
+	return response;
 };
 
 // Forgot Password
