@@ -4,7 +4,9 @@ import Message from "../../components/Message";
 import Loader from "../../components/Loader";
 import { toast } from "react-toastify";
 import { useGetProduct, useUpdateProduct } from "../../hooks/api/useProduct";
+import { Link as RouterLink } from "react-router-dom";
 import { MdCloudUpload, MdClose } from "react-icons/md";
+import NavigateNextIcon from "@material-ui/icons/NavigateNext";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Typography,
@@ -16,6 +18,12 @@ import {
   Grid,
   InputLabel,
   IconButton,
+  Breadcrumbs,
+  Link,
+  Select,
+  MenuItem,
+  FormControl,
+  FormHelperText,
 } from "@material-ui/core";
 import Meta from "../../components/Meta";
 
@@ -30,14 +38,14 @@ const useStyles = makeStyles((theme) => ({
   },
   container: {
     marginBottom: 64,
-    boxShadow: "0 10px 31px 0 rgba(0,0,0,0.05)",
+    justifyContent: "center",
   },
   imagePreview: {
     position: "relative",
     marginTop: 8,
     marginRight: 16,
     "& > img": {
-      width: 120,
+      width: 160,
       height: 160,
       objectFit: "cover",
       borderRadius: 6,
@@ -50,6 +58,16 @@ const useStyles = makeStyles((theme) => ({
   },
   errorText: {
     color: theme.palette.error.main,
+  },
+  breadcrumbsContainer: {
+    padding: theme.spacing(2, 0),
+  },
+  formContainer: {
+    width: "100%",
+    backgroundColor: "#f5f5f5",
+    padding: theme.spacing(3),
+    borderRadius: theme.shape.borderRadius,
+    boxShadow: "0 10px 31px 0 rgba(0,0,0,0.05)",
   },
 }));
 
@@ -79,7 +97,14 @@ const ProductEditScreen = ({ match, history }) => {
   const { data: productResponse, isLoading: loading, error } = useGetProduct(productId);
   const product = productResponse?.data?.product;
   const updateProductMutation = useUpdateProduct();
-  const { isLoading: loadingUpdate, error: errorUpdate, isSuccess: successUpdate } = updateProductMutation;
+  const { isLoading: loadingUpdate, error: errorUpdate, isSuccess: successUpdate, reset: resetUpdate } = updateProductMutation;
+
+  useEffect(() => {
+    // Reset mutation state on unmount
+    return () => {
+      resetUpdate();
+    };
+  }, [resetUpdate]);
 
   useEffect(() => {
     setDidMount(true);
@@ -243,13 +268,12 @@ const ProductEditScreen = ({ match, history }) => {
 
   // Render
   return (
-    <Container style={{ marginBottom: 140, maxWidth: "100%" }}>
+    <Container disableGutters style={{ marginBottom: 140, maxWidth: "100%" }}>
       <Meta title="Edit Product" />
       <Grid
         container
         component={Paper}
         elevation={0}
-        spacing={8}
         className={classes.container}
       >
         {loading ? (
@@ -257,214 +281,37 @@ const ProductEditScreen = ({ match, history }) => {
         ) : error ? (
           <Message>{error}</Message>
         ) : (
-          <>
-            <Grid item xs={12} lg={9}>
-              <Typography
-                variant="h5"
-                component="h1"
-                gutterBottom
-                style={{ textAlign: "center" }}
-              >
-                Edit Product
-              </Typography>
-              {loadingUpdate && <Loader />}
-              {errorUpdate && <Message>{errorUpdate}</Message>}
-              <form onSubmit={submitHandler} className={classes.form}>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      required
-                      label="Product Display Name"
-                      name="productDisplayName"
-                      value={productDisplayName}
-                      onChange={(e) => {
-                        setProductDisplayName(e.target.value);
-                        setFormErrors({ ...formErrors, productDisplayName: false });
-                      }}
-                      fullWidth
-                      error={formErrors.productDisplayName}
-                      helperText={formErrors.productDisplayName && "Required"}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      required
-                      label="Gender"
-                      name="gender"
-                      value={gender}
-                      onChange={(e) => {
-                        setGender(e.target.value);
-                        setFormErrors({ ...formErrors, gender: false });
-                      }}
-                      fullWidth
-                      error={formErrors.gender}
-                      helperText={formErrors.gender && "Required"}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      required
-                      label="Master Category"
-                      name="masterCategory"
-                      value={masterCategory}
-                      onChange={(e) => {
-                        setMasterCategory(e.target.value);
-                        setFormErrors({ ...formErrors, masterCategory: false });
-                      }}
-                      fullWidth
-                      error={formErrors.masterCategory}
-                      helperText={formErrors.masterCategory && "Required"}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      required
-                      label="Sub Category"
-                      name="subCategory"
-                      value={subCategory}
-                      onChange={(e) => {
-                        setSubCategory(e.target.value);
-                        setFormErrors({ ...formErrors, subCategory: false });
-                      }}
-                      fullWidth
-                      error={formErrors.subCategory}
-                      helperText={formErrors.subCategory && "Required"}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      required
-                      label="Article Type"
-                      name="articleType"
-                      value={articleType}
-                      onChange={(e) => {
-                        setArticleType(e.target.value);
-                        setFormErrors({ ...formErrors, articleType: false });
-                      }}
-                      fullWidth
-                      error={formErrors.articleType}
-                      helperText={formErrors.articleType && "Required"}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      required
-                      label="Base Colour"
-                      name="baseColour"
-                      value={baseColour}
-                      onChange={(e) => {
-                        setBaseColour(e.target.value);
-                        setFormErrors({ ...formErrors, baseColour: false });
-                      }}
-                      fullWidth
-                      error={formErrors.baseColour}
-                      helperText={formErrors.baseColour && "Required"}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      required
-                      label="Season"
-                      name="season"
-                      value={season}
-                      onChange={(e) => {
-                        setSeason(e.target.value);
-                        setFormErrors({ ...formErrors, season: false });
-                      }}
-                      fullWidth
-                      error={formErrors.season}
-                      helperText={formErrors.season && "Required"}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      label="Year"
-                      name="year"
-                      type="number"
-                      inputProps={{ min: 0 }}
-                      value={year}
-                      onChange={(e) => {
-                        setYear(e.target.value);
-                        setFormErrors({ ...formErrors, year: false });
-                      }}
-                      fullWidth
-                      error={formErrors.year}
-                      helperText={formErrors.year && "Year must be positive"}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      required
-                      label="Usage"
-                      name="usage"
-                      value={usage}
-                      onChange={(e) => {
-                        setUsage(e.target.value);
-                        setFormErrors({ ...formErrors, usage: false });
-                      }}
-                      fullWidth
-                      error={formErrors.usage}
-                      helperText={formErrors.usage && "Required"}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      label="Rating"
-                      name="rating"
-                      type="number"
-                      inputProps={{ min: 0, max: 5, step: 0.1 }}
-                      value={ratingValue}
-                      onChange={(e) => {
-                        setRatingValue(e.target.value);
-                        setFormErrors({ ...formErrors, ratingValue: false });
-                      }}
-                      fullWidth
-                      error={formErrors.ratingValue}
-                      helperText={formErrors.ratingValue ? "Rating must be between 0 and 5" : "0 - 5"}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      label="Sale (%)"
-                      name="sale"
-                      type="number"
-                      inputProps={{ min: 0, step: 0.01 }}
-                      value={sale}
-                      onChange={(e) => {
-                        setSale(e.target.value);
-                        setFormErrors({ ...formErrors, sale: false });
-                      }}
-                      fullWidth
-                      error={formErrors.sale}
-                      helperText={formErrors.sale && "Must be at least 0"}
-                    />
-                  </Grid>
-                </Grid>
-
-                <Box mt={3}>
-                  <InputLabel style={{ marginBottom: 8 }}>Upload images</InputLabel>
+          <div className="bg-[#f5f5f5]">
+            <Breadcrumbs
+              separator={<NavigateNextIcon fontSize="small" />}
+              style={{ marginBottom: 24 }}
+            >
+              <Link color="inherit" component={RouterLink} to="/admin/orderstats">
+                Dashboard
+              </Link>
+              <Link color="inherit" component={RouterLink} to="/admin/products">
+                Products Management
+              </Link>
+              <Typography color="textPrimary">Edit Product</Typography>
+            </Breadcrumbs>
+            {loadingUpdate && <Loader />}
+            {errorUpdate && <Message>{errorUpdate}</Message>}
+            <form onSubmit={submitHandler} className={classes.form}>
+              <Box my={2} display="flex" flexWrap="wrap">
+                {previewImages.map((image, index) => (
+                  <div className={classes.imagePreview} key={`${image}-${index}`}>
+                    <img src={image} alt="" />
+                    <IconButton size="small" onClick={() => handleRemovePreviewImages(image)}>
+                      <MdClose />
+                    </IconButton>
+                  </div>
+                ))}
+              </Box>
+              {formErrors.images && (
+                <p className={classes.errorText}>Please provide at least one image</p>
+              )}
+              <div className="grid grid-cols-2 gap-4">
+                <Box className="w-full">
                   <input
                     accept="image/*"
                     id="contained-button-file"
@@ -479,50 +326,250 @@ const ProductEditScreen = ({ match, history }) => {
                       color="secondary"
                       startIcon={<MdCloudUpload />}
                       component="span"
+                      className="w-full"
                     >
                       Upload
                     </Button>
                   </label>
-                  <Box my={2} display="flex" flexWrap="wrap">
-                    {previewImages.map((image, index) => (
-                      <div className={classes.imagePreview} key={`${image}-${index}`}>
-                        <img src={image} alt="" />
-                        <IconButton size="small" onClick={() => handleRemovePreviewImages(image)}>
-                          <MdClose />
-                        </IconButton>
-                      </div>
-                    ))}
-                  </Box>
-                  {formErrors.images && (
-                    <p className={classes.errorText}>Please provide at least one image</p>
-                  )}
-                </Box>
 
-                <Box mt={2}>
+                </Box>
+                <Button className="w-full" variant="outlined" color="secondary" onClick={handleApplyImageLinks}>
+                  Apply Links
+                </Button>
+
+              </div>
+              <Box mt={2}>
+                <TextField
+                  variant="outlined"
+                  size="small"
+                  label="Image URLs (one per line or comma separated)"
+                  multiline
+                  minRows={3}
+                  fullWidth
+                  value={imageLinksInput}
+                  onChange={(e) => setImageLinksInput(e.target.value)}
+                />
+
+              </Box>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
                   <TextField
                     variant="outlined"
                     size="small"
-                    label="Image URLs (one per line or comma separated)"
-                    multiline
-                    minRows={3}
+                    className="bg-white"
+                    required
+                    label="Product Display Name"
+                    name="productDisplayName"
+                    value={productDisplayName}
+                    onChange={(e) => {
+                      setProductDisplayName(e.target.value);
+                      setFormErrors({ ...formErrors, productDisplayName: false });
+                    }}
                     fullWidth
-                    value={imageLinksInput}
-                    onChange={(e) => setImageLinksInput(e.target.value)}
+                    error={formErrors.productDisplayName}
+                    helperText={formErrors.productDisplayName && "Required"}
                   />
-                  <Box mt={1} display="flex" justifyContent="flex-end">
-                    <Button variant="outlined" color="primary" onClick={handleApplyImageLinks}>
-                      Apply Links
-                    </Button>
-                  </Box>
-                </Box>
-
-                <Button type="submit" variant="contained" color="secondary">
-                  Submit
-                </Button>
-              </form>
-              {uploading && <Loader />}
-            </Grid>
-          </>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl
+                    variant="outlined"
+                    size="small"
+                    required
+                    fullWidth
+                    error={formErrors.gender}
+                    className="bg-white"
+                  >
+                    <InputLabel>Gender</InputLabel>
+                    <Select
+                      label="Gender"
+                      name="gender"
+                      value={gender}
+                      onChange={(e) => {
+                        setGender(e.target.value);
+                        setFormErrors({ ...formErrors, gender: false });
+                      }}
+                    >
+                      <MenuItem value="Men">Men</MenuItem>
+                      <MenuItem value="Women">Women</MenuItem>
+                      <MenuItem value="Boys">Boys</MenuItem>
+                      <MenuItem value="Girls">Girls</MenuItem>
+                      <MenuItem value="Unisex">Unisex</MenuItem>
+                    </Select>
+                    {formErrors.gender && <FormHelperText>Required</FormHelperText>}
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    variant="outlined"
+                    size="small"
+                    className="bg-white"
+                    required
+                    label="Master Category"
+                    name="masterCategory"
+                    value={masterCategory}
+                    onChange={(e) => {
+                      setMasterCategory(e.target.value);
+                      setFormErrors({ ...formErrors, masterCategory: false });
+                    }}
+                    fullWidth
+                    error={formErrors.masterCategory}
+                    helperText={formErrors.masterCategory && "Required"}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    variant="outlined"
+                    size="small"
+                    className="bg-white"
+                    required
+                    label="Sub Category"
+                    name="subCategory"
+                    value={subCategory}
+                    onChange={(e) => {
+                      setSubCategory(e.target.value);
+                      setFormErrors({ ...formErrors, subCategory: false });
+                    }}
+                    fullWidth
+                    error={formErrors.subCategory}
+                    helperText={formErrors.subCategory && "Required"}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    variant="outlined"
+                    size="small"
+                    className="bg-white"
+                    required
+                    label="Article Type"
+                    name="articleType"
+                    value={articleType}
+                    onChange={(e) => {
+                      setArticleType(e.target.value);
+                      setFormErrors({ ...formErrors, articleType: false });
+                    }}
+                    fullWidth
+                    error={formErrors.articleType}
+                    helperText={formErrors.articleType && "Required"}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    variant="outlined"
+                    size="small"
+                    className="bg-white"
+                    required
+                    label="Base Colour"
+                    name="baseColour"
+                    value={baseColour}
+                    onChange={(e) => {
+                      setBaseColour(e.target.value);
+                      setFormErrors({ ...formErrors, baseColour: false });
+                    }}
+                    fullWidth
+                    error={formErrors.baseColour}
+                    helperText={formErrors.baseColour && "Required"}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    variant="outlined"
+                    size="small"
+                    className="bg-white"
+                    required
+                    label="Season"
+                    name="season"
+                    value={season}
+                    onChange={(e) => {
+                      setSeason(e.target.value);
+                      setFormErrors({ ...formErrors, season: false });
+                    }}
+                    fullWidth
+                    error={formErrors.season}
+                    helperText={formErrors.season && "Required"}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    variant="outlined"
+                    size="small"
+                    className="bg-white"
+                    label="Year"
+                    name="year"
+                    type="number"
+                    inputProps={{ min: 0 }}
+                    value={year}
+                    onChange={(e) => {
+                      setYear(e.target.value);
+                      setFormErrors({ ...formErrors, year: false });
+                    }}
+                    fullWidth
+                    error={formErrors.year}
+                    helperText={formErrors.year && "Year must be positive"}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    variant="outlined"
+                    size="small"
+                    className="bg-white"
+                    required
+                    label="Usage"
+                    name="usage"
+                    value={usage}
+                    onChange={(e) => {
+                      setUsage(e.target.value);
+                      setFormErrors({ ...formErrors, usage: false });
+                    }}
+                    fullWidth
+                    error={formErrors.usage}
+                    helperText={formErrors.usage && "Required"}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    variant="outlined"
+                    size="small"
+                    className="bg-white"
+                    label="Rating"
+                    name="rating"
+                    type="number"
+                    inputProps={{ min: 0, max: 5, step: 0.1 }}
+                    value={ratingValue}
+                    onChange={(e) => {
+                      setRatingValue(e.target.value);
+                      setFormErrors({ ...formErrors, ratingValue: false });
+                    }}
+                    fullWidth
+                    error={formErrors.ratingValue}
+                    helperText={formErrors.ratingValue ? "Rating must be between 0 and 5" : "0 - 5"}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    variant="outlined"
+                    size="small"
+                    className="bg-white"
+                    label="Sale (%)"
+                    name="sale"
+                    type="number"
+                    inputProps={{ min: 0, step: 0.01 }}
+                    value={sale}
+                    onChange={(e) => {
+                      setSale(e.target.value);
+                      setFormErrors({ ...formErrors, sale: false });
+                    }}
+                    fullWidth
+                    error={formErrors.sale}
+                    helperText={formErrors.sale && "Must be at least 0"}
+                  />
+                </Grid>
+              </Grid>
+              <Button type="submit" variant="contained" color="secondary">
+                Submit
+              </Button>
+            </form>
+            {uploading && <Loader />}
+          </div>
         )}
       </Grid>
     </Container>

@@ -1,10 +1,9 @@
-import React from 'react';
 import { Helmet } from 'react-helmet';
 
-const Meta = ({ 
-  title = 'NovaWare', 
-  description = 'Wear What You Love. Love What You Wear.', 
-  keywords = 'Limited Edition, Only While Supplies Last, Exclusive Offer' 
+const Meta = ({
+  title = 'NovaWare',
+  description = 'Wear What You Love. Love What You Wear.',
+  keywords = 'Limited Edition, Only While Supplies Last, Exclusive Offer'
 }) => {
   return (
     <Helmet>

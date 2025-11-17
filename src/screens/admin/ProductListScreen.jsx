@@ -123,7 +123,7 @@ const ProductListScreen = ({ history }) => {
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(12);
+  const [pageSize, setPageSize] = useState(48);
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedBrands, setSelectedBrands] = useState([]);
