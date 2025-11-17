@@ -123,7 +123,7 @@ const ProductListScreen = ({ history }) => {
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(48);
+  const [pageSize, setPageSize] = useState(10);
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedBrands, setSelectedBrands] = useState([]);
@@ -193,14 +193,14 @@ const ProductListScreen = ({ history }) => {
     {
       field: "id",
       headerName: "ID",
-      width: 120,
+      width: 100,
       sortable: false,
       valueGetter: (params) => params.row._id || params.row.id || "",
     },
     {
       field: "image",
       headerName: "Image",
-      width: 120,
+      width: 100,
       sortable: false,
       renderCell: (params) => {
         const imageUrl = params.value;
@@ -237,13 +237,13 @@ const ProductListScreen = ({ history }) => {
     {
       field: "masterCategory",
       headerName: "Category",
-      width: 150,
+      width: 120,
       sortable: false,
     },
     {
       field: "subCategory",
       headerName: "Sub Category",
-      width: 160,
+      width: 120,
       sortable: false,
       renderCell: (params) => (
         <Typography variant="body2" className={classes.lineClampTwo}>
@@ -254,7 +254,7 @@ const ProductListScreen = ({ history }) => {
     {
       field: "articleType",
       headerName: "Article Type",
-      width: 160,
+      width: 120,
       sortable: false,
       renderCell: (params) => (
         <Typography variant="body2" className={classes.lineClampTwo}>
@@ -300,7 +300,7 @@ const ProductListScreen = ({ history }) => {
     {
       field: "sale",
       headerName: "Sale %",
-      width: 120,
+      width: 100,
       align: "right",
       headerAlign: "right",
       sortable: false,
@@ -423,6 +423,7 @@ const ProductListScreen = ({ history }) => {
               <TextField
                 variant="outlined"
                 size="small"
+                className="bg-white"
                 placeholder="Search products..."
                 value={search}
                 onChange={handleSearchChange}
