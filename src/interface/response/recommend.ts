@@ -194,4 +194,14 @@ export interface IModelRecommendationResponse {
 	outfit_complete_score: number;
 }
 
+export interface ITrainGNNWithTaskIdResponse {
+	task_id: string;
+	model: string;
+	status: string;
+	message: string;
+	progress: number;
+	current_step: string;
+	total_steps: string;
+}
+
 

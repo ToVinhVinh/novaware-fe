@@ -5,13 +5,27 @@ export interface ICategory {
 	updatedAt?: string;
 }
 
+export interface IHierarchySubCategory {
+	subCategory: string;
+	articleTypes: string[];
+}
+
+export interface IHierarchyItem {
+	masterCategory: string;
+	subCategories: IHierarchySubCategory[];
+}
+
 export interface IGetCategoriesResponse {
 	message: string;
 	data: {
-		categories: ICategory[];
-		page: number;
-		pages: number;
-		count: number;
+		hierarchy?: IHierarchyItem[];
+		masterCategories?: string[];
+		subCategories?: string[];
+		articleTypes?: string[];
+		categories?: ICategory[];
+		page?: number;
+		pages?: number;
+		count?: number;
 	};
 }
 

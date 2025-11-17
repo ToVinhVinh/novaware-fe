@@ -11,13 +11,32 @@ import { useDispatch } from "react-redux";
 import { formatPriceDollar } from "../../utils/formatPrice";
 
 const ProductCard = (props) => {
-  const { _id, id, slug, productId: incomingProductId, name, images, price, sale, variants } = props;
+  const {
+    _id,
+    id,
+    slug,
+    productId: incomingProductId,
+    name,
+    productDisplayName,
+    images,
+    price,
+    sale,
+    variants,
+    rating,
+    baseColour,
+    articleType
+  } = props;
+
   const productId = _id ?? id ?? incomingProductId ?? slug ?? "";
+  const displayName = productDisplayName || name || "Product";
   const [openModal, setOpenModal] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const dispatch = useDispatch();
   const variant = variants && variants.length > 0 ? variants[0] : null;
-  const finalPrice = variant?.price ? variant?.price : (price * (1 - sale / 100));
+
+  // Calculate price - assuming a base price if not provided
+  const basePrice = price || variant?.price || 50; // fallback price
+  const finalPrice = basePrice * (1 - (sale || 0) / 100);
 
   const handleAddToCart = (e, idToAdd) => {
     e.stopPropagation();
@@ -26,7 +45,7 @@ const ProductCard = (props) => {
       return;
     }
     dispatch(setOpenCartDrawer(true));
-    dispatch(addToCart(idToAdd, 1, variant?.size || "M", variant?.color || ""));  
+    dispatch(addToCart(idToAdd, 1, variant?.size || "M", variant?.color || ""));
   };
   const handleOpenQuickView = (e) => {
     e.stopPropagation();
@@ -55,33 +74,53 @@ const ProductCard = (props) => {
           <div className="relative w-full pb-[100%] overflow-hidden bg-gray-50">
             {sale > 0 && (
               <div className="absolute top-3 left-3 z-20 bg-pink-600 px-2 py-1 text-xs font-semibold uppercase text-white">
-                -{sale}%
+                -{Math.round(sale)}%
               </div>
             )}
 
-            {/* Back Image */}
-            {images && images[1] && (
-              <motion.img
-                className="absolute inset-0 h-full w-full object-contain"
-                src={images[1]}
-                alt={`${name} - back view`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: isHovered ? 1 : 0 }}
-                transition={{ duration: 0.4 }}
-                onError={(e) => {
-                  e.target.src = images[0] || '';
-                }}
-              />
-            )}
+            <div className="absolute top-3 left-16 z-20 bg-pink-600 px-2 py-1 text-xs font-semibold uppercase text-white">
+              {articleType}
+            </div>
 
-            {/* Front Image with fade on hover */}
-            {images && images[0] && (
+            {/* Placeholder or Images */}
+            {images && images.length > 0 ? (
+              <>
+                {/* Back Image */}
+                {images[1] && (
+                  <motion.img
+                    className="absolute inset-0 h-full w-full object-contain"
+                    src={images[1]}
+                    alt={`${displayName} - back view`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: isHovered ? 1 : 0 }}
+                    transition={{ duration: 0.4 }}
+                    onError={(e) => {
+                      e.target.src = images[0] || '';
+                    }}
+                  />
+                )}
+
+                {/* Front Image with fade on hover */}
+                <motion.img
+                  className="absolute inset-0 h-full w-full object-contain bg-white"
+                  src={images[0]}
+                  alt={displayName}
+                  initial={{ opacity: 1 }}
+                  animate={{ opacity: isHovered && images[1] ? 0 : 1 }}
+                  transition={{ duration: 0.4 }}
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
+                />
+              </>
+            ) : (
+              /* Placeholder when no images */
               <motion.img
                 className="absolute inset-0 h-full w-full object-contain bg-white"
-                src={images[0]}
-                alt={name}
+                src="https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?_gl=1*g8do3y*_ga*OTAxNTg0MjkuMTc1NzYxMDEwNQ..*_ga_8JE65Q40S6*czE3NjMzODg4MTkkbzYkZzEkdDE3NjMzODg4MjgkajUxJGwwJGgw"
+                alt={displayName}
                 initial={{ opacity: 1 }}
-                animate={{ opacity: isHovered ? 0 : 1 }}
+                animate={{ opacity: isHovered && images[1] ? 0 : 1 }}
                 transition={{ duration: 0.4 }}
                 onError={(e) => {
                   e.target.style.display = 'none';
@@ -92,19 +131,34 @@ const ProductCard = (props) => {
 
           {/* Product Info */}
           <div className="flex flex-1 flex-col p-3 bg-primary border-t rounded-t-xl">
-            <Tooltip title={name || ""} arrow>
-              <h3 className="mb-2 line-clamp-2 text-base font-light leading-6 text-white">
-                {name}
+            <Tooltip title={displayName || ""} arrow>
+              <h3 className="line-clamp-2 text-base font-light leading-6 text-white">
+                {displayName}
               </h3>
             </Tooltip>
+
+            {/* Rating display */}
+            {rating && (
+              <div className="flex items-center gap-1">
+                <div className="flex text-yellow-400">
+                  {[...Array(5)].map((_, i) => (
+                    <span style={{ fontSize: "24px" }} key={i} className={i < rating ? "text-yellow-400" : "text-gray-300"}>
+                      ★
+                    </span>
+                  ))}
+                </div>
+                <span className="text-xs text-white/80">({rating})</span>
+              </div>
+            )}
+
             <div className="mt-auto flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <span className={`text-2xl font-bold ${sale > 0 ? "text-white" : "text-white"}`}>
+                <span className="text-2xl font-bold text-white">
                   {formatPriceDollar(finalPrice)}
                 </span>
                 {sale > 0 && (
-                  <span className="text-base italic text-white line-through">
-                    {formatPriceDollar(finalPrice)}
+                  <span className="text-base italic text-white/70 line-through">
+                    {formatPriceDollar(basePrice)}
                   </span>
                 )}
               </div>
@@ -124,7 +178,7 @@ const ProductCard = (props) => {
             </div>
             {/* Desktop Action Buttons */}
             <div
-              className="grid grid-cols-2 gap-2 mt-4"
+              className="grid grid-cols-2 gap-2 mt-2"
             >
               <button
                 onClick={handleOpenQuickView}

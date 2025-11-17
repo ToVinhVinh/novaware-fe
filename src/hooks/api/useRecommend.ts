@@ -6,6 +6,7 @@ import {
 	getGNNModelRecommendations,
 	getCBFModelRecommendations,
 	getHybridModelRecommendations,
+	trainGNNModelWithTaskId,
 } from '../../lib/api/recommend';
 import * as RecommendTypes from '../../interface/response/recommend';
 import * as RecommendRequestTypes from '../../interface/request/recommend';
@@ -43,6 +44,12 @@ export const useCBFModelRecommendations = () => {
 export const useHybridModelRecommendations = () => {
 	return useMutation<RecommendTypes.IModelRecommendationResponse, Error, RecommendRequestTypes.IHybridRecommendRequest>({
 		mutationFn: getHybridModelRecommendations,
+	});
+};
+
+export const useTrainGNNModelWithTaskId = () => {
+	return useMutation<RecommendTypes.ITrainGNNWithTaskIdResponse, Error, RecommendRequestTypes.ITrainGNNWithTaskIdRequest>({
+		mutationFn: trainGNNModelWithTaskId,
 	});
 };
 

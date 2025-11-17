@@ -25,9 +25,12 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Badge,
+  Chip,
 } from "@material-ui/core";
 import NavigateNextIcon from "@material-ui/icons/NavigateNext";
 import Meta from "../../components/Meta";
+import ProductCard from "../../components/Product/ProductCard";
 import {
   useTrainGNNModel,
   useTrainCBFModel,
@@ -35,6 +38,7 @@ import {
   useGNNModelRecommendations,
   useCBFModelRecommendations,
   useHybridModelRecommendations,
+  useTrainGNNModelWithTaskId,
 } from "../../hooks/api/useRecommend";
 
 const useStyles = makeStyles((theme) => ({
@@ -145,8 +149,8 @@ const RecommendProductsScreen = () => {
   const [tabValue, setTabValue] = useState(0);
   const [userId, setUserId] = useState("");
   const [productId, setProductId] = useState("");
-  const [topKPersonal, setTopKPersonal] = useState(10);
-  const [topKOutfit, setTopKOutfit] = useState(5);
+  const [topKPersonal, setTopKPersonal] = useState(5);
+  const [topKOutfit, setTopKOutfit] = useState(4);
   const [alpha, setAlpha] = useState(0.5);
   const [trainingResults, setTrainingResults] = useState({
     gnn: null,
@@ -160,6 +164,9 @@ const RecommendProductsScreen = () => {
   const trainGNN = useTrainGNNModel();
   const trainCBF = useTrainCBFModel();
   const trainHybrid = useTrainHybridModel();
+
+  // Check status hook
+  const checkStatus = useTrainGNNModelWithTaskId();
 
   // Recommendation hooks
   const getGNNRecommendations = useGNNModelRecommendations();
@@ -218,9 +225,49 @@ const RecommendProductsScreen = () => {
     }
   };
 
+  const handleCheckStatus = async (modelType) => {
+    const trainingResult = trainingResults[modelType];
+    if (!trainingResult || !trainingResult.task_id) {
+      toast.error("No task ID available. Please train the model first.");
+      return;
+    }
+
+    try {
+      const result = await checkStatus.mutateAsync({
+        task_id: trainingResult.task_id,
+      });
+
+      // Update training result with new status
+      setTrainingResults((prev) => ({
+        ...prev,
+        [modelType]: result,
+      }));
+
+      toast.success("Status updated successfully!");
+    } catch (error) {
+      toast.error(error?.message || "Failed to check status");
+    }
+  };
+
   const handleGetRecommendations = async (modelType) => {
     if (!userId || !productId) {
       toast.error("Please enter both User ID and Product ID");
+      return;
+    }
+
+    // Validate input ranges
+    if (topKPersonal < 1 || topKPersonal > 50) {
+      toast.error("Top K Personal must be between 1 and 50");
+      return;
+    }
+
+    if (topKOutfit < 1 || topKOutfit > 10) {
+      toast.error("Top K Outfit must be between 1 and 10");
+      return;
+    }
+
+    if (modelType === "hybrid" && (alpha < 0 || alpha > 1)) {
+      toast.error("Alpha must be between 0.0 and 1.0");
       return;
     }
 
@@ -261,16 +308,16 @@ const RecommendProductsScreen = () => {
     }
 
     const { data, user_ids, product_ids, description, row_label, col_label } = matrixData;
-    
+
     // Chỉ hiển thị một số cột đầu và cuối
     const maxDisplayCols = 3; // Số cột hiển thị ở đầu và cuối
     const totalCols = product_ids.length;
     const showEllipsis = totalCols > maxDisplayCols * 2;
-    
+
     // Các cột cần hiển thị
     const firstCols = product_ids.slice(0, maxDisplayCols);
     const lastCols = showEllipsis ? product_ids.slice(-maxDisplayCols) : [];
-    
+
     // Hàm để lấy giá trị từ row dựa trên col index
     const getRowValue = (row, colIdx) => {
       return row[colIdx];
@@ -282,24 +329,24 @@ const RecommendProductsScreen = () => {
           {description || "User-Item Interaction Matrix"}
         </Typography>
         <Typography variant="caption" color="textSecondary" gutterBottom>
-          Shape: {matrixData.shape?.[0]} x {matrixData.shape?.[1]} | 
+          Shape: {matrixData.shape?.[0]} x {matrixData.shape?.[1]} |
           Displaying: {user_ids.length} rows x {showEllipsis ? `${maxDisplayCols} + ... + ${maxDisplayCols}` : totalCols} columns
         </Typography>
-        <TableContainer 
-          component={Paper} 
+        <TableContainer
+          component={Paper}
           className={classes.matrixTableContainer}
         >
-          <Table 
-            className={classes.matrixTable} 
-            size="small" 
+          <Table
+            className={classes.matrixTable}
+            size="small"
             stickyHeader
             aria-label="matrix table"
           >
             <TableHead>
               <TableRow>
-                <TableCell 
-                  className={classes.matrixHeaderCell} 
-                  style={{ minWidth: 120 }} 
+                <TableCell
+                  className={classes.matrixHeaderCell}
+                  style={{ minWidth: 120 }}
                   component="th"
                   scope="row"
                 >
@@ -307,9 +354,9 @@ const RecommendProductsScreen = () => {
                 </TableCell>
                 {/* Hiển thị các cột đầu */}
                 {firstCols.map((productId, idx) => (
-                  <TableCell 
-                    key={idx} 
-                    className={classes.matrixCell} 
+                  <TableCell
+                    key={idx}
+                    className={classes.matrixCell}
                     style={{ minWidth: 100 }}
                     align="center"
                   >
@@ -318,9 +365,9 @@ const RecommendProductsScreen = () => {
                 ))}
                 {/* Hiển thị "..." nếu có nhiều cột */}
                 {showEllipsis && (
-                  <TableCell 
-                    className={classes.matrixCell} 
-                    style={{ minWidth: 60 }} 
+                  <TableCell
+                    className={classes.matrixCell}
+                    style={{ minWidth: 60 }}
                     align="center"
                   >
                     ...
@@ -328,9 +375,9 @@ const RecommendProductsScreen = () => {
                 )}
                 {/* Hiển thị các cột cuối */}
                 {lastCols.map((productId, idx) => (
-                  <TableCell 
-                    key={`last-${idx}`} 
-                    className={classes.matrixCell} 
+                  <TableCell
+                    key={`last-${idx}`}
+                    className={classes.matrixCell}
                     style={{ minWidth: 100 }}
                     align="center"
                   >
@@ -342,8 +389,8 @@ const RecommendProductsScreen = () => {
             <TableBody>
               {data.map((row, rowIdx) => (
                 <TableRow key={rowIdx} hover>
-                  <TableCell 
-                    className={classes.matrixHeaderCell} 
+                  <TableCell
+                    className={classes.matrixHeaderCell}
                     style={{ minWidth: 120 }}
                     component="th"
                     scope="row"
@@ -354,8 +401,8 @@ const RecommendProductsScreen = () => {
                   {firstCols.map((_, idx) => {
                     const value = getRowValue(row, idx);
                     return (
-                      <TableCell 
-                        key={idx} 
+                      <TableCell
+                        key={idx}
                         className={classes.matrixCell}
                         align="center"
                       >
@@ -365,8 +412,8 @@ const RecommendProductsScreen = () => {
                   })}
                   {/* Hiển thị "..." nếu có nhiều cột */}
                   {showEllipsis && (
-                    <TableCell 
-                      className={classes.matrixCell} 
+                    <TableCell
+                      className={classes.matrixCell}
                       align="center"
                     >
                       ...
@@ -377,8 +424,8 @@ const RecommendProductsScreen = () => {
                     const actualIdx = totalCols - maxDisplayCols + idx;
                     const value = getRowValue(row, actualIdx);
                     return (
-                      <TableCell 
-                        key={`last-${idx}`} 
+                      <TableCell
+                        key={`last-${idx}`}
                         className={classes.matrixCell}
                         align="center"
                       >
@@ -418,6 +465,133 @@ const RecommendProductsScreen = () => {
       <div className={classes.tabPanel}>
         <Paper className={classes.paper}>
           {matrixData && renderMatrix(matrixData)}
+          <Typography variant="h5" gutterBottom>
+            Train Model Result
+          </Typography>
+
+          {trainingResult && (
+            <div>
+              <Box display="flex" justifyContent="space-between" alignItems="flex-start" style={{ marginBottom: 16 }}>
+                {trainingResult.task_id && (
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    onClick={() => handleCheckStatus(modelType)}
+                    disabled={checkStatus.isLoading || !trainingResult.task_id}
+                  >
+                    {checkStatus.isLoading ? (
+                      <>
+                        <CircularProgress size={16} style={{ marginRight: 8 }} />
+                        Checking...
+                      </>
+                    ) : (
+                      "Check Status"
+                    )}
+                  </Button>
+                )}
+              </Box>
+              <Grid container spacing={2}>
+                {trainingResult.task_id && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" color="textSecondary">
+                      Task ID:
+                    </Typography>
+                    <Typography variant="body1" style={{ wordBreak: "break-all" }}>
+                      {trainingResult.task_id}
+                    </Typography>
+                  </Grid>
+                )}
+                {trainingResult.model && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" color="textSecondary">
+                      Model:
+                    </Typography>
+                    <Chip
+                      size="small"
+                      label={trainingResult.model.toUpperCase()}
+                      color="primary"
+                      style={{ marginTop: 4 }}
+                    />
+                  </Grid>
+                )}
+                {trainingResult.status && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" color="textSecondary">
+                      Status:
+                    </Typography>
+                    <Chip
+                      size="small"
+                      label={trainingResult.status.toUpperCase()}
+                      style={{
+                        backgroundColor: trainingResult.status === "running" ? "#ff9800" :
+                          trainingResult.status === "completed" ? "#4caf50" :
+                            trainingResult.status === "failed" ? "#f44336" : "#9e9e9e",
+                        color: "#ffffff",
+                        fontWeight: 600
+                      }}
+                    />
+                  </Grid>
+                )}
+                {trainingResult.message && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" color="textSecondary">
+                      Message:
+                    </Typography>
+                    <Chip
+                      size="small"
+                      label={trainingResult.message}
+                      color="default"
+                      style={{ marginTop: 4 }}
+                    />
+                  </Grid>
+                )}
+                {trainingResult.progress !== undefined && trainingResult.progress !== null && (
+                  <Grid item xs={12}>
+                    <Typography variant="body2" color="textSecondary" gutterBottom>
+                      Progress: {trainingResult.progress}%
+                    </Typography>
+                    <Box style={{ width: "100%", height: 8, backgroundColor: "#e0e0e0", borderRadius: 4, overflow: "hidden" }}>
+                      <Box
+                        style={{
+                          width: `${trainingResult.progress}%`,
+                          height: "100%",
+                          backgroundColor: "#4caf50",
+                          transition: "width 0.3s ease"
+                        }}
+                      />
+                    </Box>
+                  </Grid>
+                )}
+                {(trainingResult.current_step !== undefined && trainingResult.current_step !== null) && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" color="textSecondary">
+                      Current Step:
+                    </Typography>
+                    <Typography variant="body1">
+                      {trainingResult.current_step || "N/A"}
+                    </Typography>
+                  </Grid>
+                )}
+                {(trainingResult.total_steps !== undefined && trainingResult.total_steps !== null) && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" color="textSecondary">
+                      Total Steps:
+                    </Typography>
+                    <Typography variant="body1">
+                      {trainingResult.total_steps || "N/A"}
+                    </Typography>
+                  </Grid>
+                )}
+              </Grid>
+            </div>
+          )}
+
+          {!trainingResult && (
+            <Typography variant="body2" color="textSecondary" style={{ padding: 16, textAlign: 'center' }}>
+              No training result available. Click "Train Model" to start training.
+            </Typography>
+          )}
 
           <Divider style={{ margin: "24px 0" }} />
 
@@ -459,9 +633,10 @@ const RecommendProductsScreen = () => {
                   variant="outlined"
                   type="number"
                   value={topKPersonal}
-                  onChange={(e) => setTopKPersonal(parseInt(e.target.value) || 10)}
+                  onChange={(e) => setTopKPersonal(parseInt(e.target.value) || 5)}
                   className={classes.formField}
-                  inputProps={{ min: 1, max: 100 }}
+                  inputProps={{ min: 1, max: 50 }}
+                  helperText="Number of personal recommendations (1-50, default: 5)"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -472,9 +647,10 @@ const RecommendProductsScreen = () => {
                   variant="outlined"
                   type="number"
                   value={topKOutfit}
-                  onChange={(e) => setTopKOutfit(parseInt(e.target.value) || 5)}
+                  onChange={(e) => setTopKOutfit(parseInt(e.target.value) || 4)}
                   className={classes.formField}
-                  inputProps={{ min: 1, max: 50 }}
+                  inputProps={{ min: 1, max: 10 }}
+                  helperText="Number of outfit recommendations (1-10, default: 4)"
                 />
               </Grid>
               {modelType === "hybrid" && (
@@ -489,7 +665,7 @@ const RecommendProductsScreen = () => {
                     onChange={(e) => setAlpha(parseFloat(e.target.value) || 0.5)}
                     className={classes.formField}
                     inputProps={{ min: 0, max: 1, step: 0.1 }}
-                    helperText="Weight for hybrid model (0 = CBF, 1 = GNN)"
+                    helperText="Blend weight between CF (GNN) and CBF (0.0-1.0)"
                   />
                 </Grid>
               )}
@@ -521,30 +697,55 @@ const RecommendProductsScreen = () => {
               </Typography>
 
               {recommendations.personalized && recommendations.personalized.length > 0 && (
-                <Card className={classes.recommendationCard}>
-                  <CardContent>
-                    <Typography variant="subtitle1" gutterBottom>
-                      Personalized Recommendations ({recommendations.personalized.length})
-                    </Typography>
+                <div>
+                  <Typography variant="subtitle1" gutterBottom>
+                    Personalized Recommendations ({recommendations.personalized.length})
+                  </Typography>
+                  <Grid container spacing={2} style={{ marginTop: 16 }}>
                     {recommendations.personalized.map((item, index) => (
-                      <Box key={index} style={{ marginBottom: 8 }}>
-                        <Typography variant="body2">
-                          <strong>{index + 1}.</strong> {item.name || item.product_id}
-                        </Typography>
-                        <Typography variant="caption" color="textSecondary">
-                          Product ID: {item.product_id} | Score: {item.score?.toFixed(4) || "N/A"}
-                        </Typography>
-                        {item.reason && (
-                          <Typography variant="caption" color="textSecondary" display="block">
-                            Reason: {item.reason}
-                          </Typography>
-                        )}
-                      </Box>
+                      <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
+                        <div style={{ position: 'relative' }}>
+                          <ProductCard
+                            _id={item.product?.id}
+                            id={item.product?.id}
+                            productId={item.product?.id}
+                            name={item.product?.productDisplayName}
+                            productDisplayName={item.product?.productDisplayName}
+                            images={item.product?.images}
+                            price={item.product?.price || 50}
+                            sale={item.product?.sale}
+                            variants={item.product?.variants}
+                            rating={item.product?.rating}
+                            baseColour={item.product?.baseColour}
+                            articleType={item.product?.articleType}
+                          />
+                          {/* Reason and Score overlay */}
+                          <Box
+                            style={{
+                              marginTop: 8,
+                              padding: 8,
+                              backgroundColor: '#f5f5f5',
+                              borderRadius: 4,
+                              fontSize: '0.75rem'
+                            }}
+                          >
+                            <Typography variant="caption" color="primary" style={{ fontWeight: 600 }}>
+                              Score: {item.score?.toFixed(4) || "N/A"}
+                            </Typography>
+                            {item.reason && (
+                              <Typography variant="caption" color="textSecondary" display="block" style={{ marginTop: 4 }}>
+                                {item.reason}
+                              </Typography>
+                            )}
+                          </Box>
+                        </div>
+                      </Grid>
                     ))}
-                  </CardContent>
-                </Card>
+                  </Grid>
+                </div>
               )}
 
+              {/* Outfit Recommendations Section */}
               {recommendations.outfit && Object.keys(recommendations.outfit).length > 0 && (
                 <Card className={classes.recommendationCard}>
                   <CardContent>
@@ -556,26 +757,51 @@ const RecommendProductsScreen = () => {
                         Outfit Complete Score: {recommendations.outfit_complete_score.toFixed(4)}
                       </Typography>
                     )}
-                    {Object.entries(recommendations.outfit).map(([category, items], catIndex) => (
-                      <Box key={catIndex} style={{ marginTop: 16 }}>
-                        <Typography variant="subtitle2" gutterBottom>
-                          {category} ({items.length})
+
+                    {Object.entries(recommendations.outfit).map(([category, item], catIndex) => (
+                      <Box key={catIndex} style={{ marginTop: 24 }}>
+                        <Typography variant="subtitle2" gutterBottom style={{ textTransform: 'capitalize', marginBottom: 16 }}>
+                          {category}
                         </Typography>
-                        {items.map((item, index) => (
-                          <Box key={index} style={{ marginBottom: 8, marginLeft: 16 }}>
-                            <Typography variant="body2">
-                              <strong>{index + 1}.</strong> {item.name || item.product_id}
-                            </Typography>
-                            <Typography variant="caption" color="textSecondary">
-                              Product ID: {item.product_id} | Score: {item.score?.toFixed(4) || "N/A"}
-                            </Typography>
-                            {item.reason && (
-                              <Typography variant="caption" color="textSecondary" display="block">
-                                Reason: {item.reason}
-                              </Typography>
-                            )}
-                          </Box>
-                        ))}
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} sm={6} md={4} lg={3}>
+                            <div style={{ position: 'relative' }}>
+                              <ProductCard
+                                _id={item.product?.id}
+                                id={item.product?.id}
+                                productId={item.product?.id}
+                                name={item.product?.productDisplayName}
+                                productDisplayName={item.product?.productDisplayName}
+                                images={item.product?.images}
+                                price={item.product?.price || 50}
+                                sale={item.product?.sale}
+                                variants={item.product?.variants}
+                                rating={item.product?.rating}
+                                baseColour={item.product?.baseColour}
+                                articleType={item.product?.articleType}
+                              />
+                              {/* Reason and Score overlay */}
+                              <Box
+                                style={{
+                                  marginTop: 8,
+                                  padding: 8,
+                                  backgroundColor: '#f5f5f5',
+                                  borderRadius: 4,
+                                  fontSize: '0.75rem'
+                                }}
+                              >
+                                <Typography variant="caption" color="primary" style={{ fontWeight: 600 }}>
+                                  Score: {item.score?.toFixed(4) || "N/A"}
+                                </Typography>
+                                {item.reason && (
+                                  <Typography variant="caption" color="textSecondary" display="block" style={{ marginTop: 4 }}>
+                                    {item.reason}
+                                  </Typography>
+                                )}
+                              </Box>
+                            </div>
+                          </Grid>
+                        </Grid>
                       </Box>
                     ))}
                   </CardContent>

@@ -11,6 +11,15 @@ export interface IGetProductsQuery {
 
 export interface ICreateProductBody {
 	name: string;
+	productDisplayName?: string;
+	gender?: string;
+	masterCategory?: string;
+	subCategory?: string;
+	articleType?: string;
+	baseColour?: string;
+	season?: string;
+	year?: number;
+	usage?: string;
 	price: number;
 	sale?: number;
 	images: string[];
@@ -24,10 +33,20 @@ export interface ICreateProductBody {
 		xl?: number;
 	};
 	colors?: string[];
+	rating?: number;
 }
 
 export interface IUpdateProductBody {
 	name?: string;
+	productDisplayName?: string;
+	gender?: string;
+	masterCategory?: string;
+	subCategory?: string;
+	articleType?: string;
+	baseColour?: string;
+	season?: string;
+	year?: number;
+	usage?: string;
 	price?: number;
 	sale?: number;
 	images?: string[];
@@ -41,6 +60,7 @@ export interface IUpdateProductBody {
 		xl?: number;
 	};
 	colors?: string[];
+	rating?: number;
 }
 
 export interface ICreateReviewBody {

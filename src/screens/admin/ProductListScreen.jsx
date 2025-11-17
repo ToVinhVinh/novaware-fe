@@ -40,7 +40,6 @@ import NavigateNextIcon from "@material-ui/icons/NavigateNext";
 import Meta from "../../components/Meta";
 import Loader from "../../components/Loader";
 import Message from "../../components/Message";
-import { formatPriceDollar } from "../../utils/formatPrice";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -149,13 +148,10 @@ const ProductListScreen = ({ history }) => {
   }
 
   if (selectedCategories.length > 0) {
-    // If multiple categories, use the first one (API might support only one)
-    // Or if API supports comma-separated, join them
     queryParams.category = selectedCategories[0];
   }
 
   if (selectedBrands.length > 0) {
-    // If multiple brands, use the first one (API might support only one)
     queryParams.brand = selectedBrands[0];
   }
 
@@ -165,17 +161,42 @@ const ProductListScreen = ({ history }) => {
 
   const { data: productsResponse, isLoading: loading, error } = useGetProducts(queryParams);
   const productsData = productsResponse?.data?.products || [];
-  const products = productsData.map((product) => ({
-    ...product,
-    id: product._id,
-    image: product.images?.[0] || product.image || "",
-  }));
+  const products = productsData.map((product, index) => {
+    const normalizedId = product._id || product.id || index;
+    const normalizedName = product.name || product.productDisplayName || "N/A";
+
+    return {
+      ...product,
+      id: normalizedId,
+      image: product.images?.[0] || product.image || "",
+      productDisplayName: normalizedName,
+      gender: product.gender || "N/A",
+      masterCategory: product.masterCategory || product.category || "N/A",
+      subCategory: product.subCategory || "",
+      articleType: product.articleType || "",
+      baseColour: product.baseColour || "",
+      season: product.season || "",
+      year: product.year || "",
+      usage: product.usage || "",
+      rating: product.rating ?? 0,
+      sale: product.sale ?? 0,
+      created_at: product.created_at || product.createdAt || "",
+      updated_at: product.updated_at || product.updatedAt || "",
+    };
+  });
   const totalProducts = productsResponse?.data?.count || 0;
 
   const deleteProductMutation = useDeleteProduct();
   const { error: errorDelete, isSuccess: successDelete } = deleteProductMutation;
 
   const columns = [
+    {
+      field: "id",
+      headerName: "ID",
+      width: 120,
+      sortable: false,
+      valueGetter: (params) => params.row._id || params.row.id || "",
+    },
     {
       field: "image",
       headerName: "Image",
@@ -186,7 +207,7 @@ const ProductListScreen = ({ history }) => {
         return (
           <div className={classes.imageCell}>
             {imageUrl ? (
-              <img src={imageUrl} alt={params.row.name || "Product"} />
+              <img src={imageUrl} alt={params.row.productDisplayName || "Product"} />
             ) : (
               <Typography variant="body2">N/A</Typography>
             )}
@@ -195,9 +216,12 @@ const ProductListScreen = ({ history }) => {
       },
     },
     {
-      field: "name",
+      field: "productDisplayName",
+      sortable: false,
       headerName: "Name",
-      flex: 1,
+      width: 360,
+      minWidth: 360,
+      flex: 0,
       renderCell: (params) => (
         <Typography variant="body2" className={classes.lineClampTwo}>
           {params.value || "N/A"}
@@ -205,43 +229,81 @@ const ProductListScreen = ({ history }) => {
       ),
     },
     {
-      field: "description",
-      headerName: "Description",
-      flex: 1,
+      field: "gender",
+      headerName: "Gender",
+      width: 100,
+      sortable: false,
+    },
+    {
+      field: "masterCategory",
+      headerName: "Category",
+      width: 150,
+      sortable: false,
+    },
+    {
+      field: "subCategory",
+      headerName: "Sub Category",
+      width: 160,
+      sortable: false,
       renderCell: (params) => (
-        <Typography variant="body2" color="textSecondary" className={classes.lineClampTwo}>
+        <Typography variant="body2" className={classes.lineClampTwo}>
           {params.value || "N/A"}
         </Typography>
       ),
     },
     {
-      field: "price",
-      headerName: "Price",
-      width: 140,
-      align: "right",
-      headerAlign: "right",
-      valueFormatter: ({ value }) => formatPriceDollar(value),
-    },
-    {
-      field: "category",
-      headerName: "Category",
+      field: "articleType",
+      headerName: "Article Type",
       width: 160,
-      align: "right",
-      headerAlign: "right",
+      sortable: false,
+      renderCell: (params) => (
+        <Typography variant="body2" className={classes.lineClampTwo}>
+          {params.value || "N/A"}
+        </Typography>
+      ),
     },
     {
-      field: "brand",
-      headerName: "Brand",
-      width: 140,
+      field: "baseColour",
+      headerName: "Base Colour",
+      width: 100,
+      sortable: false,
+    },
+    {
+      field: "season",
+      headerName: "Season",
+      width: 100,
+      sortable: false,
+    },
+    {
+      field: "year",
+      headerName: "Year",
+      width: 100,
       align: "right",
       headerAlign: "right",
+      sortable: false,
+    },
+    {
+      field: "usage",
+      headerName: "Usage",
+      width: 100,
+      sortable: false,
+    },
+    {
+      field: "rating",
+      headerName: "Rating",
+      width: 100,
+      sortable: false,
+      align: "right",
+      headerAlign: "right",
+      valueFormatter: ({ value }) => (value ? Number(value).toFixed(1) : "0.0"),
     },
     {
       field: "sale",
-      headerName: "Sale",
-      width: 110,
+      headerName: "Sale %",
+      width: 120,
       align: "right",
       headerAlign: "right",
+      sortable: false,
       valueFormatter: ({ value }) => `${value ?? 0} %`,
     },
     {
@@ -252,7 +314,7 @@ const ProductListScreen = ({ history }) => {
       sortable: false,
       width: 100,
       renderCell: (params) => {
-        const id = params.getValue(params.id, "_id") || "";
+        const id = params.row.id || params.getValue(params.id, "_id") || "";
         return (
           <>
             <Button
@@ -330,7 +392,7 @@ const ProductListScreen = ({ history }) => {
   const deleteHandler = async (id) => {
     if (window.confirm("Are you sure")) {
       try {
-        await deleteProductMutation.mutateAsync(id);
+        await deleteProductMutation.mutateAsync(String(id));
       } catch (error) {
         console.error("Failed to delete product:", error);
       }
@@ -520,6 +582,9 @@ const ProductListScreen = ({ history }) => {
                   typeof params === "number" ? params : params.pageSize;
                 setPageSize(nextPageSize);
                 setPage(0);
+              }}
+              onRowClick={(params) => {
+                history.push(`/admin/product/${params.row.id}/edit`);
               }}
               autoHeight
               components={{

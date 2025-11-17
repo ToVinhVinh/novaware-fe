@@ -33,6 +33,15 @@ export interface IProductReview {
 export interface IProduct {
 	_id: string;
 	name: string;
+	productDisplayName?: string;
+	gender?: string;
+	masterCategory?: string;
+	subCategory?: string;
+	articleType?: string;
+	baseColour?: string;
+	season?: string;
+	year?: number;
+	usage?: string;
 	slug?: string;
 	price: number;
 	sale?: number;
