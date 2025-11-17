@@ -40,6 +40,7 @@ import {
   useHybridModelRecommendations,
   useTrainGNNModelWithTaskId,
 } from "../../hooks/api/useRecommend";
+import { getScoreChip } from "../../utils/chipUtils.jsx";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -126,6 +127,25 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(1),
   },
 }));
+
+const ReasonList = ({ reason }) => {
+  if (!reason) {
+    return null;
+  }
+
+  const reasons = reason.split(';').map(r => r.trim()).filter(r => r);
+
+  return (
+    <Box style={{ margin: '8px 0 0 0', paddingLeft: 0, fontSize: '14px', color: 'rgba(0, 0, 0, 0.54)' }}>
+      {reasons.map((r, index) => (
+        <Box key={index} style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 4 }}>
+          <span style={{ marginRight: 8, marginTop: 1 }}>•</span>
+          <span>{r.endsWith('.') ? r : `${r}.`}</span>
+        </Box>
+      ))}
+    </Box>
+  );
+};
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -442,6 +462,8 @@ const RecommendProductsScreen = () => {
     );
   };
 
+
+
   const renderTabContent = (modelType) => {
     const isTraining =
       (modelType === "gnn" && trainGNN.isLoading) ||
@@ -703,7 +725,7 @@ const RecommendProductsScreen = () => {
                   </Typography>
                   <Grid container spacing={2} style={{ marginTop: 16 }}>
                     {recommendations.personalized.map((item, index) => (
-                      <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
+                      <Grid item xs={12} sm={4} md={4} lg={4} key={index}>
                         <div style={{ position: 'relative' }}>
                           <ProductCard
                             _id={item.product?.id}
@@ -729,14 +751,8 @@ const RecommendProductsScreen = () => {
                               fontSize: '0.75rem'
                             }}
                           >
-                            <Typography variant="caption" color="primary" style={{ fontWeight: 600 }}>
-                              Score: {item.score?.toFixed(4) || "N/A"}
-                            </Typography>
-                            {item.reason && (
-                              <Typography variant="caption" color="textSecondary" display="block" style={{ marginTop: 4 }}>
-                                {item.reason}
-                              </Typography>
-                            )}
+                            {getScoreChip(item.score)}
+                            <ReasonList reason={item.reason} />
                           </Box>
                         </div>
                       </Grid>
@@ -790,14 +806,8 @@ const RecommendProductsScreen = () => {
                                   fontSize: '0.75rem'
                                 }}
                               >
-                                <Typography variant="caption" color="primary" style={{ fontWeight: 600 }}>
-                                  Score: {item.score?.toFixed(4) || "N/A"}
-                                </Typography>
-                                {item.reason && (
-                                  <Typography variant="caption" color="textSecondary" display="block" style={{ marginTop: 4 }}>
-                                    {item.reason}
-                                  </Typography>
-                                )}
+                                {getScoreChip(item.score)}
+                                <ReasonList reason={item.reason} />
                               </Box>
                             </div>
                           </Grid>

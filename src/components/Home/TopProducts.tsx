@@ -21,7 +21,7 @@ const TopProducts: React.FC = () => {
         <LottieEmpty className="flex justify-center" />
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 gap-y-6 mb-6">
             {productTopRaw && productTopRaw.map((product) => (
               <div key={product._id}>
                 <ProductCard {...product} />

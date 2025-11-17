@@ -245,7 +245,6 @@ export const getTopProducts = async (query?: IGetTopProductsQuery): Promise<IGet
 	return await sendGet(`/products/top`, modifiedQuery);
 };
 
-// Get Latest Products
 export const getLatestProducts = async (query?: IGetLatestProductsQuery): Promise<IGetLatestProductsResponse> => {
 	return await sendGet(`/products/latest`, query);
 };
