@@ -221,7 +221,12 @@ const useStyles = makeStyles((theme) => ({
     fontSize: "1rem",
   },
   subCategorySection: {
-    marginBottom: theme.spacing(4),
+    marginBottom: 0,
+    paddingBottom: theme.spacing(2),
+    "&:not(:last-child)": {
+      borderBottom: `1px solid ${theme.palette.divider}`,
+      marginBottom: theme.spacing(2),
+    },
   },
   subCategoryTitle: {
     fontWeight: 600,
@@ -241,7 +246,7 @@ const useStyles = makeStyles((theme) => ({
   },
   subCategoryIcon: {
     fontSize: "1.1rem",
-    color: theme.palette.text.secondary,
+    color: theme.palette.text.primary,
     display: "flex",
     alignItems: "center",
   },
@@ -260,19 +265,20 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     gap: theme.spacing(1),
     textDecoration: "none",
+    backgroundColor: "rgba(221, 129, 144, 0.1)",
     "&:hover": {
-      backgroundColor: theme.palette.action.hover,
+      backgroundColor: "rgba(221, 129, 144, 0.2)",
     },
   },
   articleTypeIcon: {
     fontSize: "0.9rem",
-    color: theme.palette.text.secondary,
+    color: "#DB2777",
     display: "flex",
     alignItems: "center",
   },
   articleTypeText: {
     fontSize: "0.9rem",
-    color: theme.palette.text.secondary,
+    color: "#DB2777",
   },
   emptyState: {
     padding: theme.spacing(4),
@@ -293,7 +299,6 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ menuItemClassName }
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedMasterCategory, setSelectedMasterCategory] = useState<HierarchyItem | null>(null);
 
-  // Auto-select first master category when hierarchy is loaded
   useEffect(() => {
     if (hierarchy.length > 0 && !selectedMasterCategory) {
       setSelectedMasterCategory(hierarchy[0]);
@@ -303,7 +308,6 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ menuItemClassName }
   const handleOpen = useCallback((event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation();
     setModalOpen(true);
-    // Auto-select first master category if available and none is selected
     if (hierarchy.length > 0 && !selectedMasterCategory) {
       setSelectedMasterCategory(hierarchy[0]);
     }

@@ -725,7 +725,7 @@ const RecommendProductsScreen = () => {
                   </Typography>
                   <Grid container spacing={2} style={{ marginTop: 16 }}>
                     {recommendations.personalized.map((item, index) => (
-                      <Grid item xs={12} sm={4} md={4} lg={4} key={index}>
+                      <Grid item xs={12} sm={4} md={4} lg={3} key={index}>
                         <div style={{ position: 'relative' }}>
                           <ProductCard
                             _id={item.product?.id}
@@ -774,46 +774,122 @@ const RecommendProductsScreen = () => {
                       </Typography>
                     )}
 
-                    {Object.entries(recommendations.outfit).map(([category, item], catIndex) => (
-                      <Box key={catIndex} style={{ marginTop: 24 }}>
-                        <Typography variant="subtitle2" gutterBottom style={{ textTransform: 'capitalize', marginBottom: 16 }}>
-                          {category}
-                        </Typography>
-                        <Grid container spacing={2}>
-                          <Grid item xs={12} sm={6} md={4} lg={3}>
-                            <div style={{ position: 'relative' }}>
-                              <ProductCard
-                                _id={item.product?.id}
-                                id={item.product?.id}
-                                productId={item.product?.id}
-                                name={item.product?.productDisplayName}
-                                productDisplayName={item.product?.productDisplayName}
-                                images={item.product?.images}
-                                price={item.product?.price || 50}
-                                sale={item.product?.sale}
-                                variants={item.product?.variants}
-                                rating={item.product?.rating}
-                                baseColour={item.product?.baseColour}
-                                articleType={item.product?.articleType}
-                              />
-                              {/* Reason and Score overlay */}
-                              <Box
-                                style={{
-                                  marginTop: 8,
-                                  padding: 8,
-                                  backgroundColor: '#f5f5f5',
-                                  borderRadius: 4,
-                                  fontSize: '0.75rem'
-                                }}
-                              >
-                                {getScoreChip(item.score)}
-                                <ReasonList reason={item.reason} />
-                              </Box>
-                            </div>
-                          </Grid>
-                        </Grid>
-                      </Box>
-                    ))}
+                    <TableContainer component={Paper} style={{ marginTop: 16 }}>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell><strong>Outfit</strong></TableCell>
+                            <TableCell><strong>Accessories</strong></TableCell>
+                            <TableCell><strong>Top Wear</strong></TableCell>
+                            <TableCell><strong>Bottom Wear</strong></TableCell>
+                            <TableCell><strong>Footwear</strong></TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {Object.entries(recommendations.outfit).map(([outfitName, outfitItems]) => (
+                            <TableRow key={outfitName}>
+                              <TableCell>
+                                <Typography variant="subtitle2" style={{ textTransform: 'capitalize' }}>
+                                  {outfitName.replace('_', ' ')}
+                                </Typography>
+                              </TableCell>
+
+                              {/* Accessories */}
+                              <TableCell>
+                                {outfitItems.accessories && (
+                                  <Box>
+                                    <img
+                                      src={outfitItems.accessories.product?.images?.[0] || '/placeholder-image.jpg'}
+                                      alt={outfitItems.accessories.product?.productDisplayName}
+                                      style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4, marginBottom: 8 }}
+                                    />
+                                    <Typography variant="caption" display="block" style={{ fontSize: '0.7rem', lineHeight: 1.2 }}>
+                                      {outfitItems.accessories.product?.productDisplayName}
+                                    </Typography>
+                                    <Box style={{ marginTop: 4 }}>
+                                      {getScoreChip(outfitItems.accessories.score)}
+                                    </Box>
+                                    <Typography variant="caption" color="textSecondary" style={{ fontSize: '0.65rem' }}>
+                                      {outfitItems.accessories.product?.baseColour} | {outfitItems.accessories.product?.articleType}
+                                    </Typography>
+                                    <ReasonList reason={outfitItems.accessories.reason} />
+                                  </Box>
+                                )}
+                              </TableCell>
+
+                              {/* Top Wear */}
+                              <TableCell>
+                                {outfitItems.apparel_topwear && (
+                                  <Box>
+                                    <img
+                                      src={outfitItems.apparel_topwear.product?.images?.[0] || '/placeholder-image.jpg'}
+                                      alt={outfitItems.apparel_topwear.product?.productDisplayName}
+                                      style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4, marginBottom: 8 }}
+                                    />
+                                    <Typography variant="caption" display="block" style={{ fontSize: '0.7rem', lineHeight: 1.2 }}>
+                                      {outfitItems.apparel_topwear.product?.productDisplayName}
+                                    </Typography>
+                                    <Box style={{ marginTop: 4 }}>
+                                      {getScoreChip(outfitItems.apparel_topwear.score)}
+                                    </Box>
+                                    <Typography variant="caption" color="textSecondary" style={{ fontSize: '0.65rem' }}>
+                                      {outfitItems.apparel_topwear.product?.baseColour} | {outfitItems.apparel_topwear.product?.articleType}
+                                    </Typography>
+                                    <ReasonList reason={outfitItems.apparel_topwear.reason} />
+                                  </Box>
+                                )}
+                              </TableCell>
+
+                              {/* Bottom Wear */}
+                              <TableCell>
+                                {outfitItems.apparel_bottomwear && (
+                                  <Box>
+                                    <img
+                                      src={outfitItems.apparel_bottomwear.product?.images?.[0] || '/placeholder-image.jpg'}
+                                      alt={outfitItems.apparel_bottomwear.product?.productDisplayName}
+                                      style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4, marginBottom: 8 }}
+                                    />
+                                    <Typography variant="caption" display="block" style={{ fontSize: '0.7rem', lineHeight: 1.2 }}>
+                                      {outfitItems.apparel_bottomwear.product?.productDisplayName}
+                                    </Typography>
+                                    <Box style={{ marginTop: 4 }}>
+                                      {getScoreChip(outfitItems.apparel_bottomwear.score)}
+                                    </Box>
+                                    <Typography variant="caption" color="textSecondary" style={{ fontSize: '0.65rem' }}>
+                                      {outfitItems.apparel_bottomwear.product?.baseColour} | {outfitItems.apparel_bottomwear.product?.articleType}
+                                    </Typography>
+                                    <ReasonList reason={outfitItems.apparel_bottomwear.reason} />
+                                  </Box>
+                                )}
+                              </TableCell>
+
+                              {/* Footwear */}
+                              <TableCell>
+                                {outfitItems.footwear && (
+                                  <Box>
+                                    <img
+                                      src={outfitItems.footwear.product?.images?.[0] || '/placeholder-image.jpg'}
+                                      alt={outfitItems.footwear.product?.productDisplayName}
+                                      style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4, marginBottom: 8 }}
+                                    />
+                                    <Typography variant="caption" display="block" style={{ fontSize: '0.7rem', lineHeight: 1.2 }}>
+                                      {outfitItems.footwear.product?.productDisplayName}
+                                    </Typography>
+                                    <Box style={{ marginTop: 4 }}>
+                                      {getScoreChip(outfitItems.footwear.score)}
+                                    </Box>
+                                    <Typography variant="caption" color="textSecondary" style={{ fontSize: '0.65rem' }}>
+                                      {outfitItems.footwear.product?.baseColour} | {outfitItems.footwear.product?.articleType}
+                                    </Typography>
+                                    <ReasonList reason={outfitItems.footwear.reason} />
+                                  </Box>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
                   </CardContent>
                 </Card>
               )}
