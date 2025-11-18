@@ -25,7 +25,7 @@ import { FaTshirt, FaChartLine, FaVenusMars, FaInfoCircle, FaDollarSign, FaGem, 
 import { PiPants } from "react-icons/pi";
 import { makeStyles } from "@material-ui/core/styles";
 import { formatPriceDollar } from "../../utils/formatPrice.js";
-import { useHybridModelRecommendations } from "../../hooks/api/useRecommend";
+import { useGNNModelRecommendations } from "../../hooks/api/useRecommend";
 import LottieLoading from "../LottieLoading.jsx";
 import { toast } from "react-toastify";
 import CallMadeIcon from "@material-ui/icons/CallMade";
@@ -382,7 +382,7 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
     const [recommendationData, setRecommendationData] = useState(null);
     const [activeTab, setActiveTab] = useState(0);
 
-    const getHybridRecommendations = useHybridModelRecommendations();
+    const getGNNRecommendations = useGNNModelRecommendations();
 
     // Fetch recommendations when modal opens
     useEffect(() => {
@@ -398,10 +398,9 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
                     current_product_id: productId,
                     top_k_personal: 6,
                     top_k_outfit: 5,
-                    alpha: 0.5, // Default alpha for hybrid model
                 };
 
-                const result = await getHybridRecommendations.mutateAsync(requestData);
+                const result = await getGNNRecommendations.mutateAsync(requestData);
                 setRecommendationData(result);
             } catch (error) {
                 console.error("Failed to fetch recommendations:", error);
@@ -597,10 +596,10 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
                 </IconButton>
             </DialogTitle>
             <DialogContent className={classes.outfitModalContent}>
-                {userId && getHybridRecommendations.isLoading && (
+                {userId && getGNNRecommendations.isLoading && (
                     <LottieLoading />
                 )}
-                {userId && !getHybridRecommendations.isLoading && !getHybridRecommendations.error && (personalizedData.length > 0 || outfitData.length > 0) && (
+                {userId && !getGNNRecommendations.isLoading && !getGNNRecommendations.error && (personalizedData.length > 0 || outfitData.length > 0) && (
                     <>
                         <Tabs
                             value={activeTab}
@@ -750,14 +749,14 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
                         )}
                     </>
                 )}
-                {userId && !getHybridRecommendations.isLoading && !getHybridRecommendations.error && personalizedData.length === 0 && outfitData.length === 0 && (
+                {userId && !getGNNRecommendations.isLoading && !getGNNRecommendations.error && personalizedData.length === 0 && outfitData.length === 0 && (
                     <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
                         <Typography variant="body1" color="textSecondary">
                             No recommendations available at the moment.
                         </Typography>
                     </Box>
                 )}
-                {userId && !getHybridRecommendations.isLoading && getHybridRecommendations.error && (
+                {userId && !getGNNRecommendations.isLoading && getGNNRecommendations.error && (
                     <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
                         <Typography variant="body1" color="error">
                             Failed to load recommendations. Please try again later.
