@@ -16,6 +16,9 @@ import {
     TableHead,
     TableRow,
     Paper,
+    Tabs,
+    Tab,
+    Grid,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import { FaTshirt, FaChartLine, FaVenusMars, FaInfoCircle, FaDollarSign, FaGem, FaFemale, FaShoePrints } from "react-icons/fa";
@@ -26,6 +29,7 @@ import { useHybridModelRecommendations } from "../../hooks/api/useRecommend";
 import LottieLoading from "../LottieLoading.jsx";
 import { toast } from "react-toastify";
 import CallMadeIcon from "@material-ui/icons/CallMade";
+import { getScoreChip } from "../../utils/chipUtils.jsx";
 
 const useStyles = makeStyles((theme) => ({
     outfitModal: {
@@ -177,7 +181,7 @@ const useStyles = makeStyles((theme) => ({
     productImage: {
         width: "100%",
         height: 200,
-        objectFit: "contain",
+        objectFit: "cover",
         backgroundColor: "#fff",
     },
     productInfo: {
@@ -295,6 +299,49 @@ const useStyles = makeStyles((theme) => ({
             color: "#164e63",
         },
     },
+    tabsContainer: {
+        borderBottom: "1px solid #e0e0e0",
+        marginBottom: 16,
+    },
+    tab: {
+        minWidth: 120,
+        textTransform: "none",
+        fontSize: "1rem",
+        fontWeight: 500,
+    },
+    tabPanel: {
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        minHeight: 0,
+    },
+    personalizedGrid: {
+        flex: 1,
+        overflow: "auto",
+        padding: "16px 0",
+    },
+    personalizedCard: {
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+    },
+    reasonText: {
+        fontSize: "0.85rem",
+        color: theme.palette.text.secondary,
+        marginTop: 8,
+        fontStyle: "italic",
+    },
+    scoreChip: {
+        backgroundColor: "#fef3c7",
+        border: "1px solid #f59e0b",
+        color: "#92400e",
+        boxShadow: "0 1px 3px rgba(245, 158, 11, 0.2)",
+        "&:hover": {
+            backgroundColor: "#fde68a",
+            boxShadow: "0 3px 6px rgba(245, 158, 11, 0.3)",
+        },
+    },
 }));
 
 // Helper function to normalize category names
@@ -302,7 +349,7 @@ const normalizeCategoryName = (categoryName) => {
     if (!categoryName) return "Other";
     const normalized = categoryName.trim();
     const lower = normalized.toLowerCase();
-    
+
     const categoryMap = {
         "top": "Tops",
         "tops": "Tops",
@@ -310,26 +357,31 @@ const normalizeCategoryName = (categoryName) => {
         "shirts": "Tops",
         "t-shirt": "Tops",
         "t-shirts": "Tops",
+        "apparel_topwear": "Tops",
+        "topwear": "Tops",
         "dress": "Dresses",
         "dresses": "Dresses",
         "bottom": "Bottoms",
         "bottoms": "Bottoms",
         "pants": "Bottoms",
         "trousers": "Bottoms",
+        "apparel_bottomwear": "Bottoms",
+        "bottomwear": "Bottoms",
         "shoe": "Shoes",
         "shoes": "Shoes",
         "footwear": "Shoes",
         "accessory": "Accessories",
         "accessories": "Accessories",
     };
-    
+
     return categoryMap[lower] || normalized.charAt(0).toUpperCase() + normalized.slice(1).toLowerCase();
 };
 
 const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
     const classes = useStyles();
     const [recommendationData, setRecommendationData] = useState(null);
-    
+    const [activeTab, setActiveTab] = useState(0);
+
     const getHybridRecommendations = useHybridModelRecommendations();
 
     // Fetch recommendations when modal opens
@@ -344,11 +396,11 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
                 const requestData = {
                     user_id: userId,
                     current_product_id: productId,
-                    top_k_personal: 5,
-                    top_k_outfit: 9,
+                    top_k_personal: 6,
+                    top_k_outfit: 5,
                     alpha: 0.5, // Default alpha for hybrid model
                 };
-                
+
                 const result = await getHybridRecommendations.mutateAsync(requestData);
                 setRecommendationData(result);
             } catch (error) {
@@ -360,57 +412,77 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
         fetchRecommendations();
     }, [open, userId, productId]);
 
-    // Transform recommendation data to match expected outfit structure
+    // Process personalized recommendations
+    const personalizedData = useMemo(() => {
+        if (!recommendationData || !recommendationData.personalized) return [];
+        return recommendationData.personalized.map((item) => {
+            const variant = item.product?.variants && item.product.variants.length > 0 ? item.product.variants[0] : null;
+            return {
+                _id: item.product?.id,
+                product_id: item.product?.id,
+                name: item.product?.productDisplayName || item.product?.name || "Product",
+                images: item.product?.images || [],
+                price: variant?.price || item.product?.price || 0, // Get price from first variant or product
+                sale: variant?.sale || item.product?.sale || 0, // Get sale from first variant or product
+                rating: item.product?.rating || 0,
+                score: item.score,
+                reason: item.reason,
+                gender: item.product?.gender,
+                baseColour: item.product?.baseColour,
+                articleType: item.product?.articleType,
+            };
+        });
+    }, [recommendationData]);
+
+    // Process outfit recommendations
     const outfitData = useMemo(() => {
-        if (!recommendationData || !recommendationData.outfit) return null;
+        if (!recommendationData || !recommendationData.outfit) return [];
 
-        // Transform outfit object where each category has { score, reason, product }
-        const outfitCategories = recommendationData.outfit;
-        const categories = Object.keys(outfitCategories);
-        
-        if (categories.length === 0) return null;
+        const outfits = [];
+        const outfitKeys = Object.keys(recommendationData.outfit);
 
-        // Create a single outfit from all categories
-        const outfit = {
-            name: "Complete the Look",
-            products: [],
-            style: "Mixed",
-            totalPrice: 0,
-            compatibilityScore: recommendationData.outfit_complete_score || 0,
-            gender: user?.gender || "Unisex",
-            description: "Complete outfit recommendation based on your preferences",
-        };
+        outfitKeys.forEach((outfitKey) => {
+            const outfitCategories = recommendationData.outfit[outfitKey];
+            const categories = Object.keys(outfitCategories);
+            if (categories.length === 0) return;
 
-        // Map all products from all categories
-        // New structure: each category is { score, reason, product: {...} }
-        categories.forEach((category) => {
-            const categoryData = outfitCategories[category];
-            if (!categoryData || !categoryData.product) return;
+            const outfit = {
+                name: outfitKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                products: [],
+                totalPrice: 0,
+                compatibilityScore: recommendationData.outfit_complete_score || 0,
+                gender: user?.gender || "Unisex",
+            };
 
-            const normalizedCategory = normalizeCategoryName(category);
-            const product = categoryData.product;
-            
-            outfit.products.push({
-                _id: product.id,
-                name: product.name || "Product",
-                product_id: product.id,
-                category: normalizedCategory,
-                price: product.price || 0,
-                sale: 0, // API doesn't return sale info
-                images: product.images || [],
-                score: categoryData.score,
-                reason: categoryData.reason,
+            // Map all products from all categories
+            categories.forEach((category) => {
+                const categoryData = outfitCategories[category];
+                if (!categoryData || !categoryData.product) return;
+
+                const normalizedCategory = normalizeCategoryName(category);
+                const product = categoryData.product;
+                const variant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
+
+                outfit.products.push({
+                    _id: product.id,
+                    name: product.productDisplayName || product.name || "Product",
+                    product_id: product.id,
+                    category: normalizedCategory,
+                    price: variant?.price || product.price || 0, // Get price from first variant or product
+                    sale: variant?.sale || product.sale || 0, // Get sale from first variant or product
+                    images: product.images || [],
+                    score: categoryData.score,
+                    reason: categoryData.reason,
+                });
             });
+
+            // Calculate total price
+            outfit.totalPrice = outfit.products.reduce((sum, p) => sum + (p.price || 0) * (1 - (p.sale || 0) / 100), 0);
+
+            outfits.push(outfit);
         });
 
-        // Calculate total price
-        outfit.totalPrice = outfit.products.reduce((sum, p) => sum + (p.price || 0), 0);
-
-        return {
-            data: {
-                outfits: [outfit],
-            },
-        };
+        return outfits;
     }, [recommendationData, user?.gender]);
 
     const getCategoryIcon = (categoryName) => {
@@ -443,6 +515,67 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
         }
     }, [open, userId, user?.gender, onClose]);
 
+    const handleTabChange = (event, newValue) => {
+        setActiveTab(newValue);
+    };
+
+    const renderProductCard = (product, showReason = false, showScore = false) => (
+        <Card
+            className={classes.productCard}
+            onClick={() => window.open(`/product?id=${product._id || product.product_id || ''}`, "_blank")}
+        >
+            <img
+                src={product.images && product.images.length > 0 ? product.images[0] : "https://www.lwf.org/images/emptyimg.png"}
+                alt={product.name}
+                className={classes.productImage}
+            />
+            <Box className={classes.productInfo}>
+                <Typography className={classes.productName} variant="body2">
+                    {product.name}
+                </Typography>
+                {showReason && product.reason && (
+                    <Typography className={classes.reasonText} variant="caption">
+                        {product.reason}
+                    </Typography>
+                )}
+                <Typography className={classes.productPrice}>
+                    {formatPriceDollar((product.price || 0) * (1 - ((product.sale || 0) / 100)))}
+                    {product.sale && product.sale > 0 && (
+                        <Typography
+                            component="span"
+                            style={{
+                                fontSize: "0.8rem",
+                                textDecoration: "line-through",
+                                color: "#999",
+                                marginLeft: 8,
+                            }}
+                        >
+                            {formatPriceDollar(product.price || 0)}
+                        </Typography>
+                    )}
+                </Typography>
+                {showScore && product.score !== undefined && (
+                    <Box style={{ marginTop: 8 }}>
+                        {getScoreChip(product.score)}
+                    </Box>
+                )}
+                <Button
+                    variant="outlined"
+                    color="primary"
+                    size="medium"
+                    style={{ width: "100%", marginTop: 8 }}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(`/product?id=${product._id || product.product_id || ''}`, "_blank");
+                    }}
+                    endIcon={<CallMadeIcon />}
+                >
+                    View details
+                </Button>
+            </Box>
+        </Card>
+    );
+
     return (
         <Dialog
             open={open}
@@ -467,197 +600,167 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
                 {userId && getHybridRecommendations.isLoading && (
                     <LottieLoading />
                 )}
-                {userId && !getHybridRecommendations.isLoading && !getHybridRecommendations.error && outfitData?.data?.outfits?.length > 0 && (
+                {userId && !getHybridRecommendations.isLoading && !getHybridRecommendations.error && (personalizedData.length > 0 || outfitData.length > 0) && (
                     <>
-                        <TableContainer component={Paper} className={classes.tableContainer}>
-                            <Table className={classes.table} aria-label="outfit table" stickyHeader>
-                                <TableHead className={classes.tableHeader}>
-                                    <TableRow>
-                                        {["Tops", "Dresses", "Bottoms", "Shoes", "Accessories"].map((category) => (
-                                            <TableCell key={category} align="center">
-                                                <Box className={classes.headerContent}>
-                                                    {getCategoryIcon(category)}
-                                                    <Typography variant="body1" component="span">
-                                                        {category}
-                                                    </Typography>
-                                                </Box>
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {outfitData.data.outfits.map((outfit, outfitIndex) => {
-                                        const categories = ["Tops", "Dresses", "Bottoms", "Shoes", "Accessories"];
-                                        const productsByCategory = {
-                                            Tops: [],
-                                            Dresses: [],
-                                            Bottoms: [],
-                                            Shoes: [],
-                                            Accessories: [],
-                                            Other: [],
-                                        };
+                        <Tabs
+                            value={activeTab}
+                            onChange={handleTabChange}
+                            className={classes.tabsContainer}
+                            indicatorColor="primary"
+                            textColor="primary"
+                        >
+                            <Tab label="Personalized" className={classes.tab} />
+                            <Tab label="Outfit" className={classes.tab} />
+                        </Tabs>
 
-                                        outfit.products?.forEach((p) => {
-                                            const category = p.category || "Other";
-                                            if (productsByCategory[category]) {
-                                                productsByCategory[category].push(p);
-                                            } else {
-                                                productsByCategory.Other.push(p);
-                                            }
-                                        });
+                        {/* Personalized Tab */}
+                        {activeTab === 0 && (
+                            <Box className={classes.tabPanel}>
+                                <Grid container spacing={3} className={classes.personalizedGrid}>
+                                    {personalizedData.length > 0 ? (
+                                        personalizedData.map((product) => (
+                                            <Grid item xs={12} sm={6} md={4} lg={3} key={product._id || product.product_id}>
+                                                {renderProductCard(product, true, true)}
+                                            </Grid>
+                                        ))
+                                    ) : (
+                                        <Grid item xs={12}>
+                                            <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+                                                <Typography variant="body1" color="textSecondary">
+                                                    No personalized recommendations available at the moment.
+                                                </Typography>
+                                            </Box>
+                                        </Grid>
+                                    )}
+                                </Grid>
+                            </Box>
+                        )}
 
-                                        const renderProductCard = (product) => (
-                                            <Card
-                                                key={product._id}
-                                                className={classes.productCard}
-                                                onClick={() => window.open(`/product?id=${product._id || ''}`, "_blank")}
-                                            >
-                                                <img
-                                                    src={product.images && product.images.length > 0 ? product.images[0] : "https://via.placeholder.com/200"}
-                                                    alt={product.name}
-                                                    className={classes.productImage}
-                                                />
-                                                <Box className={classes.productInfo}>
-                                                    <Typography className={classes.productName} variant="body2">
-                                                        {product.name}
-                                                    </Typography>
-                                                    <Typography className={classes.productPrice}>
-                                                        {formatPriceDollar((product.price || 0) * (1 - ((product.sale || 0) / 100)))}
-                                                        {product.sale && product.sale > 0 && (
-                                                            <Typography
-                                                                component="span"
-                                                                style={{
-                                                                    fontSize: "0.8rem",
-                                                                    textDecoration: "line-through",
-                                                                    color: "#999",
-                                                                    marginLeft: 8,
-                                                                }}
-                                                            >
-                                                                {formatPriceDollar(product.price || 0)}
+                        {/* Outfit Tab */}
+                        {activeTab === 1 && (
+                            <Box className={classes.tabPanel}>
+                                <TableContainer component={Paper} className={classes.tableContainer}>
+                                    <Table className={classes.table} aria-label="outfit table" stickyHeader>
+                                        <TableHead className={classes.tableHeader}>
+                                            <TableRow>
+                                                {["Tops", "Dresses", "Bottoms", "Shoes", "Accessories"].map((category) => (
+                                                    <TableCell key={category} align="center">
+                                                        <Box className={classes.headerContent}>
+                                                            {getCategoryIcon(category)}
+                                                            <Typography variant="body1" component="span">
+                                                                {category}
                                                             </Typography>
-                                                        )}
-                                                    </Typography>
-                                                    <Button
-                                                        variant="outlined"
-                                                        color="primary"
-                                                        size="medium"
-                                                        style={{ width: "100%", marginTop: 8 }}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            window.open(`/product?id=${product._id || ''}`, "_blank");
-                                                        }}
-                                                        endIcon={<CallMadeIcon />}
-                                                    >
-                                                        View details
-                                                    </Button>
-                                                </Box>
-                                            </Card>
-                                        );
-
-                                        return (
-                                            <React.Fragment key={outfitIndex}>
-                                                {/* Row 1: Outfit name and product cards */}
-                                                <TableRow>
-                                                    {categories.map((category, categoryIndex) => (
-                                                        <TableCell key={category} className={classes.tableCell} align="center" style={{ verticalAlign: "top" }}>
-                                                            {categoryIndex === 0 ? (
-                                                                <Box>
-
-                                                                    <Box className={classes.productCardContainer}>
-                                                                        {productsByCategory[category]?.length > 0 ? (
-                                                                            productsByCategory[category].map((product) => renderProductCard(product))
-                                                                        ) : (
-                                                                            <Typography variant="body2" color="textSecondary" style={{ textAlign: "center", padding: "20px" }}>
-                                                                                No items
-                                                                            </Typography>
-                                                                        )}
-                                                                    </Box>
-                                                                </Box>
-                                                            ) : (
-                                                                <Box className={classes.productCardContainer}>
-                                                                    {productsByCategory[category]?.length > 0 ? (
-                                                                        productsByCategory[category].map((product) => renderProductCard(product))
-                                                                    ) : (
-                                                                        <Typography variant="body2" color="textSecondary" style={{ textAlign: "center", padding: "20px" }}>
-                                                                            No items
-                                                                        </Typography>
-                                                                    )}
-                                                                </Box>
-                                                            )}
-                                                        </TableCell>
-                                                    ))}
-                                                </TableRow>
-                                                {/* Row 2: Metadata information spanning all columns */}
-                                                <TableRow>
-                                                    <TableCell
-                                                        className={classes.tableCell}
-                                                        colSpan={categories.length}
-                                                        style={{ backgroundColor: "#fff", padding: "12px 16px", borderRight: "1px solid #e0e0e0" }}
-                                                    >
-                                                        <Box className={classes.outfitMeta} style={{ flexDirection: "row", alignItems: "center", gap: 16, flexWrap: "wrap", backgroundColor: "#fff" }}>
-                                                            <Typography variant="h6" component="h3">
-                                                                {outfit.name || `Outfit ${outfitIndex + 1}`}
-                                                            </Typography>
-                                                            {outfit.style && (
-                                                                <Chip
-                                                                    icon={<FaTshirt />}
-                                                                    label={`Style: ${outfit.style}`}
-                                                                    className={`${classes.metaChip} ${classes.styleChip}`}
-                                                                    size="small"
-                                                                />
-                                                            )}
-                                                            <Chip
-                                                                icon={<FaDollarSign />}
-                                                                label={`Total: ${formatPriceDollar(outfit.totalPrice || 0)}`}
-                                                                className={`${classes.metaChip} ${classes.totalChip}`}
-                                                                size="small"
-                                                            />
-                                                            {outfit.compatibilityScore !== undefined && (
-                                                                <Chip
-                                                                    icon={<FaChartLine />}
-                                                                    label={`Compatibility: ${(outfit.compatibilityScore * 100).toFixed(0)}%`}
-                                                                    className={`${classes.metaChip} ${classes.compatibilityChip}`}
-                                                                    size="small"
-                                                                />
-                                                            )}
-                                                            {outfit.gender && (
-                                                                <Chip
-                                                                    icon={<FaVenusMars />}
-                                                                    label={`Gender: ${outfit.gender}`}
-                                                                    className={`${classes.metaChip} ${classes.genderChip}`}
-                                                                    size="small"
-                                                                />
-                                                            )}
-                                                            {outfit.description && (
-                                                                <Chip
-                                                                    icon={<FaInfoCircle />}
-                                                                    label={outfit.description}
-                                                                    className={`${classes.metaChip} ${classes.descriptionChip}`}
-                                                                    size="small"
-                                                                />
-                                                            )}
                                                         </Box>
                                                     </TableCell>
+                                                ))}
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {outfitData.length > 0 ? (
+                                                outfitData.map((outfit, outfitIndex) => {
+                                                    const categories = ["Tops", "Dresses", "Bottoms", "Shoes", "Accessories"];
+                                                    const productsByCategory = {
+                                                        Tops: [],
+                                                        Dresses: [],
+                                                        Bottoms: [],
+                                                        Shoes: [],
+                                                        Accessories: [],
+                                                        Other: [],
+                                                    };
+
+                                                    outfit.products?.forEach((p) => {
+                                                        const category = p.category || "Other";
+                                                        if (productsByCategory[category]) {
+                                                            productsByCategory[category].push(p);
+                                                        } else {
+                                                            productsByCategory.Other.push(p);
+                                                        }
+                                                    });
+
+                                                    return (
+                                                        <React.Fragment key={outfitIndex}>
+                                                            {/* Row 1: Product cards */}
+                                                            <TableRow>
+                                                                {categories.map((category) => (
+                                                                    <TableCell key={category} className={classes.tableCell} align="center" style={{ verticalAlign: "top" }}>
+                                                                        <Box className={classes.productCardContainer}>
+                                                                            {productsByCategory[category]?.length > 0 ? (
+                                                                                productsByCategory[category].map((product) => renderProductCard(product))
+                                                                            ) : (
+                                                                                <Typography variant="body2" color="textSecondary" style={{ textAlign: "center", padding: "20px" }}>
+                                                                                    No items
+                                                                                </Typography>
+                                                                            )}
+                                                                        </Box>
+                                                                    </TableCell>
+                                                                ))}
+                                                            </TableRow>
+                                                            {/* Row 2: Metadata information spanning all columns */}
+                                                            <TableRow>
+                                                                <TableCell
+                                                                    className={classes.tableCell}
+                                                                    colSpan={categories.length}
+                                                                    style={{ backgroundColor: "#fff", padding: "12px 16px", borderRight: "1px solid #e0e0e0" }}
+                                                                >
+                                                                    <Box className={classes.outfitMeta} style={{ flexDirection: "row", alignItems: "center", gap: 16, flexWrap: "wrap", backgroundColor: "#fff" }}>
+                                                                        <Typography variant="h6" component="h3">
+                                                                            {outfit.name || `Outfit ${outfitIndex + 1}`}
+                                                                        </Typography>
+                                                                        <Chip
+                                                                            icon={<FaDollarSign />}
+                                                                            label={`Total: ${formatPriceDollar(outfit.totalPrice || 0)}`}
+                                                                            className={`${classes.metaChip} ${classes.totalChip}`}
+                                                                            size="small"
+                                                                        />
+                                                                        {outfit.compatibilityScore !== undefined && (
+                                                                            <Chip
+                                                                                icon={<FaChartLine />}
+                                                                                label={`Compatibility: ${(outfit.compatibilityScore * 100).toFixed(0)}%`}
+                                                                                className={`${classes.metaChip} ${classes.compatibilityChip}`}
+                                                                                size="small"
+                                                                            />
+                                                                        )}
+                                                                        {outfit.gender && (
+                                                                            <Chip
+                                                                                icon={<FaVenusMars />}
+                                                                                label={`Gender: ${outfit.gender}`}
+                                                                                className={`${classes.metaChip} ${classes.genderChip}`}
+                                                                                size="small"
+                                                                            />
+                                                                        )}
+                                                                    </Box>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        </React.Fragment>
+                                                    );
+                                                })
+                                            ) : (
+                                                <TableRow>
+                                                    <TableCell colSpan={5} align="center" style={{ padding: "40px" }}>
+                                                        <Typography variant="body1" color="textSecondary">
+                                                            No outfit recommendations available at the moment.
+                                                        </Typography>
+                                                    </TableCell>
                                                 </TableRow>
-                                            </React.Fragment>
-                                        );
-                                    })}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                            </Box>
+                        )}
                     </>
                 )}
-                {userId && !getHybridRecommendations.isLoading && !getHybridRecommendations.error && (!outfitData?.data?.outfits || outfitData.data.outfits.length === 0) && (
+                {userId && !getHybridRecommendations.isLoading && !getHybridRecommendations.error && personalizedData.length === 0 && outfitData.length === 0 && (
                     <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
                         <Typography variant="body1" color="textSecondary">
-                            No outfit recommendations available at the moment.
+                            No recommendations available at the moment.
                         </Typography>
                     </Box>
                 )}
                 {userId && !getHybridRecommendations.isLoading && getHybridRecommendations.error && (
                     <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
                         <Typography variant="body1" color="error">
-                            Failed to load outfit recommendations. Please try again later.
+                            Failed to load recommendations. Please try again later.
                         </Typography>
                     </Box>
                 )}

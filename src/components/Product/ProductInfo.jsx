@@ -27,7 +27,6 @@ import ShippingPolicy from "../Modal/ShippingPolicy.jsx";
 import ReturnPolicy from "../Modal/ReturnPolicy.jsx";
 import UpdateProfileModal from "../Modal/UpdateProfileModal.jsx";
 import { makeStyles } from "@material-ui/core/styles";
-import { formatPriceDollar } from "../../utils/formatPrice.js";
 import YouMightAlsoLikeModal from "./YouMightAlsoLikeModal.jsx";
 import CompleteTheLookModal from "./CompleteTheLookModal.jsx";
 
@@ -256,9 +255,10 @@ const ProductInfo = memo(
     const classes = useStyles(product);
     const [likeModalOpen, setLikeModalOpen] = useState(false);
     const [outfitModalOpen, setOutfitModalOpen] = useState(false);
-    const [currentPrice, setCurrentPrice] = useState(product.price || 0);
+    const firstVariantPrice = product.variants && product.variants.length > 0 ? product.variants[0].price : 0;
+    const [currentPrice, setCurrentPrice] = useState(firstVariantPrice);
     const currentUserId = user?._id || user?.id || "";
-    const productId = product._id || "";
+    const productId = product.id || product._id || "";
     const hasVariants = Array.isArray(product.variants) && product.variants.length > 0;
 
     const safeNumber = useCallback((value, fallback = 0) => {
@@ -272,28 +272,18 @@ const ProductInfo = memo(
 
     // Extract unique sizes from variants
     const sizeOptions = useMemo(() => {
-      if (hasVariants) {
+      if (hasVariants && product.variants) {
         const sizes = [...new Set(product.variants.map((v) => v.size.toUpperCase()))];
         return sizes.sort((a, b) => {
           const order = { S: 0, M: 1, L: 2, XL: 3 };
           return (order[a] || 99) - (order[b] || 99);
         });
       }
-      // Fallback to old structure
-      if (product.size) {
-        return Object.keys(product.size)
-          .filter((key) => safeNumber(product.size[key]) > 0)
-          .map((s) => s.toUpperCase())
-          .sort((a, b) => {
-            const order = { S: 0, M: 1, L: 2, XL: 3 };
-            return (order[a] || 99) - (order[b] || 99);
-          });
-      }
       return [];
-    }, [hasVariants, product.variants, product.size]);
+    }, [hasVariants, product.variants]);
 
     const colorOptions = useMemo(() => {
-      if (hasVariants) {
+      if (hasVariants && product.variants) {
         const colorMap = new Map();
         product.variants.forEach((variant) => {
           const colorValue = variant.color || "";
@@ -307,16 +297,8 @@ const ProductInfo = memo(
         });
         return Array.from(colorMap.values());
       }
-      if (product.colors && product.colors.length > 0) {
-        return product.colors
-          .filter((color) => color && (color.hexCode || color.name))
-          .map((color) => ({
-            name: color.name || color.hexCode,
-            hexCode: color.hexCode || color.name || "",
-          }));
-      }
       return [];
-    }, [hasVariants, product.variants, product.colors]);
+    }, [hasVariants, product.variants]);
 
     useEffect(() => {
       if (hasInitDefaultVariantRef.current) return;
@@ -330,9 +312,9 @@ const ProductInfo = memo(
       hasInitDefaultVariantRef.current = true;
     }, [hasVariants, product.variants, selectedSize, selectedColor, setValue]);
 
-    // Auto select first available size when no variants but sizes exist
+    // Auto select first available size when variants exist
     useEffect(() => {
-      if (hasVariants) return;
+      if (!hasVariants) return;
       if (!selectedSize && sizeOptions.length > 0) {
         setValue("size", sizeOptions[0], { shouldValidate: true });
       }
@@ -354,40 +336,11 @@ const ProductInfo = memo(
         }) || null;
       }
 
-      const variantFromSize = () => {
-        if (!selectedSize) return null;
-        const stock =
-          product.size?.[selectedSize.toLowerCase()] ?? product.size?.[selectedSize] ?? 0;
-        return {
-          size: selectedSize,
-          color: selectedColor || "",
-          stock: safeNumber(stock),
-          price: product.price,
-        };
-      };
-
-      if (sizeOptions.length > 0) {
-        return variantFromSize();
-      }
-
-      const aggregateStock =
-        Object.values(product.size || {}).reduce((acc, value) => acc + safeNumber(value), 0) ||
-        safeNumber(product.countInStock);
-
-      return aggregateStock > 0
-        ? {
-            size: "",
-            color: "",
-            stock: aggregateStock,
-            price: product.price,
-          }
-        : null;
+      // No fallback for old structure - only use variants
+      return null;
     }, [
       hasVariants,
       product.variants,
-      product.size,
-      product.price,
-      product.countInStock,
       selectedSize,
       selectedColor,
       sizeOptions.length,
@@ -396,13 +349,13 @@ const ProductInfo = memo(
 
     useEffect(() => {
       const variantPrice = selectedVariant?.price;
-      const basePrice = safeNumber(product.price);
+      const firstVariantPrice = product.variants && product.variants.length > 0 ? product.variants[0].price : 0;
       const nextPrice =
         variantPrice !== undefined && variantPrice !== null && safeNumber(variantPrice) > 0
           ? safeNumber(variantPrice)
-          : basePrice;
+          : safeNumber(firstVariantPrice);
       setCurrentPrice(nextPrice);
-    }, [selectedVariant, product.price]);
+    }, [selectedVariant, product.variants]);
 
     // Reset color if it's not available for selected size
     useEffect(() => {
@@ -446,9 +399,7 @@ const ProductInfo = memo(
     // Check if size is available (considering selected color)
     const isSizeAvailable = (size) => {
       if (!hasVariants || !product.variants) {
-        // Fallback to old structure
-        const sizeLower = size.toLowerCase();
-        return product.size && safeNumber(product.size[sizeLower]) > 0;
+        return false;
       }
       if (selectedColor) {
         const availableSizes = getAvailableSizesForColor(selectedColor);
@@ -491,7 +442,13 @@ const ProductInfo = memo(
 
     const shouldRenderSizeSelector = sizeOptions.length > 0;
     const shouldRenderColorSelector = availableColorOptions.length > 0;
-    const totalInventory = safeNumber(selectedVariant?.stock ?? product.countInStock);
+    // Calculate total inventory from variants
+    const totalInventory = useMemo(() => {
+      if (hasVariants && product.variants) {
+        return product.variants.reduce((sum, v) => sum + safeNumber(v.stock), 0);
+      }
+      return safeNumber(selectedVariant?.stock);
+    }, [hasVariants, product.variants, selectedVariant?.stock, safeNumber]);
     const isOutOfStock =
       (!hasVariants && shouldRenderSizeSelector && !selectedSize && totalInventory === 0) ||
       totalInventory === 0;
@@ -499,47 +456,60 @@ const ProductInfo = memo(
     return (
       <>
         <Box display="flex" alignItems="center" mb={1}>
+          {product.masterCategory && (
+            <Chip
+              size="small"
+              color="primary"
+              icon={<FaTags style={{ fontSize: 14 }} />}
+              label={product.masterCategory}
+              style={{ marginRight: 8, padding: "0 8px" }}
+            />
+          )}
+          {product.subCategory && (
+            <Chip
+              size="small"
+              color="primary"
+              icon={<FaTags style={{ fontSize: 14 }} />}
+              label={product.subCategory}
+              style={{ marginRight: 8, padding: "0 8px" }}
+            />
+          )}
+          {product.articleType && (
+            <Chip
+              size="small"
+              color="primary"
+              icon={<FaTrademark style={{ fontSize: 14 }} />}
+              label={product.articleType}
+              style={{ marginRight: 8, padding: "0 8px" }}
+            />
+          )}
           <Chip
             size="small"
-            color="primary"
-            icon={<FaTags style={{ fontSize: 14 }} />}
-            label={product.category || "Uncategorized"}
-            style={{ marginRight: 8, padding: "0 8px" }}
-          />
-          <Chip
-            size="small"
-            color="primary"
-            icon={<FaTrademark style={{ fontSize: 14 }} />}
-            label={product.brand || "Unbranded"}
-            style={{ marginRight: 8, padding: "0 8px" }}
-          />
-          <Chip
-            size="small"
-            color={product.countInStock > 0 ? "primary" : "default"}
+            color={totalInventory > 0 ? "primary" : "default"}
             icon={<FaBoxOpen style={{ fontSize: 14 }} />}
-            label={`${product.countInStock > 0 ? `${product.countInStock} in stock` : "Out of stock"}`}
+            label={`${totalInventory > 0 ? `${totalInventory} in stock` : "Out of stock"}`}
             style={{ padding: "0 8px" }}
           />
         </Box>
         <Typography variant="h5" component="h1" gutterBottom>
-          {product.name}
+          {product.productDisplayName || product.name || "Product"}
         </Typography>
         <Box display="flex" alignItems="center" mb={1}>
           <Rating
             name="read-only"
-            value={product.rating}
+            value={product.rating || 0}
             precision={0.5}
             readOnly
           />
           <Typography component="span" style={{ marginLeft: 5 }}>
-            {`(${product.numReviews} reviews) | `}
+            {`(${product.reviews?.length || 0} reviews) | `}
           </Typography>
           <Typography
             component="span"
             style={{ marginLeft: 5 }}
-            color={product.countInStock > 0 ? "secondary" : "black"}
+            color={totalInventory > 0 ? "secondary" : "black"}
           >
-            {`Status: ${product.countInStock > 0 ? "In Stock" : "Out of Stock"
+            {`Status: ${totalInventory > 0 ? "In Stock" : "Out of Stock"
               }`}
           </Typography>
         </Box>
@@ -552,25 +522,17 @@ const ProductInfo = memo(
           className={classes.price}
           gutterBottom
         >
-          {product.sale ? (
+          {product.sale && product.sale > 0 ? (
             <Typography
               variant="subtitle2"
               color="textSecondary"
               component="span"
               className={classes.rootPrice}
             >
-              {formatPriceDollar(currentPrice)}
+              ${currentPrice.toFixed(2)}
             </Typography>
           ) : null}
-          {"  "}{formatPriceDollar(currentPrice * (1 - (product.sale || 0) / 100))}
-        </Typography>
-
-        <Typography
-          variant="body1"
-          component="p"
-          className={classes.description}
-        >
-          {product.description}
+          {"  "}${(currentPrice * (1 - (product.sale || 0) / 100)).toFixed(2)}
         </Typography>
 
         {/* Form */}
@@ -770,8 +732,8 @@ const ProductInfo = memo(
                 render={({ field }) => {
                   const value = Number(field.value) || 1;
                   const min = 1;
-                  // Use variant stock if available, otherwise use product countInStock
-                  const max = Math.max(0, safeNumber(selectedVariant?.stock ?? product.countInStock));
+                  // Use variant stock if available
+                  const max = Math.max(0, safeNumber(selectedVariant?.stock ?? 0));
                   const disabled =
                     max === 0 ||
                     (shouldRenderSizeSelector && !selectedSize) ||
@@ -867,7 +829,7 @@ const ProductInfo = memo(
                 color="secondary"
                 startIcon={<FaHeart />}
                 className={classes.button}
-                disabled={product.countInStock === 0}
+                disabled={totalInventory === 0}
                 type="button"
                 onClick={
                   isFavorite ? handleRemoveFromFavorites : handleAddToFavorites
@@ -972,12 +934,23 @@ const ProductInfo = memo(
           </Box>
           <Typography className={classes.label}>Tags:</Typography>
           <Box ml={2}>
-            <Chip
-              size="small"
-              label={product.category}
-              style={{ marginRight: 8 }}
-            />
-            <Chip size="small" label={product.brand} />
+            {product.masterCategory && (
+              <Chip
+                size="small"
+                label={product.masterCategory}
+                style={{ marginRight: 8 }}
+              />
+            )}
+            {product.subCategory && (
+              <Chip
+                size="small"
+                label={product.subCategory}
+                style={{ marginRight: 8 }}
+              />
+            )}
+            {product.articleType && (
+              <Chip size="small" label={product.articleType} />
+            )}
           </Box>
         </Box>
         <Divider />
@@ -991,7 +964,7 @@ const ProductInfo = memo(
           <Box ml={1}>
             <div className={classes.socialGroup}>
               <ShareButtons
-                url={`https://cybershop-v1.herokuapp.com/product/${product._id}`}
+                url={`https://cybershop-v1.herokuapp.com/product/${productId}`}
               />
             </div>
           </Box>

@@ -8,7 +8,6 @@ import Tooltip from "@material-ui/core/Tooltip";
 import ProductModalView from "./ProductModalView";
 import { addToCart, setOpenCartDrawer } from "../../actions/cartActions";
 import { useDispatch } from "react-redux";
-import { formatPriceDollar } from "../../utils/formatPrice";
 
 const ProductCard = (props) => {
   const {
@@ -34,8 +33,7 @@ const ProductCard = (props) => {
   const dispatch = useDispatch();
   const variant = variants && variants.length > 0 ? variants[0] : null;
 
-  // Calculate price - assuming a base price if not provided
-  const basePrice = price || variant?.price || 50; // fallback price
+  const basePrice = variant?.price || price || 50; // fallback price
   const finalPrice = basePrice * (1 - (sale || 0) / 100);
 
   const handleAddToCart = (e, idToAdd) => {
@@ -111,8 +109,8 @@ const ProductCard = (props) => {
               /* Placeholder when no images */
               <motion.img
                 className="absolute inset-0 h-full w-full object-contain bg-white"
-                src="https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?_gl=1*g8do3y*_ga*OTAxNTg0MjkuMTc1NzYxMDEwNQ..*_ga_8JE65Q40S6*czE3NjMzODg4MTkkbzYkZzEkdDE3NjMzODg4MjgkajUxJGwwJGgw"
-                alt={displayName}
+                src="https://www.lwf.org/images/emptyimg.png"
+                alt="No Image Available"
                 initial={{ opacity: 1 }}
                 animate={{ opacity: isHovered && images[1] ? 0 : 1 }}
                 transition={{ duration: 0.4 }}
@@ -145,11 +143,11 @@ const ProductCard = (props) => {
             <div className="mt-auto flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-white">
-                  {formatPriceDollar(finalPrice)}
+                  ${finalPrice.toFixed(2)}
                 </span>
                 {sale > 0 && (
                   <span className="text-base italic text-white/70 line-through">
-                    {formatPriceDollar(basePrice)}
+                    ${basePrice.toFixed(2)}
                   </span>
                 )}
               </div>
