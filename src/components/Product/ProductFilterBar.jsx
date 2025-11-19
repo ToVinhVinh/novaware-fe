@@ -238,7 +238,7 @@ const ProductFilterBar = ({ sizeSelected, filter }) => {
               <Typography variant="body2">Loading categories...</Typography>
             ) : errorCategories || errorCategoryCounts ? (
               <Typography variant="body2" color="error">
-                {errorCategories || errorCategoryCounts}
+                {errorCategories?.message || errorCategoryCounts?.message || String(errorCategories || errorCategoryCounts)}
               </Typography>
             ) : (
               categoriesData.map((category) => {
@@ -254,7 +254,7 @@ const ProductFilterBar = ({ sizeSelected, filter }) => {
                     key={category._id}
                     className={clsx(
                       filter.categories.indexOf(category.name) >= 0 &&
-                        classes.isSelected
+                      classes.isSelected
                     )}
                     onClick={() => addCategoriesHandler(category.name)}
                   >
@@ -284,7 +284,7 @@ const ProductFilterBar = ({ sizeSelected, filter }) => {
               <Typography variant="body2">Loading brands...</Typography>
             ) : errorBrands ? (
               <Typography variant="body2" color="error">
-                {errorBrands}
+                {errorBrands?.message || String(errorBrands)}
               </Typography>
             ) : (
               brands.map((brand, index) => (

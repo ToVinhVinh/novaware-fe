@@ -618,7 +618,7 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
             BackdropProps={{ style: { backgroundColor: "rgba(0,0,0,0.5)" } }}
         >
             <DialogTitle className={classes.dialogTitle}>
-                <Typography variant="h5" align="center" className="tracking-widest">Complete the Look</Typography>
+                <Typography variant="h5" component="div" align="center" className="tracking-widest">Complete the Look</Typography>
                 <IconButton
                     aria-label="close"
                     onClick={onClose}
