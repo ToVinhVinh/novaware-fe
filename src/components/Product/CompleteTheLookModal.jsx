@@ -24,7 +24,6 @@ import CloseIcon from "@material-ui/icons/Close";
 import { FaTshirt, FaChartLine, FaVenusMars, FaInfoCircle, FaDollarSign, FaGem, FaFemale, FaShoePrints } from "react-icons/fa";
 import { PiPants } from "react-icons/pi";
 import { makeStyles } from "@material-ui/core/styles";
-import { formatPriceDollar } from "../../utils/formatPrice.js";
 import { useGNNModelRecommendations } from "../../hooks/api/useRecommend";
 import LottieLoading from "../LottieLoading.jsx";
 import { toast } from "react-toastify";
@@ -429,6 +428,8 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
                 gender: item.product?.gender,
                 baseColour: item.product?.baseColour,
                 articleType: item.product?.articleType,
+                usage: item.product?.usage,
+                season: item.product?.season,
             };
         });
     }, [recommendationData]);
@@ -472,6 +473,9 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
                     images: product.images || [],
                     score: categoryData.score,
                     reason: categoryData.reason,
+                    articleType: product.articleType,
+                    usage: product.usage,
+                    season: product.season,
                 });
             });
 
@@ -529,6 +533,34 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
                 className={classes.productImage}
             />
             <Box className={classes.productInfo}>
+                {(product.articleType || product.usage || product.season) && (
+                    <Box style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
+                        {product.articleType && (
+                            <Chip
+                                label={product.articleType}
+                                variant="outlined"
+                                size="medium"
+                                style={{ fontSize: "0.7rem", height: 20 }}
+                            />
+                        )}
+                        {product.usage && (
+                            <Chip
+                                label={product.usage}
+                                variant="outlined"
+                                size="medium"
+                                style={{ fontSize: "0.7rem", height: 20 }}
+                            />
+                        )}
+                        {product.season && (
+                            <Chip
+                                label={product.season}
+                                variant="outlined"
+                                size="medium"
+                                style={{ fontSize: "0.7rem", height: 20 }}
+                            />
+                        )}
+                    </Box>
+                )}
                 <Typography className={classes.productName} variant="body2">
                     {product.name}
                 </Typography>
@@ -538,7 +570,7 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
                     </Typography>
                 )}
                 <Typography className={classes.productPrice}>
-                    {formatPriceDollar((product.price || 0) * (1 - ((product.sale || 0) / 100)))}
+                    {((product.price || 0) * (1 - ((product.sale || 0) / 100))).toFixed(2)}
                     {product.sale && product.sale > 0 && (
                         <Typography
                             component="span"
@@ -549,7 +581,7 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
                                 marginLeft: 8,
                             }}
                         >
-                            {formatPriceDollar(product.price || 0)}
+                            {((product.price || 0)).toFixed(2)}
                         </Typography>
                     )}
                 </Typography>
@@ -707,7 +739,7 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
                                                                         </Typography>
                                                                         <Chip
                                                                             icon={<FaDollarSign />}
-                                                                            label={`Total: ${formatPriceDollar(outfit.totalPrice || 0)}`}
+                                                                            label={`Total: ${(outfit.totalPrice || 0).toFixed(2)}`}
                                                                             className={`${classes.metaChip} ${classes.totalChip}`}
                                                                             size="small"
                                                                         />
