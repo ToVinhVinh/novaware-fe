@@ -236,7 +236,6 @@ export const createReview = async (id: string, body: ICreateReviewBody): Promise
 	return await sendPost(`/products/${id}/reviews`, body);
 };
 
-// Get Top Products
 export const getTopProducts = async (query?: IGetTopProductsQuery): Promise<IGetTopProductsResponse> => {
 	const modifiedQuery = {
 		...query,

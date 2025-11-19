@@ -141,7 +141,7 @@ const ShopScreen = ({ location, history }) => {
     rating: rating || undefined,
     sort_by: sort_by || "default",
     pageNumber: pageNumber || 1,
-    perPage: 12,
+    perPage: 9,
   };
 
   const { data: productsResponse, isLoading: loading, error: queryError } = useFilterProducts(filterQuery);
@@ -282,12 +282,12 @@ const ShopScreen = ({ location, history }) => {
                   onDelete={() => dispatch(removeBrand(brand))}
                 />
               ))}
-              {rating > 0 && ( 
+              {rating > 0 && (
                 <Chip
                   variant="outlined"
                   size="small"
-                  label={`Rating: ${rating} Star`} 
-                  onDelete={() => dispatch(removeRating())} 
+                  label={`Rating: ${rating} Star`}
+                  onDelete={() => dispatch(removeRating())}
                 />
               )}
             </Box>
@@ -302,9 +302,9 @@ const ShopScreen = ({ location, history }) => {
                 {products.map((product) => (
                   <Grid
                     item
-                    xs={activeLayout === "fewCol" ? 12 : 6}
-                    sm={activeLayout === "fewCol" ? 6 : 4}
-                    lg={activeLayout === "fewCol" ? 4 : 3}
+                    xs={12}
+                    sm={6}
+                    md={4}
                     key={product._id}
                   >
                     <ProductCard {...product} />
@@ -319,11 +319,10 @@ const ShopScreen = ({ location, history }) => {
                       renderItem={(item) => (
                         <PaginationItem
                           component={RouterLink}
-                          to={`/shop${
-                            item.page === 0
-                              ? ""
-                              : `?sort_by=${sort_by}&page=${item.page}`
-                          }`}
+                          to={`/shop${item.page === 0
+                            ? ""
+                            : `?sort_by=${sort_by}&page=${item.page}`
+                            }`}
                           {...item}
                         />
                       )}
@@ -333,7 +332,7 @@ const ShopScreen = ({ location, history }) => {
               </Grid>
             </>
           ) : (
-              <LottieEmpty />
+            <LottieEmpty />
           )}
         </Grid>
       </Grid>

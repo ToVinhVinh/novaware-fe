@@ -394,7 +394,7 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ menuItemClassName }
                       <Typography
                         className={classes.subCategoryTitle}
                         component={Link}
-                        to={`/shop?category=${encodeURIComponent(subCat.subCategory)}`}
+                        to={`/shop?articleType=${encodeURIComponent(subCat.subCategory)}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           handleSubCategoryClick(subCat.subCategory);
@@ -412,7 +412,7 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ menuItemClassName }
                               key={`article-${index}-${artIndex}`}
                               className={classes.articleTypeItem}
                               component={Link}
-                              to={`/shop?category=${encodeURIComponent(articleType)}`}
+                              to={`/shop?articleType=${encodeURIComponent(articleType)}`}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleArticleTypeClick(articleType);
