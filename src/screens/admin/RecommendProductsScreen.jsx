@@ -487,7 +487,7 @@ const RecommendProductsScreen = () => {
       <div className={classes.tabPanel}>
         <Paper className={classes.paper}>
           {matrixData && renderMatrix(matrixData)}
-          <Typography variant="h5" gutterBottom>
+          <Typography variant="h6" gutterBottom>
             Train Model Result
           </Typography>
 
@@ -617,7 +617,7 @@ const RecommendProductsScreen = () => {
 
           <Divider style={{ margin: "24px 0" }} />
 
-          <Typography variant="h5" gutterBottom>
+          <Typography variant="h6" gutterBottom>
             Get Recommendations
           </Typography>
 
@@ -917,7 +917,7 @@ const RecommendProductsScreen = () => {
               separator={<NavigateNextIcon fontSize="small" />}
               style={{ marginBottom: 24 }}
             >
-              <Link color="inherit" component={RouterLink} to="/admin/orderstats">
+              <Link color="inherit" component={RouterLink} to="/admin/recommend-products">
                 Dashboard
               </Link>
               <Typography color="textPrimary">Recommend Products</Typography>

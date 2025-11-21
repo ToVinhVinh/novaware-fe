@@ -80,7 +80,7 @@ const UserListScreen = ({ history: historyProp }) => {
   const [pageSize, setPageSize] = useState(12);
 
   const userInfo = useSelector((state) => state.userLogin?.userInfo);
-  
+
   const { data: usersResponse, isLoading: loading, error } = useGetUsers({
     keyword: keyword || undefined,
     pageNumber: page + 1,
@@ -90,11 +90,11 @@ const UserListScreen = ({ history: historyProp }) => {
   const users = usersData.map((user) => ({
     ...user,
     id: user._id || user.id,
-    interaction_history_length: Array.isArray(user.interaction_history) 
-      ? user.interaction_history.length 
+    interaction_history_length: Array.isArray(user.interaction_history)
+      ? user.interaction_history.length
       : 0,
-    outfit_history_length: Array.isArray(user.outfit_history) 
-      ? user.outfit_history.length 
+    outfit_history_length: Array.isArray(user.outfit_history)
+      ? user.outfit_history.length
       : 0,
   }));
   const totalUsers = usersResponse?.data?.count || 0;
@@ -106,6 +106,13 @@ const UserListScreen = ({ history: historyProp }) => {
     history.push(`/admin/user/${userId}/edit`);
   };
 
+  const handleRowClick = (params) => {
+    const userId = params.row.id || params.row._id;
+    if (userId) {
+      history.push(`/admin/user/${userId}/edit`);
+    }
+  };
+
   const columns = [
     { field: "email", headerName: "Email", flex: 0.25, minWidth: 200, sortable: false },
     { field: "name", headerName: "Name", flex: 0.2, minWidth: 150, sortable: false },
@@ -115,7 +122,10 @@ const UserListScreen = ({ history: historyProp }) => {
       flex: 0.1,
       minWidth: 80,
       sortable: false,
-      valueFormatter: (params) => params.value || "-",
+      valueFormatter: (params) => {
+        if (!params.value) return "-";
+        return params.value.charAt(0).toUpperCase() + params.value.slice(1).toLowerCase();
+      },
     },
     {
       field: "age",
@@ -180,7 +190,10 @@ const UserListScreen = ({ history: historyProp }) => {
               color="primary"
               startIcon={<AiOutlineEdit />}
               className={classes.button}
-              onClick={() => handleOpenEditModal(id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleOpenEditModal(id);
+              }}
             />
             <Button
               variant="contained"
@@ -188,7 +201,10 @@ const UserListScreen = ({ history: historyProp }) => {
               style={{ marginLeft: 8 }}
               className={classes.button}
               startIcon={<AiOutlineDelete />}
-              onClick={() => deleteHandler(id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteHandler(id);
+              }}
             />
           </>
         );
@@ -234,7 +250,7 @@ const UserListScreen = ({ history: historyProp }) => {
               separator={<NavigateNextIcon fontSize="small" />}
               style={{ marginBottom: 24 }}
             >
-              <Link color="inherit" component={RouterLink} to="/admin/orderstats">
+              <Link color="inherit" component={RouterLink} to="/admin/recommend-products">
                 Dashboard
               </Link>
               <Typography color="textPrimary">Users Management</Typography>
@@ -296,6 +312,7 @@ const UserListScreen = ({ history: historyProp }) => {
                 setPageSize(nextPageSize);
                 setPage(0);
               }}
+              onRowClick={handleRowClick}
               autoHeight
               disableColumnMenu
               disableColumnFilter

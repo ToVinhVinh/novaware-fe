@@ -5,6 +5,7 @@ import LottieLoading from "../LottieLoading";
 import ProductCard from "../Product/ProductCard";
 import { useGetTopProducts } from "../../hooks/api/useProduct";
 import LottieEmpty from "../LottieEmpty";
+import Loader from "../Loader";
 const TopProducts: React.FC = () => {
   const { data: productTopRatedResponse, isLoading: loadingProductTop, error: errorProductTop } = useGetTopProducts();
   const productTopRaw = productTopRatedResponse?.data?.products || [];
@@ -16,7 +17,7 @@ const TopProducts: React.FC = () => {
         <div className='h-[1px] bg-primary flex-1'></div>
       </div>
       {loadingProductTop ? (
-        <LottieLoading />
+        <Loader />
       ) : errorProductTop ? (
         <LottieEmpty className="flex justify-center" />
       ) : (

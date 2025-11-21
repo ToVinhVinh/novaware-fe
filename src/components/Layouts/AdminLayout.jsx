@@ -99,8 +99,12 @@ const useStyles = makeStyles((theme) => ({
   },
   drawerPaper: {
     width: drawerWidth,
+    maxWidth: drawerWidth,
     backgroundColor: '#f8f9fa',
     borderRight: '1px solid rgba(0, 0, 0, 0.08)',
+    overflowX: 'hidden',
+    overflowY: 'auto',
+    boxSizing: 'border-box',
   },
   drawerHeader: {
     display: 'flex',
@@ -182,6 +186,9 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: '#c62828',
     },
   },
+  shadowBottom: {
+    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+  },
 }));
 
 const AdminLayout = ({ children }) => {
@@ -193,6 +200,11 @@ const AdminLayout = ({ children }) => {
 
   // Menu items (flat structure, no sub-menus)
   const menuItems = [
+    {
+      text: 'Recommend Products',
+      icon: <RecommendIcon />,
+      link: '/admin/recommend-products',
+    },
     {
       text: 'Order Statistics',
       icon: <AssessmentIcon />,
@@ -228,11 +240,6 @@ const AdminLayout = ({ children }) => {
       icon: <SettingsIcon />,
       link: '/admin/home-content',
     },
-    {
-      text: 'Recommend Products',
-      icon: <RecommendIcon />,
-      link: '/admin/recommend-products',
-    },
   ];
 
   const handleDrawerToggle = () => {
@@ -246,32 +253,31 @@ const AdminLayout = ({ children }) => {
 
   const isActive = (link) => {
     const pathname = location.pathname;
-    
-    // Exact match for orderstats
-    if (link === '/admin/orderstats') {
-      return pathname === '/admin/orderstats';
+
+    if (link === '/recommend-products') {
+      return pathname === '/recommend-products';
     }
-    
-    // Match product list - also highlight when on product edit page
+
     if (link === '/admin/products') {
-      // Match /admin/products or /admin/product/:id (edit page)
-      return pathname === '/admin/products' || 
-             pathname.match(/^\/admin\/product\/[^/]+$/) ||
-             pathname.match(/^\/admin\/product\/[^/]+\/edit$/);
+      return pathname === '/admin/products' ||
+        pathname.match(/^\/admin\/product\/[^/]+$/) ||
+        pathname.match(/^\/admin\/product\/[^/]+\/edit$/);
     }
-    
-    // Match order list - also highlight when on order detail page
+
     if (link === '/admin/orders') {
-      return pathname === '/admin/orders' || 
-             pathname.match(/^\/admin\/order\/[^/]+$/);
+      return pathname === '/admin/orders' ||
+        pathname.match(/^\/admin\/order\/[^/]+$/);
     }
-    
-    // Match recommend products
+
     if (link === '/admin/recommend-products') {
       return pathname === '/admin/recommend-products';
     }
-    
-    // Default: exact match
+
+    if (link === '/admin/users') {
+      return pathname === '/admin/users' ||
+        pathname.match(/^\/admin\/user\/[^/]+\/edit$/);
+    }
+
     return pathname === link;
   };
 
@@ -296,7 +302,7 @@ const AdminLayout = ({ children }) => {
           >
             {open ? <ChevronLeftIcon /> : <MenuIcon />}
           </IconButton>
-          
+
           {/* Logo */}
           <div className={classes.logoWrapper}>
             <RouterLink to="/">
@@ -308,7 +314,6 @@ const AdminLayout = ({ children }) => {
             variant='contained'
             color='secondary'
             onClick={handleLogout}
-            className="!rounded-none"
             endIcon={<LogoutIcon />}
           >
             Đăng xuất
@@ -325,7 +330,7 @@ const AdminLayout = ({ children }) => {
           paper: classes.drawerPaper,
         }}
       >
-        <div className={classes.drawerHeader}>
+        <div className={clsx("flex justify-center items-center min-h-16 bg-white", classes.shadowBottom)}>
           <Typography variant="h6" className={classes.dashboardTitle}>
             Admin Panel
           </Typography>
@@ -353,7 +358,7 @@ const AdminLayout = ({ children }) => {
                 >
                   {item.icon}
                 </ListItemIcon>
-                <ListItemText 
+                <ListItemText
                   primary={item.text}
                   className={classes.listItemText}
                 />

@@ -12,6 +12,7 @@ import ProductCard from './ProductCard';
 import { Button, Typography } from '@material-ui/core';
 import LottieLoading from '../LottieLoading';
 import LottieEmpty from '../LottieEmpty';
+import Loader from '../Loader';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -132,7 +133,7 @@ const ProductTabs = () => {
       </AppBar>
       <TabPanel value={value} index={0}>
         {loadingProductLatest ? (
-          <LottieLoading className="flex justify-center" />
+          <Loader />
         ) : errorProductLatest ? (
           <LottieEmpty className="flex justify-center" />
         ) : (

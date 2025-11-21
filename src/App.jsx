@@ -66,12 +66,12 @@ const App = () => {
           {/* Admin Routes - Must be inside Switch and checked first */}
           <Route path="/admin" exact>
             {userInfo && userInfo.isAdmin ? (
-              <Redirect to="/admin/orderstats" />
+              <Redirect to="/admin/recommend-products" />
             ) : (
               <Redirect to="/" />
             )}
           </Route>
-          
+
           <Route path="/admin">
             {userInfo && userInfo.isAdmin ? (
               <AdminLayout>
@@ -94,7 +94,7 @@ const App = () => {
                     )}
                   />
                   <Route path="/admin/recommend-products" component={RecommendProductsScreen} />
-                  <Redirect to="/admin/orderstats" />
+                  <Redirect to="/admin/recommend-products" />
                 </Switch>
               </AdminLayout>
             ) : (
@@ -114,7 +114,7 @@ const App = () => {
                 <Route path="/shipping" component={ShippingScreen} />
                 <Route path="/payment" component={PaymentScreen} />
                 <Route path="/placeorder" component={PlaceOrderScreen} />
-                <Route path="/order/:id" component={OrderScreen} /> 
+                <Route path="/order/:id" component={OrderScreen} />
                 <Route path="/search" component={HomeScreen} exact />
                 <Route path="/" component={HomeScreen} exact />
                 <Route component={NotFoundScreen} />

@@ -213,7 +213,7 @@ const LoginModal = ({
 
       const isAdmin = computedUserInfo.isAdmin;
       if (isAdmin) {
-        history.push("/admin/orderstats");
+        history.push("/recommend-products");
       } else if (redirect) {
         history.push(redirect);
       } else {

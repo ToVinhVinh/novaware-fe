@@ -114,14 +114,14 @@ export default function HeaderUser({
                         id="menu-list-grow"
                         onKeyDown={handleListKeyDown}
                       >
-                        <MenuItem component={RouterLink} to="/profile" divider>
+                        <MenuItem component={RouterLink} to={userInfo.isAdmin ? "/admin/recommend-products" : "/profile"} divider>
                           <FaUser className={classes.menuItemIcon} />
                           {userInfo.name ? userInfo.name : "Profile"}
                         </MenuItem>
                         <MenuItem onClick={handleChat}>
                           <FaComments className={classes.menuItemIcon} />
                           Chat
-                        </MenuItem>                      
+                        </MenuItem>
                         <MenuItem onClick={handleLogout}>
                           <FaSignOutAlt className={classes.menuItemIcon} />
                           Logout

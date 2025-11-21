@@ -18,6 +18,12 @@ import {
   FormControl,
   FormControlLabel,
   Checkbox,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from "@material-ui/core";
 import NavigateNextIcon from "@material-ui/icons/NavigateNext";
 import Meta from "../../components/Meta";
@@ -43,6 +49,11 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(3),
     marginTop: 0,
   },
+  interactionHistoryContainer: {
+    padding: theme.spacing(3),
+    paddingTop: 0,
+    marginTop: 0,
+  },
   form: {
     width: "100%",
   },
@@ -51,6 +62,17 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     gap: theme.spacing(2),
     justifyContent: "flex-end",
+  },
+  tableContainer: {
+    marginTop: theme.spacing(4),
+  },
+  tableTitle: {
+    marginBottom: theme.spacing(2),
+    fontWeight: 600,
+  },
+  tableHeader: {
+    backgroundColor: theme.palette.grey[100],
+    fontWeight: 600,
   },
 }));
 
@@ -141,6 +163,28 @@ const UserEditScreen = () => {
     }
   };
 
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return "-";
+    try {
+      const date = new Date(timestamp);
+      return date.toLocaleString("en-US", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+    } catch (error) {
+      return timestamp;
+    }
+  };
+
+  const formatInteractionType = (type) => {
+    if (!type) return "-";
+    return type.charAt(0).toUpperCase() + type.slice(1);
+  };
+
   return (
     <Container disableGutters style={{ marginBottom: 140, maxWidth: "100%" }}>
       <Meta title="Dashboard | Edit User" />
@@ -151,7 +195,7 @@ const UserEditScreen = () => {
               separator={<NavigateNextIcon fontSize="small" />}
               style={{ marginBottom: 24 }}
             >
-              <Link color="inherit" component={RouterLink} to="/admin/orderstats">
+              <Link color="inherit" component={RouterLink} to="/admin/recommend-products">
                 Dashboard
               </Link>
               <Link color="inherit" component={RouterLink} to="/admin/users">
@@ -291,6 +335,39 @@ const UserEditScreen = () => {
               </form>
             </Paper>
           </Grid>
+          {user?.interaction_history && user.interaction_history.length > 0 && (
+            <Grid item xs={12}>
+              <Paper className={classes.interactionHistoryContainer} elevation={0}>
+                <Typography variant="h6" gutterBottom>
+                  Interaction History
+                </Typography>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell className={classes.tableHeader}>Product ID</TableCell>
+                        <TableCell className={classes.tableHeader}>Interaction Type</TableCell>
+                        <TableCell className={classes.tableHeader}>Timestamp</TableCell>
+                        <TableCell className={classes.tableHeader}>Usage</TableCell>
+                        <TableCell className={classes.tableHeader}>Base Colour</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {user.interaction_history.map((interaction, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{interaction.product_id || "-"}</TableCell>
+                          <TableCell>{formatInteractionType(interaction.interaction_type)}</TableCell>
+                          <TableCell>{formatTimestamp(interaction.timestamp)}</TableCell>
+                          <TableCell>{interaction.usage || "-"}</TableCell>
+                          <TableCell>{interaction.baseColour || "-"}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Paper>
+            </Grid>
+          )}
         </Grid>
       )}
     </Container>
