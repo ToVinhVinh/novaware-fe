@@ -24,8 +24,13 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Chip,
 } from "@material-ui/core";
 import NavigateNextIcon from "@material-ui/icons/NavigateNext";
+import ShoppingCartIcon from "@material-ui/icons/ShoppingCart";
+import AddShoppingCartIcon from "@material-ui/icons/AddShoppingCart";
+import ThumbUpIcon from "@material-ui/icons/ThumbUp";
+import VisibilityIcon from "@material-ui/icons/Visibility";
 import Meta from "../../components/Meta";
 import Loader from "../../components/Loader";
 import Message from "../../components/Message";
@@ -183,6 +188,47 @@ const UserEditScreen = () => {
   const formatInteractionType = (type) => {
     if (!type) return "-";
     return type.charAt(0).toUpperCase() + type.slice(1);
+  };
+
+  const renderInteractionTypeChip = (type) => {
+    if (!type) return "-";
+
+    const typeLower = type.toLowerCase();
+    let icon = null;
+    let label = type.charAt(0).toUpperCase() + type.slice(1);
+    let color = "default";
+
+    switch (typeLower) {
+      case "purchase":
+        icon = <ShoppingCartIcon style={{ fontSize: 16 }} />;
+        color = "primary";
+        break;
+      case "cart":
+        icon = <AddShoppingCartIcon style={{ fontSize: 16 }} />;
+        color = "secondary";
+        break;
+      case "like":
+        icon = <ThumbUpIcon style={{ fontSize: 16 }} />;
+        color = "primary";
+        break;
+      case "view":
+        icon = <VisibilityIcon style={{ fontSize: 16 }} />;
+        color = "default";
+        break;
+      default:
+        return label;
+    }
+
+    return (
+      <Chip
+        icon={icon}
+        label={label}
+        variant="outlined"
+        color={color}
+        size="small"
+        style={{ paddingLeft: 10, paddingRight: 10 }}
+      />
+    );
   };
 
   return (
@@ -356,7 +402,7 @@ const UserEditScreen = () => {
                       {user.interaction_history.map((interaction, index) => (
                         <TableRow key={index}>
                           <TableCell>{interaction.product_id || "-"}</TableCell>
-                          <TableCell>{formatInteractionType(interaction.interaction_type)}</TableCell>
+                          <TableCell>{renderInteractionTypeChip(interaction.interaction_type)}</TableCell>
                           <TableCell>{formatTimestamp(interaction.timestamp)}</TableCell>
                           <TableCell>{interaction.usage || "-"}</TableCell>
                           <TableCell>{interaction.baseColour || "-"}</TableCell>

@@ -122,8 +122,8 @@ const ProductListScreen = ({ history }) => {
   const classes = useStyles();
 
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(9);
-  const [pageSize, setPageSize] = useState(20);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedBrands, setSelectedBrands] = useState([]);
