@@ -69,7 +69,7 @@ const ProductCard = (props) => {
           }}
         >
           {/* Image Container with proper aspect ratio */}
-          <div className="relative w-full pb-[100%] overflow-hidden bg-gray-50 group-hover:-mb-10 transition-all duration-300 ease-in-out -mb-12 z-0">
+          <div className="relative w-full pb-[100%] -mb-10 overflow-hidden bg-gray-50 transition-all duration-300 ease-in-out z-0">
             {sale > 0 && (
               <div className="absolute top-3 left-3 z-20 bg-pink-600 px-2 py-1 text-xs font-semibold uppercase text-white">
                 -{Math.round(sale)}%
@@ -86,7 +86,7 @@ const ProductCard = (props) => {
                 {/* Back Image */}
                 {images[1] && (
                   <motion.img
-                    className="absolute inset-0 h-full w-full object-contain"
+                    className="absolute inset-0 h-full w-full object-contain hover:scale-110 transition-all duration-300 ease-in-out"
                     src={images[1]}
                     alt={`${displayName} - back view`}
                     initial={{ opacity: 0 }}
@@ -97,7 +97,7 @@ const ProductCard = (props) => {
 
                 {/* Front Image with fade on hover */}
                 <motion.img
-                  className="absolute inset-0 h-full w-full object-contain bg-white"
+                  className="absolute inset-0 h-full w-full object-contain bg-white hover:scale-110 transition-all duration-300 ease-in-out"
                   src={images[0]}
                   alt={displayName}
                   initial={{ opacity: 1 }}
@@ -108,7 +108,7 @@ const ProductCard = (props) => {
             ) : (
               /* Placeholder when no images */
               <motion.img
-                className="absolute inset-0 h-full w-full object-contain bg-white"
+                className="absolute inset-0 h-full w-full object-contain bg-white hover:scale-110 transition-all duration-300 ease-in-out"
                 src="https://www.lwf.org/images/emptyimg.png"
                 alt="No Image Available"
                 initial={{ opacity: 1 }}

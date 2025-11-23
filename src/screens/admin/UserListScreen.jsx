@@ -77,7 +77,7 @@ const UserListScreen = ({ history: historyProp }) => {
 
   const [keyword, setKeyword] = useState("");
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(12);
+  const [pageSize, setPageSize] = useState(50);
 
   const userInfo = useSelector((state) => state.userLogin?.userInfo);
 

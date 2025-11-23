@@ -33,7 +33,6 @@ import useScrollTrigger from "@material-ui/core/useScrollTrigger";
 import HeaderUser from "./HeaderUser.jsx";
 import SearchBox from "./SearchBox.jsx";
 import FavoritePreview from '../components/Drawer/FavoritePreview';
-import BrandDropdown from "./Header/BrandDropdown";
 import CategoryDropdown from "./Header/CategoryDropdown";
 
 const useStyles = makeStyles((theme) => ({
@@ -325,15 +324,9 @@ const Header = ({
                 Shop
               </MenuItem>
               {/* Categories Menu */}
-                <CategoryDropdown
-                  menuItemClassName={classes.menuItem}
-                />
-
-              {/* Brands Menu */}
-              <BrandDropdown
+              <CategoryDropdown
                 menuItemClassName={classes.menuItem}
               />
-
               <MenuItem
                 component={Link}
                 to="/about-us"
@@ -390,20 +383,6 @@ const Header = ({
                 >
                   Categories
                 </MenuItem>
-                <MenuItem
-                  component={Link}
-                  to="/shop"
-                  onClick={() => {
-                    handleAllBrandsClick();
-                    handleCloseDrawer();
-                  }}
-                  selected={
-                    currentPath === "shop" && pathname.includes("brand=all")
-                  }
-                >
-                  Brands
-                </MenuItem>
-
                 <MenuItem
                   component={Link}
                   to="/about-us"

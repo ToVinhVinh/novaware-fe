@@ -103,6 +103,7 @@ export interface IFilterProductsQuery {
 	priceMin?: number;
 	priceMax?: number;
 	sort_by?: "latest" | "rating" | "sale" | "priceAsc" | "priceDesc";
+	articleType?: string;
 	pageNumber?: number;
 	perPage?: number;
 }

@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   removeSearchTerm,
   removeRangePrice,
   removeCategory,
   removeSize,
   removeBrand,
-  filterClearAll,
   removeRating,
 } from "../../actions/filterActions";
 import { useFilterProducts } from "../../hooks/api/useProduct";
@@ -123,7 +122,7 @@ const ShopScreen = ({ location, history }) => {
   const ref = useRef();
   const [activeLayout, setActiveLayout] = useState("moreCol");
   const query = queryString.parse(location.search);
-  let { sort_by = "default", page: pageNumber = 1 } = query;
+  let { sort_by = "default", page: pageNumber = 1, articleType } = query;
 
   // Selectors
   const filter = useSelector((state) => state.filter);
@@ -140,6 +139,7 @@ const ShopScreen = ({ location, history }) => {
     priceMax: priceMax || undefined,
     rating: rating || undefined,
     sort_by: sort_by || "default",
+    articleType: articleType || undefined,
     pageNumber: pageNumber || 1,
     perPage: 9,
   };
@@ -198,9 +198,13 @@ const ShopScreen = ({ location, history }) => {
                 <FormLabel>Sort by</FormLabel>
                 <Select
                   value={sort_by}
-                  onChange={(e) =>
-                    history.push(`/shop?sort_by=${e.target.value}`)
-                  }
+                  onChange={(e) => {
+                    const queryParams = [`sort_by=${e.target.value}`];
+                    if (articleType) {
+                      queryParams.push(`articleType=${articleType}`);
+                    }
+                    history.push(`/shop?${queryParams.join("&")}`);
+                  }}
                 >
                   <MenuItem value="default">Default Sorting</MenuItem>
                   <MenuItem value="latest">Lastest</MenuItem>
@@ -316,16 +320,26 @@ const ShopScreen = ({ location, history }) => {
                       className={classes.pagination}
                       page={page}
                       count={pages}
-                      renderItem={(item) => (
-                        <PaginationItem
-                          component={RouterLink}
-                          to={`/shop${item.page === 0
-                            ? ""
-                            : `?sort_by=${sort_by}&page=${item.page}`
-                            }`}
-                          {...item}
-                        />
-                      )}
+                      renderItem={(item) => {
+                        const queryParams = [];
+                        if (sort_by && sort_by !== "default") {
+                          queryParams.push(`sort_by=${sort_by}`);
+                        }
+                        if (articleType) {
+                          queryParams.push(`articleType=${articleType}`);
+                        }
+                        if (item.page > 0) {
+                          queryParams.push(`page=${item.page}`);
+                        }
+                        const queryString = queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
+                        return (
+                          <PaginationItem
+                            component={RouterLink}
+                            to={`/shop${queryString}`}
+                            {...item}
+                          />
+                        );
+                      }}
                     />
                   </Grid>
                 )}

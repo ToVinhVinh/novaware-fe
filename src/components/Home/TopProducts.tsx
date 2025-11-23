@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { Button, Typography } from "@material-ui/core";
-import LottieLoading from "../LottieLoading";
 import ProductCard from "../Product/ProductCard";
 import { useGetTopProducts } from "../../hooks/api/useProduct";
 import LottieEmpty from "../LottieEmpty";

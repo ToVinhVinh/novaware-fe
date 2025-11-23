@@ -5,7 +5,6 @@ import Loader from "../../components/Loader";
 import { toast } from "react-toastify";
 import { MdCloudUpload, MdClose } from "react-icons/md";
 import { useGetCategories } from "../../hooks/api/useCategory";
-import { useGetBrands } from "../../hooks/api/useBrand";
 import { useCreateProduct, useGetProduct } from "../../hooks/api/useProduct";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -100,7 +99,6 @@ const ProductCreateScreen = ({ history }) => {
   const [name, setName] = useState("");
   const [price, setPrice] = useState(0);
   const [sale, setSale] = useState(0);
-  const [brand, setBrand] = useState("");
   const [category, setCategory] = useState("");
   const [sizeS, setSizeS] = useState(0);
   const [sizeM, setSizeM] = useState(0);
@@ -118,9 +116,6 @@ const ProductCreateScreen = ({ history }) => {
   // Hooks for API data
   const { data: categoriesResponse, isLoading: loadingCategories, error: errorCategories } = useGetCategories();
   const categoriesData = categoriesResponse?.data?.categories || [];
-
-  const { data: brandsResponse, isLoading: loadingBrands, error: errorBrands } = useGetBrands();
-  const brands = brandsResponse?.data?.brands || [];
 
   const createProductMutation = useCreateProduct();
   const { isLoading: loadingCreate, error: errorCreate, isSuccess: successCreate, data: createdProductResponse } = createProductMutation;
@@ -214,7 +209,6 @@ const ProductCreateScreen = ({ history }) => {
     if (!name) errors.name = true;
     if (price < 0) errors.price = true;
     if (sale < 0) errors.sale = true;
-    if (!brand) errors.brand = true;
     if (!category) errors.category = true;
     if (!description) errors.description = true;
     if (images.length === 0) errors.images = true;
@@ -245,7 +239,7 @@ const ProductCreateScreen = ({ history }) => {
         console.error(error);
         setUploading(false);
         toast.error("Lỗi khi tải hình ảnh");
-        return; 
+        return;
       }
     } else {
       uploadedImages = [
@@ -259,7 +253,6 @@ const ProductCreateScreen = ({ history }) => {
       price,
       sale,
       images: uploadedImages,
-      brand,
       category,
       description,
       size: { s: sizeS, m: sizeM, l: sizeL, xl: sizeXl },
@@ -408,33 +401,6 @@ const ProductCreateScreen = ({ history }) => {
                 </p>
               )}
             </div>
-            <TextField
-              select
-              variant="outlined"
-              required
-              name="brand"
-              label="Brand"
-              fullWidth
-              value={brand}
-              onChange={(e) => {
-                setBrand(e.target.value);
-                setFormErrors({ ...formErrors, brand: false });
-              }}
-              error={formErrors.brand}
-              helperText={formErrors.brand && "Brand is required"}
-            >
-              {loadingBrands ? (
-                <MenuItem disabled>Loading brands...</MenuItem>
-              ) : errorBrands ? (
-                <MenuItem disabled>Error loading brands</MenuItem>
-              ) : (
-                brands.map((option) => (
-                  <MenuItem key={option._id} value={option.name}>
-                    {option.name}
-                  </MenuItem>
-                ))
-              )}
-            </TextField>
             <Box>
               <Typography variant="h6">Colors</Typography>
               <Grid container spacing={2}>
@@ -606,9 +572,9 @@ const ProductCreateScreen = ({ history }) => {
               previewImages.length !== 0
                 ? previewImages
                 : [
-                    "https://via.placeholder.com/300x400?text=NovaWare",
-                    "https://via.placeholder.com/300x400?text=NovaWare",
-                  ]
+                  "https://via.placeholder.com/300x400?text=NovaWare",
+                  "https://via.placeholder.com/300x400?text=NovaWare",
+                ]
             }
             price={price}
             sale={sale}

@@ -16,11 +16,6 @@ function sanitizeToken(token?: string | null): string | null {
 	return trimmed;
 }
 
-function normalizeUrl(url: string): string {
-	if (!url) return url;
-	return url.replace(/\/+$/, '');
-}
-
 function getLocalAccessToken() {
 	let accessToken = sanitizeToken(cookies.get("accessToken"));
 	if (!accessToken && typeof window !== "undefined") {
@@ -79,9 +74,6 @@ instance.interceptors.request.use(
 		const token = getLocalAccessToken();
 		if (token) {
 			config.headers["Authorization"] = `Bearer ${token}`;
-		}
-		if (config.url) {
-			config.url = normalizeUrl(config.url);
 		}
 		return config;
 	},

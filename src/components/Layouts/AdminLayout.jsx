@@ -226,11 +226,6 @@ const AdminLayout = ({ children }) => {
       link: '/admin/categories',
     },
     {
-      text: 'Brand Management',
-      icon: <StoreIcon />,
-      link: '/admin/brands',
-    },
-    {
       text: 'User Management',
       icon: <GroupIcon />,
       link: '/admin/users',
@@ -254,8 +249,8 @@ const AdminLayout = ({ children }) => {
   const isActive = (link) => {
     const pathname = location.pathname;
 
-    if (link === '/recommend-products') {
-      return pathname === '/recommend-products';
+    if (link === '/admin/recommend-products') {
+      return pathname === '/admin/recommend-products';
     }
 
     if (link === '/admin/products') {

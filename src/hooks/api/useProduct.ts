@@ -16,7 +16,6 @@ import {
 import * as ProductTypes from '../../interface/response/product';
 import * as ProductRequestTypes from '../../interface/request/product';
 
-// Queries
 export const useGetProducts = (query?: ProductRequestTypes.IGetProductsQuery) => {
 	return useQuery<ProductTypes.IGetProductsResponse, Error>({
 		queryKey: ['products', 'list', query],

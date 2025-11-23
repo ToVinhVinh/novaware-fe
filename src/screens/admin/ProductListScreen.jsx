@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { useGetProducts, useDeleteProduct } from "../../hooks/api/useProduct";
 import { useGetCategories } from "../../hooks/api/useCategory";
-import { useGetBrands } from "../../hooks/api/useBrand";
 import { Link as RouterLink } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -103,12 +102,6 @@ const useStyles = makeStyles((theme) => ({
     flexWrap: "wrap",
     gap: theme.spacing(1),
   },
-  brandList: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: theme.spacing(1),
-    marginTop: theme.spacing(2),
-  },
   filterSection: {
     marginBottom: theme.spacing(2),
   },
@@ -126,16 +119,12 @@ const ProductListScreen = ({ history }) => {
   const [pageSize, setPageSize] = useState(10);
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedBrands, setSelectedBrands] = useState([]);
   const [ordering, setOrdering] = useState("");
 
   const userInfo = useSelector((state) => state.userLogin?.userInfo);
 
   const { data: categoriesResponse, isLoading: loadingCategories } = useGetCategories();
   const categories = categoriesResponse?.data?.categories || [];
-
-  const { data: brandsResponse, isLoading: loadingBrands } = useGetBrands();
-  const brands = brandsResponse?.data?.brands || [];
 
   // Build query parameters
   const queryParams = {
@@ -149,10 +138,6 @@ const ProductListScreen = ({ history }) => {
 
   if (selectedCategories.length > 0) {
     queryParams.category = selectedCategories[0];
-  }
-
-  if (selectedBrands.length > 0) {
-    queryParams.brand = selectedBrands[0];
   }
 
   if (ordering) {
@@ -357,19 +342,6 @@ const ProductListScreen = ({ history }) => {
     setPage(0);
   };
 
-  const handleBrandToggle = (brandId) => {
-    setSelectedBrands((prev) => {
-      const idString = String(brandId);
-      const isCurrentlySelected = prev.some((id) => String(id) === idString);
-      if (isCurrentlySelected) {
-        return prev.filter((id) => String(id) !== idString);
-      } else {
-        return [...prev, brandId];
-      }
-    });
-    setPage(0);
-  };
-
   const handleOrderingChange = (event) => {
     setOrdering(event.target.value);
     setPage(0);
@@ -485,42 +457,6 @@ const ProductListScreen = ({ history }) => {
                               color={isSelected ? "primary" : "default"}
                               onClick={() => handleCategoryToggle(categoryId)}
                               onDelete={isSelected ? () => handleCategoryToggle(categoryId) : undefined}
-                            />
-                          );
-                        })}
-                      </Box>
-                    </Box>
-                  )}
-                </Box>
-
-                {/* Brands Filter */}
-                <Box className={classes.filterSection}>
-                  {loadingBrands ? (
-                    <Typography variant="body2" color="textSecondary">
-                      Loading brands...
-                    </Typography>
-                  ) : brands.length === 0 ? (
-                    <Typography variant="body2" color="textSecondary">
-                      No brands available
-                    </Typography>
-                  ) : (
-                    <Box>
-                      <Typography variant="subtitle2" gutterBottom>
-                        Select Brands:
-                      </Typography>
-                      <Box className={classes.brandList}>
-                        {brands.map((brand) => {
-                          const brandId = brand._id || brand.id;
-                          const isSelected = selectedBrands.some((id) => String(id) === String(brandId));
-                          return (
-                            <Chip
-                              key={brandId}
-                              label={brand.name}
-                              className={classes.categoryChip}
-                              clickable
-                              color={isSelected ? "primary" : "default"}
-                              onClick={() => handleBrandToggle(brandId)}
-                              onDelete={isSelected ? () => handleBrandToggle(brandId) : undefined}
                             />
                           );
                         })}

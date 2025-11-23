@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
   Typography,
-  Button,
   Box,
   Divider,
   Slider,
@@ -13,22 +12,23 @@ import {
   AccordionDetails,
   Accordion,
   useMediaQuery,
+  Chip,
 } from "@material-ui/core";
 import {
   addRangePrice,
   addCategories,
   addSize,
-  addBrands,
   addRating,
   removeRating,
 } from "../../actions/filterActions";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
-import { useGetCategories, useGetCategoryCounts } from "../../hooks/api/useCategory";
-import { useGetBrands } from "../../hooks/api/useBrand";
+import { useGetCategories } from "../../hooks/api/useCategory";
+import { useHistory, useLocation } from "react-router-dom";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Rating from "@material-ui/lab/Rating";
 import clsx from "clsx";
+import queryString from "query-string";
 
 const INITIAL_RANGE_PRICE = [10, 400];
 
@@ -47,24 +47,19 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   category: {
-    ...theme.mixins.customize.flexMixin("flex-start", "flex-start", "column"),
-    "& > .MuiBox-root + .MuiBox-root": {
-      marginTop: theme.spacing(2),
-    },
-    "& > .MuiBox-root": {
+    display: "flex",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: theme.spacing(1),
+    "& > .MuiChip-root": {
       cursor: "pointer",
     },
   },
-  brands: {
-    "& > button": {
-      paddingLeft: 0,
-      paddingRight: 0,
-      minWidth: 0,
-      textTransform: "capitalize",
-      color: theme.palette.text.primary,
-    },
-    "& > button:hover": {
-      backgroundColor: "transparent",
+  chipActive: {
+    backgroundColor: "#DB2777 !important",
+    color: "#ffffff !important",
+    "&:hover": {
+      backgroundColor: "#DB2777 !important",
     },
   },
   size: {
@@ -86,13 +81,14 @@ const useStyles = makeStyles((theme) => ({
     "& .MuiAccordionSummary-root": {
       padding: 0,
     },
+    "& .MuiAccordionSummary-content.Mui-expanded": {
+      marginTop: 12,
+      marginBottom: 12,
+    },
     "& .MuiAccordionDetails-root": {
       display: "block",
       padding: 0,
     },
-  },
-  isSelected: {
-    color: "#111 !important",
   },
 }));
 
@@ -100,13 +96,14 @@ const ProductFilterBar = ({ sizeSelected, filter }) => {
   // Khởi tạo state và các hook
   const classes = useStyles();
   const dispatch = useDispatch();
+  const history = useHistory();
+  const location = useLocation();
   const onMobile = useMediaQuery("(max-width:740px)");
 
   const [expanded, setExpanded] = useState([
     "priceRange",
     "categories",
     "size",
-    "brands",
     "rating",
   ]);
   const [price, setPrice] = useState(INITIAL_RANGE_PRICE);
@@ -115,12 +112,10 @@ const ProductFilterBar = ({ sizeSelected, filter }) => {
 
   // Hooks for API data
   const { data: categoriesResponse, isLoading: loadingCategories, error: errorCategories } = useGetCategories();
-  const { data: categoryCountsResponse, isLoading: loadingCategoryCounts, error: errorCategoryCounts } = useGetCategoryCounts();
-  const { data: brandsResponse, isLoading: loadingBrands, error: errorBrands } = useGetBrands();
 
-  const categoriesData = categoriesResponse?.data?.categories || [];
-  const categoryCounts = categoryCountsResponse?.data?.categoryCounts || [];
-  const brands = brandsResponse?.data?.brands || [];
+  const articleTypes = categoriesResponse?.data?.articleTypes || [];
+  const query = queryString.parse(location.search);
+  const currentArticleType = query.articleType;
 
   useEffect(() => {
     if (price !== INITIAL_RANGE_PRICE) {
@@ -184,8 +179,14 @@ const ProductFilterBar = ({ sizeSelected, filter }) => {
     dispatch(addSize(size));
   };
 
-  const addBrandsHandler = (brand) => {
-    dispatch(addBrands(brand));
+  const handleArticleTypeClick = (articleType) => {
+    const queryParams = { ...query, articleType };
+    if (currentArticleType === articleType) {
+      // If clicking the same articleType, remove it
+      delete queryParams.articleType;
+    }
+    const queryStr = queryString.stringify(queryParams);
+    history.push(`/shop${queryStr ? `?${queryStr}` : ""}`);
   };
 
   return (
@@ -234,75 +235,26 @@ const ProductFilterBar = ({ sizeSelected, filter }) => {
         </AccordionSummary>
         <AccordionDetails>
           <Box className={classes.category} color="text.secondary">
-            {loadingCategories || loadingCategoryCounts ? (
+            {loadingCategories ? (
               <Typography variant="body2">Loading categories...</Typography>
-            ) : errorCategories || errorCategoryCounts ? (
+            ) : errorCategories ? (
               <Typography variant="body2" color="error">
-                {errorCategories?.message || errorCategoryCounts?.message || String(errorCategories || errorCategoryCounts)}
+                {errorCategories?.message || String(errorCategories)}
               </Typography>
+            ) : articleTypes.length === 0 ? (
+              <Typography variant="body2">No article types available</Typography>
             ) : (
-              categoriesData.map((category) => {
-                const categoryCount =
-                  categoryCounts.find((c) => c.name === category.name)?.count ||
-                  0;
-
-                return (
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    width="100%"
-                    key={category._id}
-                    className={clsx(
-                      filter.categories.indexOf(category.name) >= 0 &&
-                      classes.isSelected
-                    )}
-                    onClick={() => addCategoriesHandler(category.name)}
-                  >
-                    <span>{category.name}</span>
-                    <span>({categoryCount})</span>
-                  </Box>
-                );
-              })
-            )}
-          </Box>
-        </AccordionDetails>
-      </Accordion>
-      <Divider className={classes.divider} />
-      <Accordion
-        className={classes.accordion}
-        expanded={expanded.indexOf("brands") >= 0}
-        onChange={handleAccordionChange("brands")}
-      >
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6" gutterBottom className={classes.title}>
-            Brands
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box className={classes.brands} color="text.secondary">
-            {loadingBrands ? (
-              <Typography variant="body2">Loading brands...</Typography>
-            ) : errorBrands ? (
-              <Typography variant="body2" color="error">
-                {errorBrands?.message || String(errorBrands)}
-              </Typography>
-            ) : (
-              brands.map((brand, index) => (
-                <Button
-                  disableElevation
-                  disableFocusRipple
-                  disableRipple
-                  key={brand._id}
+              articleTypes.map((articleType) => (
+                <Chip
+                  key={articleType}
+                  label={articleType}
+                  variant={currentArticleType === articleType ? "default" : "outlined"}
+                  size="medium"
+                  onClick={() => handleArticleTypeClick(articleType)}
                   className={clsx(
-                    filter.brands.indexOf(brand.name) >= 0 && classes.isSelected
+                    currentArticleType === articleType && classes.chipActive
                   )}
-                  onClick={() => addBrandsHandler(brand.name)}
-                >
-                  {brand.name}
-                  {index !== brands.length - 1 && (
-                    <span style={{ margin: "0 8px" }}>/</span>
-                  )}
-                </Button>
+                />
               ))
             )}
           </Box>
