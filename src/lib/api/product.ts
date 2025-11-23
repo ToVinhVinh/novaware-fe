@@ -239,7 +239,7 @@ export const createReview = async (id: string, body: ICreateReviewBody): Promise
 export const getTopProducts = async (query?: IGetTopProductsQuery): Promise<IGetTopProductsResponse> => {
 	const modifiedQuery = {
 		...query,
-		perPage: 15,
+		perPage: 12,
 	};
 	return await sendGet(`/products/top`, modifiedQuery);
 };

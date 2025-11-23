@@ -21,10 +21,9 @@ import {
     Grid,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
-import { FaTshirt, FaChartLine, FaVenusMars, FaInfoCircle, FaDollarSign, FaGem, FaFemale, FaShoePrints } from "react-icons/fa";
+import { FaTshirt, FaChartLine, FaVenusMars, FaDollarSign, FaGem, FaFemale, FaShoePrints } from "react-icons/fa";
 import { PiPants } from "react-icons/pi";
-import { makeStyles } from "@material-ui/core/styles";
-import { useGNNModelRecommendations } from "../../hooks/api/useRecommend";
+import { makeStyles, useTheme } from "@material-ui/core/styles";
 import LottieLoading from "../LottieLoading.jsx";
 import { toast } from "react-toastify";
 import CallMadeIcon from "@material-ui/icons/CallMade";
@@ -376,39 +375,10 @@ const normalizeCategoryName = (categoryName) => {
     return categoryMap[lower] || normalized.charAt(0).toUpperCase() + normalized.slice(1).toLowerCase();
 };
 
-const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
+const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommendationData, isLoading, error }) => {
     const classes = useStyles();
-    const [recommendationData, setRecommendationData] = useState(null);
+    const theme = useTheme();
     const [activeTab, setActiveTab] = useState(0);
-
-    const getGNNRecommendations = useGNNModelRecommendations();
-
-    // Fetch recommendations when modal opens
-    useEffect(() => {
-        if (!open || !userId || !productId) {
-            setRecommendationData(null);
-            return;
-        }
-
-        const fetchRecommendations = async () => {
-            try {
-                const requestData = {
-                    user_id: userId,
-                    current_product_id: productId,
-                    top_k_personal: 6,
-                    top_k_outfit: 5,
-                };
-
-                const result = await getGNNRecommendations.mutateAsync(requestData);
-                setRecommendationData(result);
-            } catch (error) {
-                console.error("Failed to fetch recommendations:", error);
-                toast.error("Failed to load outfit recommendations.");
-            }
-        };
-
-        fetchRecommendations();
-    }, [open, userId, productId]);
 
     // Process personalized recommendations
     const personalizedData = useMemo(() => {
@@ -420,8 +390,8 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
                 product_id: item.product?.id,
                 name: item.product?.productDisplayName || item.product?.name || "Product",
                 images: item.product?.images || [],
-                price: variant?.price || item.product?.price || 0, // Get price from first variant or product
-                sale: variant?.sale || item.product?.sale || 0, // Get sale from first variant or product
+                price: variant?.price || item.product?.price || 0,
+                sale: variant?.sale || item.product?.sale || 0,
                 rating: item.product?.rating || 0,
                 score: item.score,
                 reason: item.reason,
@@ -434,7 +404,6 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
         });
     }, [recommendationData]);
 
-    // Process outfit recommendations
     const outfitData = useMemo(() => {
         if (!recommendationData || !recommendationData.outfit) return [];
 
@@ -538,15 +507,21 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
                         {product.articleType && (
                             <Chip
                                 label={product.articleType}
-                                variant="outlined"
+                                variant="contained"
                                 size="medium"
-                                style={{ fontSize: "0.7rem", height: 20 }}
+                                style={{
+                                    fontSize: "0.7rem",
+                                    height: 20,
+                                    backgroundColor: theme.palette.secondary.main,
+                                    color: "#fff"
+                                }}
                             />
                         )}
                         {product.usage && (
                             <Chip
                                 label={product.usage}
                                 variant="outlined"
+                                color="primary"
                                 size="medium"
                                 style={{ fontSize: "0.7rem", height: 20 }}
                             />
@@ -556,6 +531,7 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
                                 label={product.season}
                                 variant="outlined"
                                 size="medium"
+                                color="primary"
                                 style={{ fontSize: "0.7rem", height: 20 }}
                             />
                         )}
@@ -570,7 +546,7 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
                     </Typography>
                 )}
                 <Typography className={classes.productPrice}>
-                    {((product.price || 0) * (1 - ((product.sale || 0) / 100))).toFixed(2)}
+                    ${((product.price || 0) * (1 - ((product.sale || 0) / 100))).toFixed(2)}
                     {product.sale && product.sale > 0 && (
                         <Typography
                             component="span"
@@ -628,10 +604,10 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
                 </IconButton>
             </DialogTitle>
             <DialogContent className={classes.outfitModalContent}>
-                {userId && getGNNRecommendations.isLoading && (
+                {userId && isLoading && (
                     <LottieLoading />
                 )}
-                {userId && !getGNNRecommendations.isLoading && !getGNNRecommendations.error && (personalizedData.length > 0 || outfitData.length > 0) && (
+                {userId && !isLoading && !error && (personalizedData.length > 0 || outfitData.length > 0) && (
                     <>
                         <Tabs
                             value={activeTab}
@@ -781,14 +757,14 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user }) => {
                         )}
                     </>
                 )}
-                {userId && !getGNNRecommendations.isLoading && !getGNNRecommendations.error && personalizedData.length === 0 && outfitData.length === 0 && (
+                {userId && !isLoading && !error && personalizedData.length === 0 && outfitData.length === 0 && (
                     <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
                         <Typography variant="body1" color="textSecondary">
                             No recommendations available at the moment.
                         </Typography>
                     </Box>
                 )}
-                {userId && !getGNNRecommendations.isLoading && getGNNRecommendations.error && (
+                {userId && !isLoading && error && (
                     <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
                         <Typography variant="body1" color="error">
                             Failed to load recommendations. Please try again later.

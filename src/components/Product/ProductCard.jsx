@@ -152,7 +152,6 @@ const ProductCard = (props) => {
                 )}
               </div>
 
-              {/* Mobile Add to Cart Button */}
               <div className="w-full md:hidden">
                 <button
                   onClick={(e) => handleAddToCart(e, productId)}

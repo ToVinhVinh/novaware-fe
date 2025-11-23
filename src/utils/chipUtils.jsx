@@ -8,23 +8,26 @@ export const getScoreChip = (score) => {
   let chipColor = "#9e9e9e"; // default gray
 
   if (score >= 0.8) {
-    matchType = "Excellent Match";
+    matchType = "Best Match for You";
     chipColor = "#4caf50"; // green
   } else if (score >= 0.6) {
-    matchType = "Strong Match";
+    matchType = "Quite Suitable for You";
     chipColor = "#8bc34a"; // light green
   } else if (score >= 0.3) {
-    matchType = "Good Match";
+    matchType = "Suitable for You";
     chipColor = "#ff9800"; // orange
   } else {
-    matchType = "Weak Match";
-    chipColor = "#f44336"; // red
+    matchType = "You Might Like";
+    chipColor = "#607d8b"; // blue-grey
   }
+
+  // If score < 0.2, only show matchType without percentage
+  const label = score < 0.2 ? matchType : `${percentage}% Match (${matchType})`;
 
   return (
     <Chip
       size="small"
-      label={`${percentage}% Match (${matchType})`}
+      label={label}
       style={{
         backgroundColor: chipColor,
         color: "#ffffff",

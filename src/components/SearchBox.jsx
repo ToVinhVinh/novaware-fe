@@ -127,9 +127,9 @@ const SearchBox = (props) => {
 
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState(keyword);
-  
+
   const { data: productsResponse, isLoading: loading } = useFilterProducts(
-    debouncedKeyword ? { keyword: debouncedKeyword, perPage: 15 } : undefined
+    debouncedKeyword ? { keyword: debouncedKeyword, perPage: 12 } : undefined
   );
   const products = productsResponse?.data?.products || [];
 

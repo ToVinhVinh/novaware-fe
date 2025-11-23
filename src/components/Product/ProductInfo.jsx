@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { FiShoppingBag } from "react-icons/fi";
-import { FaTags, FaShareAlt, FaHeart, FaRegHeart, FaTrademark, FaBoxOpen, FaTshirt } from "react-icons/fa";
+import { FaTags, FaShareAlt, FaHeart, FaRegHeart, FaTrademark, FaBoxOpen, FaTshirt, FaThumbsUp } from "react-icons/fa";
 import {
   Box,
   Button,
@@ -29,6 +29,7 @@ import UpdateProfileModal from "../Modal/UpdateProfileModal.jsx";
 import { makeStyles } from "@material-ui/core/styles";
 import YouMightAlsoLikeModal from "./YouMightAlsoLikeModal.jsx";
 import CompleteTheLookModal from "./CompleteTheLookModal.jsx";
+import { useHybridModelRecommendations } from "../../hooks/api/useRecommend";
 
 const useStyles = makeStyles((theme) => ({
   price: {
@@ -168,8 +169,10 @@ const useStyles = makeStyles((theme) => ({
   navRight: { right: -8 },
   buttonGroup: {
     marginTop: 30,
-    display: "flex",
-    alignItems: "center",
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr 1fr",
+    gap: 10,
+    width: "100%",
   },
   favoriteButton: {
     marginLeft: 10,
@@ -255,11 +258,14 @@ const ProductInfo = memo(
     const classes = useStyles(product);
     const [likeModalOpen, setLikeModalOpen] = useState(false);
     const [outfitModalOpen, setOutfitModalOpen] = useState(false);
+    const [recommendationData, setRecommendationData] = useState(null);
     const firstVariantPrice = product.variants && product.variants.length > 0 ? product.variants[0].price : 0;
     const [currentPrice, setCurrentPrice] = useState(firstVariantPrice);
     const currentUserId = user?._id || user?.id || "";
     const productId = product.id || product._id || "";
     const hasVariants = Array.isArray(product.variants) && product.variants.length > 0;
+
+    const getHybridRecommendations = useHybridModelRecommendations();
 
     const safeNumber = useCallback((value, fallback = 0) => {
       const parsed = Number(value);
@@ -372,6 +378,34 @@ const ProductInfo = memo(
         }
       }
     }, [hasVariants, selectedSize, selectedColor, product.variants, setValue]);
+
+    // Fetch recommendations when component mounts
+    useEffect(() => {
+      if (!currentUserId || !productId) {
+        setRecommendationData(null);
+        return;
+      }
+
+      const fetchRecommendations = async () => {
+        try {
+          const requestData = {
+            user_id: currentUserId,
+            current_product_id: productId,
+            top_k_personal: 6,
+            top_k_outfit: 5,
+          };
+
+          const result = await getHybridRecommendations.mutateAsync(requestData);
+          setRecommendationData(result);
+        } catch (error) {
+          console.error("Failed to fetch recommendations:", error);
+          // Don't show toast here, let modal handle it if needed
+        }
+      };
+
+      fetchRecommendations();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentUserId, productId]);
 
     const getAvailableSizesForColor = (colorHex) => {
       if (!product.variants || !colorHex) return sizeOptions;
@@ -785,16 +819,12 @@ const ProductInfo = memo(
                 }}
               />
             </Box>
-            {/* Button Groups */}
-            {/* Top row: two new buttons + Wishlist */}
             <Box className={classes.buttonGroup}>
               <Button
                 variant="contained"
                 color="default"
-                startIcon={<FaRegHeart className={classes.pulseIcon} />}
-                className={classes.button}
+                startIcon={<FaThumbsUp />}
                 type="button"
-                // onClick={() => setLikeModalOpen(true)}
                 onClick={() => {
                   if (!currentUserId) {
                     toast.info("Please sign in to see outfit recommendations.");
@@ -802,65 +832,58 @@ const ProductInfo = memo(
                   }
                   setOutfitModalOpen(true);
                 }}
-                style={{ backgroundColor: "#00bcd4", color: "#fff", whiteSpace: "nowrap", paddingLeft: 16, paddingRight: 16, width: "auto", minWidth: "auto" }}
+                style={{
+                  backgroundColor: "#00bcd4",
+                  color: "#fff",
+                  whiteSpace: "nowrap",
+                  width: "100%",
+                  height: 48,
+                  borderRadius: 0,
+                }}
               >
-                You might also like
+                Recommendation
               </Button>
-              {/* <Button
-                variant="contained"
-                color="default"
-                startIcon={<FaTshirt className={classes.pulseIcon} />}
-                className={classes.button}
-                type="button"
-                onClick={() => {
-                  if (!currentUserId) {
-                    toast.info("Please sign in to see outfit recommendations.");
-                    return;
-                  }
-                  setOutfitModalOpen(true);
-                }}
-                style={{ backgroundColor: "#9c27b0", color: "#fff", whiteSpace: "nowrap", paddingLeft: 16, paddingRight: 16, width: "auto", minWidth: "auto" }}
-              >
-                Complete the look
-              </Button> */}
-              {/* Favorite Button (Wishlist) */}
               <Button
                 variant="contained"
                 color="secondary"
                 startIcon={<FaHeart />}
-                className={classes.button}
                 disabled={totalInventory === 0}
                 type="button"
                 onClick={
                   isFavorite ? handleRemoveFromFavorites : handleAddToFavorites
                 }
-                style={{ whiteSpace: "nowrap", paddingLeft: 16, paddingRight: 16 }}
+                style={{
+                  whiteSpace: "nowrap",
+                  width: "100%",
+                  height: 48,
+                  borderRadius: 0,
+                }}
               >
                 {isFavorite ? (
                   <span style={{ whiteSpace: "nowrap", wordBreak: "keep-all" }}>
-                    remove wishlist
+                    Remove from wishlist
                   </span>
                 ) : (
                   <span style={{ whiteSpace: "nowrap", wordBreak: "keep-all" }}>
-                    wishlist
+                    Add to wishlist
                   </span>
                 )}
               </Button>
-            </Box>
-            {/* Bottom row: Add to Cart full width */}
-            <Box style={{ marginTop: 12, width: "100%" }}>
               <Button
                 variant="contained"
                 color="secondary"
                 startIcon={<FiShoppingBag />}
-                className={classes.addToCartFullWidth}
                 disabled={
                   isOutOfStock ||
                   (shouldRenderSizeSelector && !selectedSize) ||
                   (shouldRenderColorSelector && !selectedColor && hasVariants)
                 }
                 type="submit"
-                fullWidth
+                style={{
+                  width: "100%",
+                  height: 48,
+                  borderRadius: 0,
+                }}
               >
                 Add to Cart
               </Button>
@@ -881,6 +904,9 @@ const ProductInfo = memo(
           userId={currentUserId}
           productId={productId}
           user={user}
+          recommendationData={recommendationData}
+          isLoading={getHybridRecommendations.isLoading}
+          error={getHybridRecommendations.error}
         />
 
         <Box

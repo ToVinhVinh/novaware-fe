@@ -87,11 +87,11 @@ const ProductTabs = () => {
   const matches = useMediaQuery('(max-width:600px)');
   const titles = ['Latest Products', 'Sale Products', 'All Products'];
 
-  const { data: productLatestResponse, isLoading: loadingProductLatest, error: errorProductLatest } = useGetLatestProducts({ pageNumber: 1, perPage: 15 });
+  const { data: productLatestResponse, isLoading: loadingProductLatest, error: errorProductLatest } = useGetLatestProducts({ pageNumber: 1, perPage: 12 });
   const productsLatestRaw = productLatestResponse?.data?.products || [];
   const productsLatest = useMemo(() => productsLatestRaw.slice(0, 15).sort(() => 0.5 - Math.random()), [productsLatestRaw]);
 
-  const { data: productSaleResponse, isLoading: loadingProductSale, error: errorProductSale } = useGetSaleProducts({ pageNumber: 1, perPage: 15 });
+  const { data: productSaleResponse, isLoading: loadingProductSale, error: errorProductSale } = useGetSaleProducts({ pageNumber: 1, perPage: 12 });
   const productsSaleRaw = productSaleResponse?.data?.products || [];
   const productsSale = useMemo(() => productsSaleRaw.slice(0, 15).sort(() => 0.5 - Math.random()), [productsSaleRaw]);
 
