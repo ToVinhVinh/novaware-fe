@@ -273,9 +273,9 @@ const useStyles = makeStyles((theme) => ({
         overflow: "hidden",
         textOverflow: "ellipsis",
         display: "-webkit-box",
-        WebkitLineClamp: 2,
+        WebkitLineClamp: 1,
         WebkitBoxOrient: "vertical",
-        minHeight: 40,
+        minHeight: 20,
     },
     productPrice: {
         fontSize: "1rem",
@@ -856,25 +856,28 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                                                                         <TableCell key={category} className={classes.tableCell} align="center" style={{ verticalAlign: "top" }}>
                                                                             {products.length > 0 ? (
                                                                                 <Box className={classes.productCarouselContainer}>
-                                                                                    <Button
-                                                                                        className={classes.carouselNavButton}
-                                                                                        onClick={handleNext}
-                                                                                        disabled={currentIndex === products.length - 1}
-                                                                                        endIcon={<ExpandLessIcon />}
-                                                                                    >
-                                                                                        Next
-                                                                                    </Button>
+                                                                                    <div className="grid grid-cols-2 w-full">
+                                                                                        <Button
+                                                                                            className={classes.carouselNavButton}
+                                                                                            onClick={handleNext}
+                                                                                            disabled={currentIndex === products.length - 1}
+                                                                                            endIcon={<ExpandLessIcon />}
+                                                                                        >
+                                                                                            Next
+                                                                                        </Button>
+                                                                                        <Button
+                                                                                            className={classes.carouselNavButton}
+                                                                                            onClick={handlePrev}
+                                                                                            disabled={currentIndex === 0}
+                                                                                            startIcon={<ExpandMoreIcon />}
+                                                                                        >
+                                                                                            Prev
+                                                                                        </Button>
+                                                                                    </div>
                                                                                     <Box className={classes.carouselProductWrapper}>
                                                                                         {currentProduct && renderProductCard(currentProduct)}
                                                                                     </Box>
-                                                                                    <Button
-                                                                                        className={classes.carouselNavButton}
-                                                                                        onClick={handlePrev}
-                                                                                        disabled={currentIndex === 0}
-                                                                                        startIcon={<ExpandMoreIcon />}
-                                                                                    >
-                                                                                        Prev
-                                                                                    </Button>
+
                                                                                 </Box>
                                                                             ) : (
                                                                                 <Typography variant="body2" color="textSecondary" style={{ textAlign: "center", padding: "20px" }}>
