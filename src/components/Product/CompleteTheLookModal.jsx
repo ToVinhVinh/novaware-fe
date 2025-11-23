@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import {
     Box,
     Button,
@@ -19,8 +19,11 @@ import {
     Tabs,
     Tab,
     Grid,
+    CircularProgress,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { FaTshirt, FaChartLine, FaVenusMars, FaDollarSign, FaGem, FaFemale, FaShoePrints } from "react-icons/fa";
 import { PiPants } from "react-icons/pi";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
@@ -104,7 +107,6 @@ const useStyles = makeStyles((theme) => ({
         },
     },
     tableContainer: {
-        marginTop: 16,
         flex: 1,
         display: "flex",
         flexDirection: "column",
@@ -160,6 +162,49 @@ const useStyles = makeStyles((theme) => ({
             borderRight: "none",
         },
         backgroundColor: "#FAFAFA",
+        position: "relative",
+    },
+    productCarouselContainer: {
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+
+        padding: "8px",
+    },
+    carouselHeader: {
+        fontSize: "0.9rem",
+        fontWeight: 600,
+        color: theme.palette.text.secondary,
+        textAlign: "center",
+        minHeight: 24,
+    },
+    carouselNavButton: {
+        width: "100%",
+        minWidth: "auto",
+        padding: "8px 12px",
+        backgroundColor: "rgba(255, 255, 255, 0.9)",
+        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: 0,
+        color: theme.palette.secondary.main,
+        transition: "all 0.2s ease",
+        "&:hover": {
+            backgroundColor: theme.palette.secondary.main,
+            color: "#fff",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+        },
+        "&:disabled": {
+            opacity: 0.35,
+            cursor: "not-allowed",
+            backgroundColor: "rgba(255, 255, 255, 0.5)",
+        },
+    },
+    carouselProductWrapper: {
+        width: "100%",
+        minHeight: 300,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
     },
     productCardContainer: {
         display: "flex",
@@ -181,6 +226,41 @@ const useStyles = makeStyles((theme) => ({
         height: 200,
         objectFit: "cover",
         backgroundColor: "#fff",
+        transition: "opacity 0.3s ease-in-out",
+    },
+    imageContainer: {
+        position: "relative",
+        width: "100%",
+        height: 200,
+        backgroundColor: "#f5f5f5",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "hidden",
+    },
+    imageLoading: {
+        opacity: 0,
+    },
+    imageLoaded: {
+        opacity: 1,
+    },
+    imagePlaceholder: {
+        width: "100%",
+        height: "100%",
+        backgroundColor: "#f5f5f5",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    imageError: {
+        width: "100%",
+        height: "100%",
+        backgroundColor: "#f5f5f5",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        color: theme.palette.text.secondary,
     },
     productInfo: {
         padding: 12,
@@ -299,7 +379,6 @@ const useStyles = makeStyles((theme) => ({
     },
     tabsContainer: {
         borderBottom: "1px solid #e0e0e0",
-        marginBottom: 16,
     },
     tab: {
         minWidth: 120,
@@ -342,7 +421,6 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-// Helper function to normalize category names
 const normalizeCategoryName = (categoryName) => {
     if (!categoryName) return "Other";
     const normalized = categoryName.trim();
@@ -370,15 +448,72 @@ const normalizeCategoryName = (categoryName) => {
         "footwear": "Shoes",
         "accessory": "Accessories",
         "accessories": "Accessories",
+        "innerwear": "Innerwear",
     };
 
     return categoryMap[lower] || normalized.charAt(0).toUpperCase() + normalized.slice(1).toLowerCase();
+};
+
+// Lazy-loaded image component with loading state
+const LazyProductImage = ({ src, alt, className, classes }) => {
+    const [imageState, setImageState] = useState("loading"); // loading, loaded, error
+    const imgRef = useRef(null);
+
+    useEffect(() => {
+        if (!src) {
+            setImageState("error");
+            return;
+        }
+
+        const img = new Image();
+        img.onload = () => {
+            setImageState("loaded");
+        };
+        img.onerror = () => {
+            setImageState("error");
+        };
+        img.src = src;
+
+        return () => {
+            img.onload = null;
+            img.onerror = null;
+        };
+    }, [src]);
+
+    if (imageState === "error") {
+        return (
+            <Box className={classes.imageError}>
+                <Typography variant="caption" style={{ fontSize: "0.75rem" }}>
+                    Image not available
+                </Typography>
+            </Box>
+        );
+    }
+
+    return (
+        <Box className={classes.imageContainer}>
+            {imageState === "loading" && (
+                <Box className={classes.imagePlaceholder}>
+                    <CircularProgress size={24} thickness={4} />
+                </Box>
+            )}
+            <img
+                ref={imgRef}
+                src={src}
+                alt={alt}
+                className={`${className} ${imageState === "loaded" ? classes.imageLoaded : classes.imageLoading}`}
+                loading="lazy"
+                decoding="async"
+            />
+        </Box>
+    );
 };
 
 const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommendationData, isLoading, error }) => {
     const classes = useStyles();
     const theme = useTheme();
     const [activeTab, setActiveTab] = useState(0);
+    const [carouselIndices, setCarouselIndices] = useState({});
 
     // Process personalized recommendations
     const personalizedData = useMemo(() => {
@@ -407,54 +542,50 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
     const outfitData = useMemo(() => {
         if (!recommendationData || !recommendationData.outfit) return [];
 
-        const outfits = [];
-        const outfitKeys = Object.keys(recommendationData.outfit);
+        const products = [];
 
-        outfitKeys.forEach((outfitKey) => {
-            const outfitCategories = recommendationData.outfit[outfitKey];
-            const categories = Object.keys(outfitCategories);
-            if (categories.length === 0) return;
+        Object.entries(recommendationData.outfit).forEach(([categoryKey, categoryProducts]) => {
+            if (!Array.isArray(categoryProducts) || categoryProducts.length === 0) return;
 
-            const outfit = {
-                name: outfitKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                products: [],
-                totalPrice: 0,
-                compatibilityScore: recommendationData.outfit_complete_score || 0,
-                gender: user?.gender || "Unisex",
-            };
+            const normalizedCategory = normalizeCategoryName(categoryKey);
 
-            // Map all products from all categories
-            categories.forEach((category) => {
-                const categoryData = outfitCategories[category];
-                if (!categoryData || !categoryData.product) return;
+            categoryProducts.forEach((item) => {
+                if (!item.product) return;
 
-                const normalizedCategory = normalizeCategoryName(category);
-                const product = categoryData.product;
+                const product = item.product;
                 const variant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
 
-                outfit.products.push({
+                products.push({
                     _id: product.id,
                     name: product.productDisplayName || product.name || "Product",
                     product_id: product.id,
                     category: normalizedCategory,
-                    price: variant?.price || product.price || 0, // Get price from first variant or product
-                    sale: variant?.sale || product.sale || 0, // Get sale from first variant or product
+                    price: variant?.price || product.price || 0,
+                    sale: variant?.sale || product.sale || 0,
                     images: product.images || [],
-                    score: categoryData.score,
-                    reason: categoryData.reason,
+                    score: item.score,
+                    reason: item.reason,
                     articleType: product.articleType,
                     usage: product.usage,
                     season: product.season,
                 });
             });
-
-            // Calculate total price
-            outfit.totalPrice = outfit.products.reduce((sum, p) => sum + (p.price || 0) * (1 - (p.sale || 0) / 100), 0);
-
-            outfits.push(outfit);
         });
 
-        return outfits;
+        if (products.length === 0) return [];
+
+        // Calculate total price
+        const totalPrice = products.reduce((sum, p) => sum + (p.price || 0) * (1 - (p.sale || 0) / 100), 0);
+
+        const outfit = {
+            name: "Complete the Look",
+            products,
+            totalPrice,
+            compatibilityScore: recommendationData.outfit_complete_score || 0,
+            gender: user?.gender || "Unisex",
+        };
+
+        return [outfit];
     }, [recommendationData, user?.gender]);
 
     const getCategoryIcon = (categoryName) => {
@@ -470,6 +601,8 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                 return <FaShoePrints className={classes.headerIcon} />;
             case "accessories":
                 return <FaGem className={classes.headerIcon} />;
+            case "innerwear":
+                return <FaTshirt className={classes.headerIcon} />;
             default:
                 return null;
         }
@@ -491,97 +624,104 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
         setActiveTab(newValue);
     };
 
-    const renderProductCard = (product, showReason = false, showScore = false) => (
-        <Card
-            className={classes.productCard}
-            onClick={() => window.open(`/product?id=${product._id || product.product_id || ''}`, "_blank")}
-        >
-            <img
-                src={product.images && product.images.length > 0 ? product.images[0] : "https://www.lwf.org/images/emptyimg.png"}
-                alt={product.name}
-                className={classes.productImage}
-            />
-            <Box className={classes.productInfo}>
-                {(product.articleType || product.usage || product.season) && (
-                    <Box style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
-                        {product.articleType && (
-                            <Chip
-                                label={product.articleType}
-                                variant="contained"
-                                size="medium"
-                                style={{
-                                    fontSize: "0.7rem",
-                                    height: 20,
-                                    backgroundColor: theme.palette.secondary.main,
-                                    color: "#fff"
-                                }}
-                            />
-                        )}
-                        {product.usage && (
-                            <Chip
-                                label={product.usage}
-                                variant="outlined"
-                                color="primary"
-                                size="medium"
-                                style={{ fontSize: "0.7rem", height: 20 }}
-                            />
-                        )}
-                        {product.season && (
-                            <Chip
-                                label={product.season}
-                                variant="outlined"
-                                size="medium"
-                                color="primary"
-                                style={{ fontSize: "0.7rem", height: 20 }}
-                            />
-                        )}
-                    </Box>
-                )}
-                <Typography className={classes.productName} variant="body2">
-                    {product.name}
-                </Typography>
-                {showReason && product.reason && (
-                    <Typography className={classes.reasonText} variant="caption">
-                        {product.reason}
+    const renderProductCard = (product, showReason = false, showScore = false) => {
+        const imageSrc = product.images && product.images.length > 0
+            ? product.images[0]
+            : "https://www.lwf.org/images/emptyimg.png";
+
+        return (
+            <Card
+                className={classes.productCard}
+                onClick={() => window.open(`/product?id=${product._id || product.product_id || ''}`, "_blank")}
+            >
+                <LazyProductImage
+                    src={imageSrc}
+                    alt={product.name}
+                    className={classes.productImage}
+                    classes={classes}
+                />
+                <Box className={classes.productInfo}>
+                    {(product.articleType || product.usage || product.season) && (
+                        <Box style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
+                            {product.articleType && (
+                                <Chip
+                                    label={product.articleType}
+                                    variant="default"
+                                    size="medium"
+                                    style={{
+                                        fontSize: "0.7rem",
+                                        height: 20,
+                                        backgroundColor: theme.palette.secondary.main,
+                                        color: "#fff"
+                                    }}
+                                />
+                            )}
+                            {product.usage && (
+                                <Chip
+                                    label={product.usage}
+                                    variant="outlined"
+                                    color="primary"
+                                    size="medium"
+                                    style={{ fontSize: "0.7rem", height: 20 }}
+                                />
+                            )}
+                            {product.season && (
+                                <Chip
+                                    label={product.season}
+                                    variant="outlined"
+                                    size="medium"
+                                    color="primary"
+                                    style={{ fontSize: "0.7rem", height: 20 }}
+                                />
+                            )}
+                        </Box>
+                    )}
+                    <Typography className={classes.productName} variant="body2">
+                        {product.name}
                     </Typography>
-                )}
-                <Typography className={classes.productPrice}>
-                    ${((product.price || 0) * (1 - ((product.sale || 0) / 100))).toFixed(2)}
-                    {product.sale && product.sale > 0 && (
-                        <Typography
-                            component="span"
-                            style={{
-                                fontSize: "0.8rem",
-                                textDecoration: "line-through",
-                                color: "#999",
-                                marginLeft: 8,
-                            }}
-                        >
-                            {((product.price || 0)).toFixed(2)}
+                    {showReason && product.reason && (
+                        <Typography className={classes.reasonText} variant="caption">
+                            {product.reason}
                         </Typography>
                     )}
-                </Typography>
-                {showScore && product.score !== undefined && (
-                    <Box style={{ marginTop: 8 }}>
-                        {getScoreChip(product.score)}
-                    </Box>
-                )}
-                <Button
-                    variant="outlined"
-                    color="primary"
-                    size="medium"
-                    style={{ width: "100%", marginTop: 8 }}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        window.open(`/product?id=${product._id || product.product_id || ''}`, "_blank");
-                    }}
-                    endIcon={<CallMadeIcon />}
-                >
-                    View details
-                </Button>
-            </Box>
-        </Card>
-    );
+                    <Typography className={classes.productPrice}>
+                        ${((product.price || 0) * (1 - ((product.sale || 0) / 100))).toFixed(2)}
+                        {product.sale && product.sale > 0 && (
+                            <Typography
+                                component="span"
+                                style={{
+                                    fontSize: "0.8rem",
+                                    textDecoration: "line-through",
+                                    color: "#999",
+                                    marginLeft: 8,
+                                }}
+                            >
+                                {((product.price || 0)).toFixed(2)}
+                            </Typography>
+                        )}
+                    </Typography>
+                    {showScore && product.score !== undefined && (
+                        <Box style={{ marginTop: 8 }}>
+                            {getScoreChip(product.score)}
+                        </Box>
+                    )}
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        size="medium"
+                        style={{ width: "100%", marginTop: 8 }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(`/product?id=${product._id || product.product_id || ''}`, "_blank");
+                        }}
+                        endIcon={<CallMadeIcon />}
+                    >
+                        View details
+                    </Button>
+                </Box>
+            </Card>
+        );
+    };
 
     return (
         <Dialog
@@ -688,55 +828,62 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                                                         <React.Fragment key={outfitIndex}>
                                                             {/* Row 1: Product cards */}
                                                             <TableRow>
-                                                                {categories.map((category) => (
-                                                                    <TableCell key={category} className={classes.tableCell} align="center" style={{ verticalAlign: "top" }}>
-                                                                        <Box className={classes.productCardContainer}>
-                                                                            {productsByCategory[category]?.length > 0 ? (
-                                                                                productsByCategory[category].map((product) => renderProductCard(product))
+                                                                {categories.map((category) => {
+                                                                    const carouselKey = `${category}-${outfitIndex}`;
+                                                                    const currentIndex = carouselIndices[carouselKey] || 0;
+                                                                    const products = productsByCategory[category] || [];
+                                                                    const currentProduct = products[currentIndex];
+
+                                                                    const handlePrev = () => {
+                                                                        if (currentIndex > 0) {
+                                                                            setCarouselIndices(prev => ({
+                                                                                ...prev,
+                                                                                [carouselKey]: currentIndex - 1
+                                                                            }));
+                                                                        }
+                                                                    };
+
+                                                                    const handleNext = () => {
+                                                                        if (currentIndex < products.length - 1) {
+                                                                            setCarouselIndices(prev => ({
+                                                                                ...prev,
+                                                                                [carouselKey]: currentIndex + 1
+                                                                            }));
+                                                                        }
+                                                                    };
+
+                                                                    return (
+                                                                        <TableCell key={category} className={classes.tableCell} align="center" style={{ verticalAlign: "top" }}>
+                                                                            {products.length > 0 ? (
+                                                                                <Box className={classes.productCarouselContainer}>
+                                                                                    <Button
+                                                                                        className={classes.carouselNavButton}
+                                                                                        onClick={handleNext}
+                                                                                        disabled={currentIndex === products.length - 1}
+                                                                                        endIcon={<ExpandLessIcon />}
+                                                                                    >
+                                                                                        Next
+                                                                                    </Button>
+                                                                                    <Box className={classes.carouselProductWrapper}>
+                                                                                        {currentProduct && renderProductCard(currentProduct)}
+                                                                                    </Box>
+                                                                                    <Button
+                                                                                        className={classes.carouselNavButton}
+                                                                                        onClick={handlePrev}
+                                                                                        disabled={currentIndex === 0}
+                                                                                        startIcon={<ExpandMoreIcon />}
+                                                                                    >
+                                                                                        Prev
+                                                                                    </Button>
+                                                                                </Box>
                                                                             ) : (
                                                                                 <Typography variant="body2" color="textSecondary" style={{ textAlign: "center", padding: "20px" }}>
                                                                                     No items
                                                                                 </Typography>
                                                                             )}
-                                                                        </Box>
-                                                                    </TableCell>
-                                                                ))}
-                                                            </TableRow>
-                                                            {/* Row 2: Metadata information spanning all columns */}
-                                                            <TableRow>
-                                                                <TableCell
-                                                                    className={classes.tableCell}
-                                                                    colSpan={categories.length}
-                                                                    style={{ backgroundColor: "#fff", padding: "12px 16px", borderRight: "1px solid #e0e0e0" }}
-                                                                >
-                                                                    <Box className={classes.outfitMeta} style={{ flexDirection: "row", alignItems: "center", gap: 16, flexWrap: "wrap", backgroundColor: "#fff" }}>
-                                                                        <Typography variant="h6" component="h3">
-                                                                            {outfit.name || `Outfit ${outfitIndex + 1}`}
-                                                                        </Typography>
-                                                                        <Chip
-                                                                            icon={<FaDollarSign />}
-                                                                            label={`Total: ${(outfit.totalPrice || 0).toFixed(2)}`}
-                                                                            className={`${classes.metaChip} ${classes.totalChip}`}
-                                                                            size="small"
-                                                                        />
-                                                                        {outfit.compatibilityScore !== undefined && (
-                                                                            <Chip
-                                                                                icon={<FaChartLine />}
-                                                                                label={`Compatibility: ${(outfit.compatibilityScore * 100).toFixed(0)}%`}
-                                                                                className={`${classes.metaChip} ${classes.compatibilityChip}`}
-                                                                                size="small"
-                                                                            />
-                                                                        )}
-                                                                        {outfit.gender && (
-                                                                            <Chip
-                                                                                icon={<FaVenusMars />}
-                                                                                label={`Gender: ${outfit.gender}`}
-                                                                                className={`${classes.metaChip} ${classes.genderChip}`}
-                                                                                size="small"
-                                                                            />
-                                                                        )}
-                                                                    </Box>
-                                                                </TableCell>
+                                                                        </TableCell>
+                                                                    );
+                                                                })}
                                                             </TableRow>
                                                         </React.Fragment>
                                                     );
