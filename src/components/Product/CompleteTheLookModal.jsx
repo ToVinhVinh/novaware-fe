@@ -227,6 +227,7 @@ const useStyles = makeStyles((theme) => ({
         objectFit: "cover",
         backgroundColor: "#fff",
         transition: "opacity 0.3s ease-in-out",
+        select: "none",
     },
     imageContainer: {
         position: "relative",
@@ -237,12 +238,15 @@ const useStyles = makeStyles((theme) => ({
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
+        select: "none",
     },
     imageLoading: {
         opacity: 0,
+        select: "none",
     },
     imageLoaded: {
         opacity: 1,
+        select: "none",
     },
     imagePlaceholder: {
         width: "100%",
@@ -251,6 +255,7 @@ const useStyles = makeStyles((theme) => ({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        select: "none",
     },
     imageError: {
         width: "100%",
