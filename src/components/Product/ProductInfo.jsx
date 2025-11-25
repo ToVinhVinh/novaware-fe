@@ -391,7 +391,7 @@ const ProductInfo = memo(
           const requestData = {
             user_id: currentUserId,
             current_product_id: productId,
-            top_k_personal: 6,
+            top_k_personal: 5,
             top_k_outfit: 5,
           };
 

@@ -32,6 +32,8 @@ import { toast } from "react-toastify";
 import CallMadeIcon from "@material-ui/icons/CallMade";
 import { getScoreChip } from "../../utils/chipUtils.jsx";
 
+const ICON_COLOR = "#ec4899";
+
 const useStyles = makeStyles((theme) => ({
     outfitModal: {
         "& .MuiDialog-paper": {
@@ -46,6 +48,7 @@ const useStyles = makeStyles((theme) => ({
         flexDirection: "column",
         height: "100%",
         overflow: "hidden",
+        backgroundColor: "#fce7f3",
     },
     dialogTitle: {
         position: "relative",
@@ -129,7 +132,7 @@ const useStyles = makeStyles((theme) => ({
         },
     },
     tableHeader: {
-        backgroundColor: "#E8F4FD",
+        backgroundColor: "#FAFAFA",
         "& .MuiTableCell-head": {
             color: "#000",
             fontWeight: 600,
@@ -138,14 +141,14 @@ const useStyles = makeStyles((theme) => ({
             position: "sticky",
             top: 0,
             zIndex: 10,
-            backgroundColor: "#E8F4FD",
+            backgroundColor: "#FAFAFA",
         },
     },
     headerIcon: {
         marginRight: 8,
         fontSize: "1.2rem",
         verticalAlign: "middle",
-        color: "#0ea5e9",
+        color: ICON_COLOR,
     },
     headerContent: {
         display: "flex",
@@ -161,16 +164,20 @@ const useStyles = makeStyles((theme) => ({
         "&:last-child": {
             borderRight: "none",
         },
-        backgroundColor: "#FAFAFA",
         position: "relative",
+    },
+    tableRow: {
+        backgroundColor: "#fce7f3",
+        "& .MuiTableCell-root": {
+            borderBottom: "none",
+        },
     },
     productCarouselContainer: {
         width: "100%",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-
-        padding: "8px",
+        padding: "4px",
     },
     carouselHeader: {
         fontSize: "0.9rem",
@@ -310,11 +317,20 @@ const useStyles = makeStyles((theme) => ({
         alignItems: "center",
         gap: 6,
         transition: "all 0.2s ease",
+        maxWidth: 66,
         "&:hover": {
             transform: "translateY(-1px)",
         },
         "& svg": {
             fontSize: 14,
+            color: ICON_COLOR,
+        },
+        "& .MuiChip-label": {
+            maxWidth: 66,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            display: "block",
         },
     },
     styleChip: {
@@ -327,7 +343,15 @@ const useStyles = makeStyles((theme) => ({
             boxShadow: "0 3px 6px rgba(59, 130, 246, 0.3)",
         },
         "& svg": {
-            color: "#1e3a8a",
+            color: ICON_COLOR,
+        },
+        maxWidth: 66,
+        "& .MuiChip-label": {
+            maxWidth: 66,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            display: "block",
         },
     },
     totalChip: {
@@ -340,7 +364,15 @@ const useStyles = makeStyles((theme) => ({
             boxShadow: "0 3px 6px rgba(34, 197, 94, 0.3)",
         },
         "& svg": {
-            color: "#15803d",
+            color: ICON_COLOR,
+        },
+        maxWidth: 66,
+        "& .MuiChip-label": {
+            maxWidth: 66,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            display: "block",
         },
     },
     compatibilityChip: {
@@ -353,7 +385,15 @@ const useStyles = makeStyles((theme) => ({
             boxShadow: "0 3px 6px rgba(249, 115, 22, 0.3)",
         },
         "& svg": {
-            color: "#c2410c",
+            color: ICON_COLOR,
+        },
+        maxWidth: 66,
+        "& .MuiChip-label": {
+            maxWidth: 66,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            display: "block",
         },
     },
     genderChip: {
@@ -366,7 +406,15 @@ const useStyles = makeStyles((theme) => ({
             boxShadow: "0 3px 6px rgba(168, 85, 247, 0.3)",
         },
         "& svg": {
-            color: "#7e22ce",
+            color: ICON_COLOR,
+        },
+        maxWidth: 66,
+        "& .MuiChip-label": {
+            maxWidth: 66,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            display: "block",
         },
     },
     descriptionChip: {
@@ -379,7 +427,15 @@ const useStyles = makeStyles((theme) => ({
             boxShadow: "0 3px 6px rgba(6, 182, 212, 0.3)",
         },
         "& svg": {
-            color: "#164e63",
+            color: ICON_COLOR,
+        },
+        maxWidth: 66,
+        "& .MuiChip-label": {
+            maxWidth: 66,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            display: "block",
         },
     },
     tabsContainer: {
@@ -390,6 +446,13 @@ const useStyles = makeStyles((theme) => ({
         textTransform: "none",
         fontSize: "1rem",
         fontWeight: 500,
+        "&.Mui-selected": {
+            color: "#ec4899 !important",
+            borderBottom: "2px solid #ec4899",
+        },
+    },
+    tabIndicator: {
+        backgroundColor: "#ec4899",
     },
     tabPanel: {
         flex: 1,
@@ -402,6 +465,14 @@ const useStyles = makeStyles((theme) => ({
         flex: 1,
         overflow: "auto",
         padding: "16px 0",
+    },
+    personalizedGridInner: {
+        display: "grid",
+        gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+        gap: 0,
+    },
+    gridItem: {
+        padding: "4px",
     },
     personalizedCard: {
         height: "100%",
@@ -519,6 +590,7 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
     const theme = useTheme();
     const [activeTab, setActiveTab] = useState(0);
     const [carouselIndices, setCarouselIndices] = useState({});
+    const iconStyle = useMemo(() => ({ color: ICON_COLOR }), []);
 
     // Process personalized recommendations
     const personalizedData = useMemo(() => {
@@ -657,7 +729,11 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                                         fontSize: "0.7rem",
                                         height: 20,
                                         backgroundColor: theme.palette.secondary.main,
-                                        color: "#fff"
+                                        color: "#fff",
+                                        maxWidth: 66,
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap",
                                     }}
                                 />
                             )}
@@ -667,7 +743,14 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                                     variant="outlined"
                                     color="primary"
                                     size="medium"
-                                    style={{ fontSize: "0.7rem", height: 20 }}
+                                    style={{
+                                        fontSize: "0.7rem",
+                                        height: 20,
+                                        maxWidth: 66,
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap",
+                                    }}
                                 />
                             )}
                             {product.season && (
@@ -676,7 +759,14 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                                     variant="outlined"
                                     size="medium"
                                     color="primary"
-                                    style={{ fontSize: "0.7rem", height: 20 }}
+                                    style={{
+                                        fontSize: "0.7rem",
+                                        height: 20,
+                                        maxWidth: 66,
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap",
+                                    }}
                                 />
                             )}
                         </Box>
@@ -719,7 +809,7 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                             e.stopPropagation();
                             window.open(`/product?id=${product._id || product.product_id || ''}`, "_blank");
                         }}
-                        endIcon={<CallMadeIcon />}
+                        endIcon={<CallMadeIcon style={iconStyle} />}
                     >
                         View details
                     </Button>
@@ -745,7 +835,7 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                     onClick={onClose}
                     className={classes.closeButton}
                 >
-                    <CloseIcon />
+                    <CloseIcon style={iconStyle} />
                 </IconButton>
             </DialogTitle>
             <DialogContent className={classes.outfitModalContent}>
@@ -758,6 +848,7 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                             value={activeTab}
                             onChange={handleTabChange}
                             className={classes.tabsContainer}
+                            classes={{ indicator: classes.tabIndicator }}
                             indicatorColor="primary"
                             textColor="primary"
                         >
@@ -768,23 +859,23 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                         {/* Personalized Tab */}
                         {activeTab === 0 && (
                             <Box className={classes.tabPanel}>
-                                <Grid container spacing={3} className={classes.personalizedGrid}>
+                                <Box className={classes.personalizedGrid}>
                                     {personalizedData.length > 0 ? (
-                                        personalizedData.map((product) => (
-                                            <Grid item xs={12} sm={6} md={4} lg={3} key={product._id || product.product_id}>
-                                                {renderProductCard(product, true, true)}
-                                            </Grid>
-                                        ))
+                                        <Box className={classes.personalizedGridInner}>
+                                            {personalizedData.map((product) => (
+                                                <Box key={product._id || product.product_id} className={classes.gridItem}>
+                                                    {renderProductCard(product, true, true)}
+                                                </Box>
+                                            ))}
+                                        </Box>
                                     ) : (
-                                        <Grid item xs={12}>
-                                            <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-                                                <Typography variant="body1" color="textSecondary">
-                                                    No personalized recommendations available at the moment.
-                                                </Typography>
-                                            </Box>
-                                        </Grid>
+                                        <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+                                            <Typography variant="body1" color="textSecondary">
+                                                No personalized recommendations available at the moment.
+                                            </Typography>
+                                        </Box>
                                     )}
-                                </Grid>
+                                </Box>
                             </Box>
                         )}
 
@@ -794,12 +885,12 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                                 <TableContainer component={Paper} className={classes.tableContainer}>
                                     <Table className={classes.table} aria-label="outfit table" stickyHeader>
                                         <TableHead className={classes.tableHeader}>
-                                            <TableRow>
+                                            <TableRow className={classes.tableRow}>
                                                 {["Tops", "Dresses", "Bottoms", "Shoes", "Accessories"].map((category) => (
                                                     <TableCell key={category} align="center">
                                                         <Box className={classes.headerContent}>
                                                             {getCategoryIcon(category)}
-                                                            <Typography variant="body1" component="span">
+                                                            <Typography variant="body1" component="span" style={{ color: ICON_COLOR, fontWeight: 600 }}>
                                                                 {category}
                                                             </Typography>
                                                         </Box>
@@ -832,7 +923,7 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                                                     return (
                                                         <React.Fragment key={outfitIndex}>
                                                             {/* Row 1: Product cards */}
-                                                            <TableRow>
+                                                            <TableRow className={classes.tableRow}>
                                                                 {categories.map((category) => {
                                                                     const carouselKey = `${category}-${outfitIndex}`;
                                                                     const currentIndex = carouselIndices[carouselKey] || 0;
@@ -866,7 +957,7 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                                                                                             className={classes.carouselNavButton}
                                                                                             onClick={handleNext}
                                                                                             disabled={currentIndex === products.length - 1}
-                                                                                            endIcon={<ExpandLessIcon />}
+                                                                                            endIcon={<ExpandLessIcon style={iconStyle} />}
                                                                                         >
                                                                                             Next
                                                                                         </Button>
@@ -874,7 +965,7 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                                                                                             className={classes.carouselNavButton}
                                                                                             onClick={handlePrev}
                                                                                             disabled={currentIndex === 0}
-                                                                                            startIcon={<ExpandMoreIcon />}
+                                                                                            startIcon={<ExpandMoreIcon style={iconStyle} />}
                                                                                         >
                                                                                             Prev
                                                                                         </Button>
@@ -897,7 +988,7 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                                                     );
                                                 })
                                             ) : (
-                                                <TableRow>
+                                                <TableRow className={classes.tableRow}>
                                                     <TableCell colSpan={5} align="center" style={{ padding: "40px" }}>
                                                         <Typography variant="body1" color="textSecondary">
                                                             No outfit recommendations available at the moment.
