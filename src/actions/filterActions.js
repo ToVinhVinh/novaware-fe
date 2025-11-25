@@ -14,6 +14,8 @@ import {
   FILTER_BY_BRAND,
   FILTER_ADD_RATING,
   FILTER_REMOVE_RATING,
+  FILTER_SET_GENDER,
+  FILTER_REMOVE_GENDER,
 } from '../constants/filterConstants';
 
 export const addSearchTerm = (term) => ({
@@ -96,3 +98,12 @@ export const removeRating = () => (dispatch) => {
     type: FILTER_REMOVE_RATING,
   });
 };
+
+export const setGenderFilter = (gender) => ({
+  type: FILTER_SET_GENDER,
+  payload: gender,
+});
+
+export const clearGenderFilter = () => ({
+  type: FILTER_REMOVE_GENDER,
+});

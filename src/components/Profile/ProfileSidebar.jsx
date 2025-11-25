@@ -37,8 +37,8 @@ const useStyles = makeStyles((theme) => ({
 const menuItems = [
   { id: "profile", label: "Profile", icon: <PersonIcon /> },
   { id: "orders", label: "Orders", icon: <ShoppingBasketIcon /> },
-  { id: "favorites", label: "Favorites", icon: <FavoriteIcon /> },
-  { id: "outfit-suggestions", label: "Outfit Suggestions", icon: <StyleIcon /> },
+  { id: "favorites", label: "Interaction History", icon: <FavoriteIcon /> },
+  { id: "outfit-suggestions", label: "Saved Outfits", icon: <StyleIcon /> },
   { id: "settings", label: "Settings", icon: <SettingsIcon /> },
 ];
 

@@ -20,6 +20,8 @@ import {
   addSize,
   addRating,
   removeRating,
+  setGenderFilter,
+  clearGenderFilter,
 } from "../../actions/filterActions";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
@@ -92,6 +94,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const GENDER_OPTIONS = ["Men", "Women", "Boys", "Girls", "Unisex"];
+
 const ProductFilterBar = ({ sizeSelected, filter }) => {
   // Khởi tạo state và các hook
   const classes = useStyles();
@@ -103,12 +107,14 @@ const ProductFilterBar = ({ sizeSelected, filter }) => {
   const [expanded, setExpanded] = useState([
     "priceRange",
     "categories",
+    "gender",
     "size",
     "rating",
   ]);
   const [price, setPrice] = useState(INITIAL_RANGE_PRICE);
   const [size, setSize] = useState("");
   const [rating, setRating] = useState(0);
+  const [gender, setGender] = useState(filter?.gender || "");
 
   // Hooks for API data
   const { data: categoriesResponse, isLoading: loadingCategories, error: errorCategories } = useGetCategories();
@@ -145,6 +151,14 @@ const ProductFilterBar = ({ sizeSelected, filter }) => {
     }
   }, [onMobile]);
 
+  useEffect(() => {
+    if (!filter?.gender) {
+      setGender("");
+    } else {
+      setGender(filter.gender);
+    }
+  }, [filter?.gender]);
+
   // Handlers
   const handleAccordionChange = (panel) => (event, isExpanded) => {
     setExpanded(
@@ -177,6 +191,16 @@ const ProductFilterBar = ({ sizeSelected, filter }) => {
 
   const addSizeHandler = (size) => {
     dispatch(addSize(size));
+  };
+
+  const handleGenderChange = (selectedGender) => {
+    if (selectedGender === gender) {
+      setGender("");
+      dispatch(clearGenderFilter());
+    } else {
+      setGender(selectedGender);
+      dispatch(setGenderFilter(selectedGender));
+    }
   };
 
   const handleArticleTypeClick = (articleType) => {
@@ -257,6 +281,31 @@ const ProductFilterBar = ({ sizeSelected, filter }) => {
                 />
               ))
             )}
+          </Box>
+        </AccordionDetails>
+      </Accordion>
+      <Accordion
+        className={classes.accordion}
+        expanded={expanded.indexOf("gender") >= 0}
+        onChange={handleAccordionChange("gender")}
+      >
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="h6" gutterBottom className={classes.title}>
+            Gender
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Box className={classes.category} color="text.secondary">
+            {GENDER_OPTIONS.map((option) => (
+              <Chip
+                key={option}
+                label={option}
+                variant={gender === option ? "default" : "outlined"}
+                size="medium"
+                onClick={() => handleGenderChange(option)}
+                className={clsx(gender === option && classes.chipActive)}
+              />
+            ))}
           </Box>
         </AccordionDetails>
       </Accordion>

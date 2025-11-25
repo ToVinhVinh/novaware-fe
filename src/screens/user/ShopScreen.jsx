@@ -6,6 +6,7 @@ import {
   removeSize,
   removeBrand,
   removeRating,
+  clearGenderFilter,
 } from "../../actions/filterActions";
 import { useFilterProducts } from "../../hooks/api/useProduct";
 import {
@@ -126,7 +127,7 @@ const ShopScreen = ({ location, history }) => {
 
   // Selectors
   const filter = useSelector((state) => state.filter);
-  const { searchTerm, categories, brands, size, priceMax, priceMin, rating } =
+  const { searchTerm, categories, brands, size, priceMax, priceMin, rating, gender } =
     filter;
 
   // Build filter query
@@ -138,6 +139,7 @@ const ShopScreen = ({ location, history }) => {
     priceMin: priceMin || undefined,
     priceMax: priceMax || undefined,
     rating: rating || undefined,
+    gender: gender || undefined,
     sort_by: sort_by || "default",
     articleType: articleType || undefined,
     pageNumber: pageNumber || 1,
@@ -269,6 +271,14 @@ const ShopScreen = ({ location, history }) => {
                   onDelete={() => dispatch(removeCategory(category))}
                 />
               ))}
+              {gender && (
+                <Chip
+                  variant="outlined"
+                  size="small"
+                  label={`Gender: ${gender}`}
+                  onDelete={() => dispatch(clearGenderFilter())}
+                />
+              )}
               {size && (
                 <Chip
                   variant="outlined"

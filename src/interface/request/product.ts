@@ -100,6 +100,7 @@ export interface IFilterProductsQuery {
 	brands?: string; // comma-separated
 	size?: "s" | "m" | "l" | "xl";
 	rating?: number;
+	gender?: string;
 	priceMin?: number;
 	priceMax?: number;
 	sort_by?: "latest" | "rating" | "sale" | "priceAsc" | "priceDesc";

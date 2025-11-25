@@ -131,7 +131,20 @@ const FavoritesContent = () => {
   const currentUserId = userInfo?._id || "";
 
   const { data: userResponse, isLoading: loading, error } = useGetUserById(currentUserId);
-  const interactionHistory = userResponse?.data?.user?.interactionHistory || [];
+  const interactionHistory = useMemo(() => {
+    const raw =
+      userResponse?.data?.user?.interaction_history ||
+      userResponse?.data?.user?.interactionHistory ||
+      [];
+
+    return raw
+      .map((interaction) => ({
+        ...interaction,
+        productId: interaction.productId || interaction.product_id || "",
+        interactionType: interaction.interactionType || interaction.interaction_type || "",
+      }))
+      .filter((interaction) => interaction.productId && interaction.interactionType);
+  }, [userResponse]);
 
   const sortedHistory = useMemo(() => {
     return [...interactionHistory].sort(
