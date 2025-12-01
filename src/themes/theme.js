@@ -31,13 +31,6 @@ const theme = createTheme({
     },
   },
   palette: {
-    // secondary: {
-    //   main: '#83BAFF',
-    // },
-    // // background: {
-    // //   default: "#B9D3FF",
-    // //   paper: "#9BC1FF", 
-    // // },
   },
 });
 

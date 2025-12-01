@@ -7,10 +7,8 @@ import {
   Redirect,
 } from "react-router-dom";
 import LottieLoading from "./components/LottieLoading";
-// Import Layout
 import UserLayout from "./components/Layouts/UserLayout.jsx";
 import AdminLayout from "./components/Layouts/AdminLayout.jsx";
-// import user
 const HomeScreen = React.lazy(() => import("./screens/user/HomeScreen"));
 const ShopScreen = React.lazy(() => import("./screens/user/ShopScreen"));
 const ProductScreen = React.lazy(() => import("./screens/user/ProductScreen"));
@@ -21,7 +19,6 @@ const PaymentScreen = React.lazy(() => import("./screens/user/PaymentScreen"));
 const PlaceOrderScreen = React.lazy(() => import("./screens/user/PlaceOrderScreen"));
 const OrderScreen = React.lazy(() => import("./screens/user/OrderScreen"));
 const AboutUs = React.lazy(() => import("./screens/user/AboutUs"));
-// import admin
 const AdminOrderScreen = React.lazy(() => import("./screens/admin/AdminOrderScreen"));
 const CategoryListScreen = React.lazy(() => import("./screens/admin/CategoryListScreen"));
 const OrderListScreen = React.lazy(() => import("./screens/admin/OrderListScreen"));
@@ -34,7 +31,6 @@ const StatisticsScreen = React.lazy(() => import("./screens/admin/StatisticsScre
 const AdminChatScreen = React.lazy(() => import("./screens/admin/AdminChatScreen"));
 const HomeContentEditScreen = React.lazy(() => import("./screens/admin/HomeContentEditScreen"));
 const RecommendProductsScreen = React.lazy(() => import("./screens/admin/RecommendProductsScreen"));
-// import 404
 const NotFoundScreen = React.lazy(() => import("./screens/NotFoundScreen"));
 
 const App = () => {
@@ -62,7 +58,6 @@ const App = () => {
     <Router>
       <Suspense fallback={<LottieLoading />}>
         <Switch>
-          {/* Admin Routes - Must be inside Switch and checked first */}
           <Route path="/admin" exact>
             {userInfo && userInfo.isAdmin ? (
               <Redirect to="/admin/recommend-products" />
@@ -100,7 +95,6 @@ const App = () => {
             )}
           </Route>
 
-          {/* User Routes */}
           <Route>
             <UserLayout setHasNewMessageRef={setHasNewMessageRef}>
               <Switch>

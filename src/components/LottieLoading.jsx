@@ -3,9 +3,6 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 const DEFAULT_SRC =
   'https://lottie.host/3b1fcf27-8ddd-4b39-9bb1-0930cc3ceaca/Mg0srF2Fsh.lottie';
-/**
- * @param {{ src?: string, loop?: boolean, autoplay?: boolean, className?: any, style?: any }} props
- */
 const LottieLoading = forwardRef(function LottieLoading(
   {
     src = DEFAULT_SRC,

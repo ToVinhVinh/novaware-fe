@@ -136,7 +136,6 @@ const PlaceOrderScreen = ({ history }) => {
 
   useEffect(() => {
     if (success && order?._id) {
-      // Track PURCHASE interaction for all products in the order
       if (userId && selectedItems.length > 0) {
         selectedItems.forEach((item) => {
           if (item.product) {

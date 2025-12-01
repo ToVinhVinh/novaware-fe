@@ -14,13 +14,9 @@ import {
     Paper,
     Chip,
     CircularProgress,
-    Alert,
-    Pagination,
 } from '@material-ui/core';
+import { Alert, Pagination } from '@material-ui/lab';
 
-/**
- * Component để hiển thị lịch sử interaction của user
- */
 const InteractionHistoryView: React.FC = () => {
     const userInfo = useSelector((state: any) => state.userLogin?.userInfo);
     const userId = userInfo?._id || userInfo?.id || '';
@@ -28,10 +24,8 @@ const InteractionHistoryView: React.FC = () => {
     const [page, setPage] = React.useState(1);
     const pageSize = 20;
 
-    // Get user info including interaction_history
     const { data: userData, isLoading: isLoadingUser } = useGetUserById(userId);
 
-    // Get all interactions from user_interactions collection
     const { data: interactionsData, isLoading: isLoadingInteractions } = useGetUserInteractions({
         page,
         page_size: pageSize,
@@ -78,7 +72,6 @@ const InteractionHistoryView: React.FC = () => {
                 </Box>
             ) : (
                 <>
-                    {/* Interaction History from User Profile */}
                     <Box marginBottom={4}>
                         <Typography variant="h6" gutterBottom>
                             From User Profile ({interactionHistory.length} items)
@@ -121,7 +114,6 @@ const InteractionHistoryView: React.FC = () => {
                         </TableContainer>
                     </Box>
 
-                    {/* All Interactions from user_interactions Collection */}
                     <Box>
                         <Typography variant="h6" gutterBottom>
                             All Interactions from Collection ({interactionsData?.data?.count || 0} total)

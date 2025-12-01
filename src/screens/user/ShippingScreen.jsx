@@ -71,13 +71,9 @@ const ShippingScreen = ({ history }) => {
   const methods = useForm();
   const { handleSubmit, control } = methods;
   const dispatch = useDispatch();
-
-  // Selectors
   const cart = useSelector((state) => state.cart);
   const { shippingAddress } = cart;
   const { userInfo } = useSelector((state) => state.userLogin);
-
-  // Handlers
   const onSubmit = ({
     address,
     city,
@@ -97,7 +93,6 @@ const ShippingScreen = ({ history }) => {
     history.push("/payment");
   };
 
-  // Effects
   useEffect(() => {
     if (!userInfo) {
       dispatch(logout());

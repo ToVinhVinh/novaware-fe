@@ -92,8 +92,8 @@ const useStyles = makeStyles((theme) => ({
     border: "1px solid rgba(0, 0, 0, 0.1)",
     padding: 22,
     marginBottom: theme.spacing(5),
-    backgroundColor: theme.palette.background.paper, // Màu nền từ theme
-    color: theme.palette.text.primary, // Văn bản từ theme
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
     "& .MuiChip-root": {
       margin: 4,
     },
@@ -116,7 +116,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ShopScreen = ({ location, history }) => {
-  // State
   const dispatch = useDispatch();
   const classes = useStyles();
   const onExtraSmallMobile = useMediaQuery("(max-width:460px)");
@@ -124,13 +123,9 @@ const ShopScreen = ({ location, history }) => {
   const [activeLayout, setActiveLayout] = useState("moreCol");
   const query = queryString.parse(location.search);
   let { sort_by = "default", page: pageNumber = 1, articleType } = query;
-
-  // Selectors
   const filter = useSelector((state) => state.filter);
   const { searchTerm, categories, brands, size, priceMax, priceMin, rating, gender } =
     filter;
-
-  // Build filter query
   const filterQuery = {
     keyword: searchTerm || undefined,
     categories: categories?.length ? categories.join(",") : undefined,
@@ -151,8 +146,6 @@ const ShopScreen = ({ location, history }) => {
   const page = productsResponse?.data?.page || 1;
   const pages = productsResponse?.data?.pages || 1;
   const error = queryError?.message || (queryError ? String(queryError) : null);
-
-  // Effect
   useEffect(() => {
     ref.current.scrollIntoView({ behavior: "smooth" });
   }, [pageNumber]);

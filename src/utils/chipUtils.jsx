@@ -5,23 +5,22 @@ export const getScoreChip = (score) => {
 
   const percentage = Math.round(score * 100);
   let matchType = "";
-  let chipColor = "#9e9e9e"; // default gray
+  let chipColor = "#9e9e9e";
 
   if (score >= 0.8) {
     matchType = "Best Match for You";
-    chipColor = "#4caf50"; // green
+    chipColor = "#4caf50";
   } else if (score >= 0.6) {
     matchType = "Quite Suitable for You";
-    chipColor = "#8bc34a"; // light green
+    chipColor = "#8bc34a";
   } else if (score >= 0.3) {
     matchType = "Suitable for You";
-    chipColor = "#ff9800"; // orange
+    chipColor = "#ff9800";
   } else {
     matchType = "You Might Like";
-    chipColor = "#607d8b"; // blue-grey
+    chipColor = "#607d8b";
   }
 
-  // If score < 0.2, only show matchType without percentage
   const label = score < 0.2 ? matchType : `${percentage}% Match (${matchType})`;
 
   return (

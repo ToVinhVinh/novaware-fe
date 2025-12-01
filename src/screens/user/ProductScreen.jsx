@@ -8,7 +8,6 @@ import { Grid, Container, Link } from "@material-ui/core";
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import NavigateNextIcon from "@material-ui/icons/NavigateNext";
 import Meta from "../../components/Meta";
-import Loader from "../../components/Loader";
 import Message from "../../components/Message";
 import ProductReview from "../../components/Product/ProductReview.jsx";
 import ProductRelated from "../../components/Product/ProductRelated.jsx";
@@ -42,20 +41,20 @@ const ProductScreen = ({ setLoginModalOpen }) => {
 
   const { data: productResponse, isLoading: loading, error: productError } = useGetProduct(productId);
   const product = productResponse?.data?.product;
-  
+
   const userInfo = useSelector((state) => state.userLogin?.userInfo);
   const currentUserId = userInfo?._id || "";
-  
+
   const { data: userResponse } = useGetUserById(currentUserId);
   const user = userResponse?.data?.user;
-  
+
   const { data: favoritesResponse } = useGetFavorites(userInfo?._id || "");
   const favoriteItems = favoritesResponse?.data?.favoriteItems || [];
-  
+
   const addFavoriteMutation = useAddFavorite();
   const removeFavoriteMutation = useRemoveFavorite();
   const updateInteraction = useUpdateInteraction(currentUserId);
-  
+
   const error = productError?.message || (productError ? String(productError) : null);
 
   const [shippingModalOpen, setShippingModalOpen] = useState(false);
@@ -67,7 +66,6 @@ const ProductScreen = ({ setLoginModalOpen }) => {
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   }, []);
 
-  // Track VIEW interaction when product is loaded
   useEffect(() => {
     if (product?._id && currentUserId) {
       updateInteraction.mutate({
@@ -97,15 +95,14 @@ const ProductScreen = ({ setLoginModalOpen }) => {
     }
 
     dispatch(addToCart(productId, qty, size, color, colorName));
-    
-    // Track CART interaction
+
     if (currentUserId && product?._id) {
       updateInteraction.mutate({
         product_id: product._id,
         interaction_type: 'cart',
       });
     }
-    
+
     toast.success("Sản phẩm đã được thêm vào giỏ hàng!");
   };
 
@@ -116,7 +113,6 @@ const ProductScreen = ({ setLoginModalOpen }) => {
           userId: userInfo._id,
           body: { productId: product._id }
         });
-        // Track LIKE interaction
         if (currentUserId) {
           updateInteraction.mutate({
             product_id: product._id,
@@ -147,7 +143,7 @@ const ProductScreen = ({ setLoginModalOpen }) => {
   };
 
   return (
-    <Container style={{ marginBottom: 140, maxWidth: "100%"}}>
+    <Container style={{ marginBottom: 140, maxWidth: "100%" }}>
       {loading ? (
         <LottieLoading />
       ) : error ? (
