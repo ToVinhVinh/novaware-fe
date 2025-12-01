@@ -46,7 +46,6 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 15,
     color: theme.palette.text.secondary,
   },
-  // --- Color swatch styles ---
   colorOption: {
     display: "flex",
     alignItems: "center",
@@ -264,19 +263,14 @@ const ProductInfo = memo(
     const currentUserId = user?._id || user?.id || "";
     const productId = product.id || product._id || "";
     const hasVariants = Array.isArray(product.variants) && product.variants.length > 0;
-
     const getHybridRecommendations = useHybridModelRecommendations();
-
     const safeNumber = useCallback((value, fallback = 0) => {
       const parsed = Number(value);
       return Number.isFinite(parsed) ? parsed : fallback;
     }, []);
 
-    // Watch size and color changes
     const selectedSize = watch("size");
     const selectedColor = watch("color");
-
-    // Extract unique sizes from variants
     const sizeOptions = useMemo(() => {
       if (hasVariants && product.variants) {
         const sizes = [...new Set(product.variants.map((v) => v.size.toUpperCase()))];
@@ -297,7 +291,7 @@ const ProductInfo = memo(
           if (!colorMap.has(colorValue)) {
             colorMap.set(colorValue, {
               hexCode: colorValue,
-              name: colorValue, // Use hex/name if no name provided
+              name: colorValue,
             });
           }
         });
@@ -318,7 +312,6 @@ const ProductInfo = memo(
       hasInitDefaultVariantRef.current = true;
     }, [hasVariants, product.variants, selectedSize, selectedColor, setValue]);
 
-    // Auto select first available size when variants exist
     useEffect(() => {
       if (!hasVariants) return;
       if (!selectedSize && sizeOptions.length > 0) {
@@ -342,7 +335,6 @@ const ProductInfo = memo(
         }) || null;
       }
 
-      // No fallback for old structure - only use variants
       return null;
     }, [
       hasVariants,
@@ -363,7 +355,6 @@ const ProductInfo = memo(
       setCurrentPrice(nextPrice);
     }, [selectedVariant, product.variants]);
 
-    // Reset color if it's not available for selected size
     useEffect(() => {
       if (!hasVariants) return;
       if (selectedSize && selectedColor && product.variants) {
@@ -379,7 +370,6 @@ const ProductInfo = memo(
       }
     }, [hasVariants, selectedSize, selectedColor, product.variants, setValue]);
 
-    // Fetch recommendations when component mounts
     useEffect(() => {
       if (!currentUserId || !productId) {
         setRecommendationData(null);
@@ -399,7 +389,6 @@ const ProductInfo = memo(
           setRecommendationData(result);
         } catch (error) {
           console.error("Failed to fetch recommendations:", error);
-          // Don't show toast here, let modal handle it if needed
         }
       };
 
@@ -415,7 +404,6 @@ const ProductInfo = memo(
         .filter((size, index, self) => self.indexOf(size) === index);
     };
 
-    // Get available colors for selected size
     const getAvailableColorsForSize = (size) => {
       if (!product.variants || !size) return colorOptions;
       return product.variants
@@ -430,7 +418,6 @@ const ProductInfo = memo(
         }));
     };
 
-    // Check if size is available (considering selected color)
     const isSizeAvailable = (size) => {
       if (!hasVariants || !product.variants) {
         return false;
@@ -439,7 +426,6 @@ const ProductInfo = memo(
         const availableSizes = getAvailableSizesForColor(selectedColor);
         return availableSizes.includes(size);
       }
-      // If no color selected, check if size exists in any variant with stock
       return product.variants.some(
         (v) => v.size.toUpperCase() === size && v.stock > 0
       );
@@ -456,16 +442,13 @@ const ProductInfo = memo(
       );
     };
 
-    // Filter color options to only show colors that have available sizes
     const availableColorOptions = useMemo(() => {
       if (!hasVariants || !product.variants || product.variants.length === 0) {
         return colorOptions;
       }
       if (selectedSize) {
-        // If size is selected, only show colors that have this size available
         return getAvailableColorsForSize(selectedSize);
       }
-      // If no size selected, show colors that have at least one size available
       return colorOptions.filter((color) => {
         const colorHex = color.hexCode || color.name;
         return product.variants.some(
@@ -476,7 +459,6 @@ const ProductInfo = memo(
 
     const shouldRenderSizeSelector = sizeOptions.length > 0;
     const shouldRenderColorSelector = availableColorOptions.length > 0;
-    // Calculate total inventory from variants
     const totalInventory = useMemo(() => {
       if (hasVariants && product.variants) {
         return product.variants.reduce((sum, v) => sum + safeNumber(v.stock), 0);

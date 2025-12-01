@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useForgotPassword, useVerifyCode } from "../../hooks/api/useAuth"; 
-import { Alert } from "@material-ui/lab";
+import { useForgotPassword, useVerifyCode } from "../../hooks/api/useAuth";
+import { toast } from "react-toastify";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Button,
@@ -49,16 +49,32 @@ const ForgotPasswordModal = ({ open, onClose }) => {
 
   useEffect(() => {
     if (isSuccess) {
+      if (message) {
+        toast.success(message);
+      }
       setShowCodeInput(true);
     }
-  }, [isSuccess]);
+  }, [isSuccess, message]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   useEffect(() => {
     if (verifySuccess && verifyResetToken) {
+      toast.success("Code verified successfully!");
       setResetToken(verifyResetToken);
-      onClose(); 
+      onClose();
     }
   }, [verifySuccess, verifyResetToken, onClose]);
+
+  useEffect(() => {
+    if (verifyError) {
+      toast.error(verifyError);
+    }
+  }, [verifyError]);
 
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
@@ -97,8 +113,6 @@ const ForgotPasswordModal = ({ open, onClose }) => {
             <Typography component="h1" variant="h5">
               Forgot Password
             </Typography>
-            {error && <Alert severity="error">{error}</Alert>}
-            {isSuccess && message && <Alert severity="success">{message}</Alert>}
             {!showCodeInput ? (
               <form onSubmit={handleEmailSubmit}>
                 <TextField
@@ -126,7 +140,6 @@ const ForgotPasswordModal = ({ open, onClose }) => {
               </form>
             ) : (
               <Box mt={3}>
-                {verifyError && <Alert severity="error">{verifyError}</Alert>}
                 <form onSubmit={handleCodeSubmit}>
                   <TextField
                     variant="outlined"

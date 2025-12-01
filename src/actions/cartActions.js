@@ -7,32 +7,16 @@ import {
   CART_OPEN_DRAWER_PREVIEW,
 } from "../constants/cartConstants";
 
-// Thêm sản phẩm vào giỏ hàng
 export const addToCart =
   (id, qty, sizeSelected, colorHex, colorName) =>
   async (dispatch, getState) => {
     const { data } = await axios.get(`/api/products/${id}`);
 
-    // const newItem = {
-    //   product: data._id,
-    //   name: data.name,
-    //   qty,
-    //   sizeSelected: sizeSelected.toLowerCase(), // ✅ normalize
-    //   colorSelected: colorName,
-    //   size: data.size,
-    //   color: data.colors,
-    //   images: data.images,
-    //   price: data.price,
-    //   sale: data.sale,
-    //   priceSale: data.price * (1 - data.sale / 100),
-    //   countInStock: data.countInStock,
-    // };
-
     const newItem = {
       product: data._id,
       name: data.name,
       qty,
-      sizeSelected: sizeSelected.toLowerCase(), // ✅ normalize
+      sizeSelected: sizeSelected.toLowerCase(),
       colorSelected: colorName,
       size: data.size,
       color: data.colors,

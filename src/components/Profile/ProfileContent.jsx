@@ -15,11 +15,11 @@ import {
 } from "@material-ui/core";
 import { useForm, FormProvider } from "react-hook-form";
 import { VscEyeClosed, VscEye } from "react-icons/vsc";
-import { 
-  FaUser, 
-  FaEnvelope, 
-  FaRulerVertical, 
-  FaWeight, 
+import {
+  FaUser,
+  FaEnvelope,
+  FaRulerVertical,
+  FaWeight,
   FaVenusMars,
   FaLock,
   FaCalendarAlt
@@ -29,7 +29,6 @@ import { toast } from "react-toastify";
 import { useUpdateProfile } from "../../hooks/api/useUser";
 import InputController from "../InputController";
 
-// Import avatar images
 import male30 from "../../assets/images/male30.webp";
 import male40 from "../../assets/images/male40.webp";
 import male50 from "../../assets/images/male50.webp";
@@ -150,7 +149,7 @@ const getAvatarImage = (age, gender) => {
   }
 
   const genderPrefix = gender.toLowerCase() === "male" ? "male" : "female";
-  
+
   if (age <= 30) {
     return genderPrefix === "male" ? male30 : female30;
   } else if (age <= 50) {
@@ -221,9 +220,9 @@ const ProfileContent = ({ user, onItemClick }) => {
 
   return (
     <Paper className={classes.paper} elevation={0}>
-      <Typography 
-      className="tracking-widest"
-      variant="h5" style={{ marginBottom: 24 }}>
+      <Typography
+        className="tracking-widest"
+        variant="h5" style={{ marginBottom: 24 }}>
         Personal Information
       </Typography>
       <Box className={classes.profile}>
@@ -240,9 +239,9 @@ const ProfileContent = ({ user, onItemClick }) => {
             className={classes.largeAvatar}
           />
         </StyledBadge>
-        <Typography 
-        className="tracking-widest"
-        style={{ marginTop: 40, fontSize: 20, color: "#eee", }}>{user?.name}</Typography>
+        <Typography
+          className="tracking-widest"
+          style={{ marginTop: 40, fontSize: 20, color: "#eee", }}>{user?.name}</Typography>
         <Typography
           variant="caption"
           style={{ color: "#eee", fontSize: 14 }}
@@ -253,7 +252,7 @@ const ProfileContent = ({ user, onItemClick }) => {
           <Box className={classes.interactionSection}>
             <Typography className={classes.interactionText}>
               You have interacted with{" "}
-              <span style={{ fontWeight: "bold", color: "#f50057", fontSize: 20, marginRight: 2, marginLeft: 2}}>
+              <span style={{ fontWeight: "bold", color: "#f50057", fontSize: 20, marginRight: 2, marginLeft: 2 }}>
                 {user.interactionHistory.length}
               </span>{" "}
               product{user.interactionHistory.length !== 1 ? 's' : ''}

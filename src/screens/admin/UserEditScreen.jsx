@@ -154,7 +154,6 @@ const UserEditScreen = () => {
         isAdmin: formData.isAdmin,
       };
 
-      // Remove undefined values
       Object.keys(updateBody).forEach(
         (key) => updateBody[key] === undefined && delete updateBody[key]
       );

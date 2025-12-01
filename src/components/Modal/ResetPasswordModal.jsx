@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useResetPassword } from "../../hooks/api/useAuth"; 
+import { useResetPassword } from "../../hooks/api/useAuth";
 import { useLocation, useHistory } from "react-router-dom";
 import {
   Button,
@@ -10,7 +10,7 @@ import {
   Backdrop,
   Fade,
 } from "@material-ui/core";
-import { Alert } from "@material-ui/lab";
+import { toast } from "react-toastify";
 import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme) => ({
@@ -41,19 +41,27 @@ const ResetPasswordModal = ({ open, onClose, resetTokenFromProp }) => {
   const history = useHistory();
 
   const resetToken = resetTokenFromProp || (location.state && location.state.resetToken);
-  
+
   const resetPasswordMutation = useResetPassword();
   const { isLoading: loading, error, isSuccess } = resetPasswordMutation;
 
   useEffect(() => {
     if (isSuccess) {
-      onClose(); 
+      toast.success("Password reset successfully!");
+      onClose();
     }
   }, [isSuccess, history, onClose]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
       setMessage("Passwords do not match");
     } else {
       if (resetToken) {
@@ -63,6 +71,7 @@ const ResetPasswordModal = ({ open, onClose, resetTokenFromProp }) => {
           console.error("Reset password failed:", error);
         }
       } else {
+        toast.error("Reset token not found. Please go back to forgot password and try again.");
         setMessage("Reset token not found. Please go back to forgot password and try again.");
       }
     }
@@ -87,8 +96,6 @@ const ResetPasswordModal = ({ open, onClose, resetTokenFromProp }) => {
             <Typography component="h1" variant="h5">
               Reset Password
             </Typography>
-            {error && <Alert severity="error">{error}</Alert>}
-            {message && <Alert severity="error">{message}</Alert>}
             <form onSubmit={handleSubmit}>
               <TextField
                 variant="outlined"

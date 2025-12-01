@@ -22,7 +22,6 @@ import {
 import thunk from "redux-thunk";
 
 const reducers = combineReducers({
-  // User related (login, register, profile, etc.)
   userLogin: userLoginReducer,
   userRegister: userRegisterReducer,
   userDetails: userDetailsReducer,
@@ -33,10 +32,8 @@ const reducers = combineReducers({
   userForgotPassword: userForgotPasswordReducer,
   userVerifyCode: userVerifyCodeReducer,
   userResetPassword: userResetPasswordReducer,
-  // Cart related
   cart: cartReducer,
   cartOpenDrawer: cartOpenDrawerReducer,
-  // UI state related
   snackbarState: snackbarReducer,
   filter: filterReducer,
   chat: chatReducer,

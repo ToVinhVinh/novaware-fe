@@ -7,20 +7,16 @@ import {
 } from '../../hooks/api/useUserInteraction';
 import { useGetUserById } from '../../hooks/api/useUser';
 import { Button, Box, Typography, Chip, CircularProgress } from '@material-ui/core';
-import { Alert } from '@material-ui/lab';
+import { toast } from 'react-toastify';
 import { FaEye, FaHeart, FaShoppingCart, FaShoppingBag, FaStar } from 'react-icons/fa';
 
 interface ProductInteractionTrackerProps {
     productId: string | number;
     onInteractionChange?: (interactionType: string) => void;
-    showStats?: boolean; // Hiển thị thống kê interactions
-    compact?: boolean; // Chế độ compact (ẩn một số thông tin)
+    showStats?: boolean;
+    compact?: boolean;
 }
 
-/**
- * Component để track và hiển thị product interactions
- * Tự động track view, cho phép user thực hiện các interaction khác
- */
 const ProductInteractionTracker: React.FC<ProductInteractionTrackerProps> = ({
     productId,
     onInteractionChange,
@@ -30,21 +26,16 @@ const ProductInteractionTracker: React.FC<ProductInteractionTrackerProps> = ({
     const userInfo = useSelector((state: any) => state.userLogin?.userInfo);
     const userId = userInfo?._id || userInfo?.id || '';
 
-    // Get user info including interaction_history
     const { data: userData, isLoading: isLoadingUser } = useGetUserById(userId);
 
-    // Get all interactions (chỉ khi showStats = true để tối ưu performance)
     const { data: interactionsData } = useGetUserInteractions(
         showStats ? { page: 1, page_size: 10 } : undefined
     );
 
-    // Create interaction
     const createInteraction = useCreateUserInteraction();
 
-    // Update interaction
     const updateInteraction = useUpdateInteraction(userId);
 
-    // Get current interaction type for this product
     const user = userData?.data?.user;
     const interactionHistory = (user as any)?.interactionHistory || (user as any)?.interaction_history || [];
     const currentInteraction = interactionHistory.find(
@@ -53,7 +44,18 @@ const ProductInteractionTracker: React.FC<ProductInteractionTrackerProps> = ({
 
     const [lastAction, setLastAction] = useState<string>('');
 
-    // Auto track view when component mounts
+    useEffect(() => {
+        if (!userId && !compact) {
+            toast.info('Please login to track your product interactions');
+        }
+    }, [userId, compact]);
+
+    useEffect(() => {
+        if (lastAction && !compact) {
+            toast.success(`Last action: ${lastAction.toUpperCase()} - Success!`);
+        }
+    }, [lastAction, compact]);
+
     useEffect(() => {
         if (userId && productId) {
             updateInteraction.mutate(
@@ -79,7 +81,6 @@ const ProductInteractionTracker: React.FC<ProductInteractionTrackerProps> = ({
         }
 
         if (interactionType === 'review') {
-            // For review, use createInteraction with rating
             createInteraction.mutate(
                 {
                     product_id: productId,
@@ -95,7 +96,6 @@ const ProductInteractionTracker: React.FC<ProductInteractionTrackerProps> = ({
                 }
             );
         } else {
-            // For other types, use updateInteraction
             updateInteraction.mutate(
                 {
                     product_id: productId,
@@ -111,17 +111,12 @@ const ProductInteractionTracker: React.FC<ProductInteractionTrackerProps> = ({
         }
     };
 
-    // Không hiển thị component nếu không có userId (chế độ compact)
     if (compact && !userId) {
         return null;
     }
 
     if (!userId) {
-        return (
-            <Alert severity="info" style={{ margin: '16px 0' }}>
-                Please login to track your product interactions
-            </Alert>
-        );
+        return null;
     }
 
     const isLoading = updateInteraction.isPending || createInteraction.isPending;
@@ -129,18 +124,18 @@ const ProductInteractionTracker: React.FC<ProductInteractionTrackerProps> = ({
     const errorMessage =
         updateInteraction.error?.message || createInteraction.error?.message || '';
 
+    useEffect(() => {
+        if (hasError && errorMessage) {
+            toast.error(errorMessage);
+        }
+    }, [hasError, errorMessage]);
+
     return (
         <Box style={{ padding: compact ? '8px' : '16px', border: compact ? 'none' : '1px solid #e0e0e0', borderRadius: '8px' }}>
             {!compact && (
                 <Typography variant="h6" gutterBottom>
                     Product Interactions
                 </Typography>
-            )}
-
-            {hasError && (
-                <Alert severity="error" style={{ marginBottom: '16px' }}>
-                    {errorMessage}
-                </Alert>
             )}
 
             {isLoadingUser && !compact && (
@@ -165,12 +160,6 @@ const ProductInteractionTracker: React.FC<ProductInteractionTrackerProps> = ({
                         {new Date(currentInteraction.timestamp).toLocaleString()}
                     </Typography>
                 </Box>
-            )}
-
-            {lastAction && !compact && (
-                <Alert severity="success" style={{ marginBottom: '16px' }}>
-                    Last action: {lastAction.toUpperCase()} - Success!
-                </Alert>
             )}
 
             <Box display="flex" flexWrap="wrap" style={{ gap: 8 }} marginBottom={2}>

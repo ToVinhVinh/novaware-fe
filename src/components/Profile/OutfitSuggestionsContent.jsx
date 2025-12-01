@@ -230,11 +230,10 @@ const OutfitSuggestionsContent = () => {
         totalPrice: 0,
         compatibilityScore: recommendationData.outfit_complete_score || 0,
         gender: user?.gender || "Unisex",
-        style: "Casual", // Default style, can be enhanced
+        style: "Casual",
         description: `Complete outfit recommendation based on your preferences`,
       };
 
-      // Map all products from all categories
       categories.forEach((category) => {
         const categoryData = outfitCategories[category];
         if (!categoryData || !categoryData.product) return;
@@ -253,7 +252,6 @@ const OutfitSuggestionsContent = () => {
         });
       });
 
-      // Calculate total price (including sale discount)
       outfit.totalPrice = outfit.products.reduce((sum, p) => sum + (p.price || 0) * (1 - (p.sale || 0) / 100), 0);
 
       if (outfit.products.length > 0) {

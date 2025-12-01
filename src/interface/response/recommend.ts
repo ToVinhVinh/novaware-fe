@@ -107,7 +107,6 @@ export interface ITrainModelsResponse {
 	message: string;
 }
 
-// 9.x 新接口类型
 export interface IPersonalizedGNNResponse {
 	success: boolean;
 	message: string;

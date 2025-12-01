@@ -15,7 +15,8 @@ import {
     Chip,
     CircularProgress,
 } from '@material-ui/core';
-import { Alert, Pagination } from '@material-ui/lab';
+import { Pagination } from '@material-ui/lab';
+import { toast } from 'react-toastify';
 
 const InteractionHistoryView: React.FC = () => {
     const userInfo = useSelector((state: any) => state.userLogin?.userInfo);
@@ -31,12 +32,14 @@ const InteractionHistoryView: React.FC = () => {
         page_size: pageSize,
     });
 
+    React.useEffect(() => {
+        if (!userId) {
+            toast.info('Please login to view your interaction history');
+        }
+    }, [userId]);
+
     if (!userId) {
-        return (
-            <Alert severity="info" style={{ margin: '16px 0' }}>
-                Please login to view your interaction history
-            </Alert>
-        );
+        return null;
     }
 
     const getInteractionColor = (type: string) => {
@@ -56,7 +59,8 @@ const InteractionHistoryView: React.FC = () => {
         }
     };
 
-    const interactionHistory = userData?.data?.user?.interaction_history || [];
+    const user = userData?.data?.user;
+    const interactionHistory = (user as any)?.interactionHistory || (user as any)?.interaction_history || [];
     const allInteractions = interactionsData?.data?.interactions || [];
     const totalPages = interactionsData?.data?.pages || 1;
 

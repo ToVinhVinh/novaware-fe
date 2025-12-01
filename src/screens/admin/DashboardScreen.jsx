@@ -142,7 +142,6 @@ const DashboardScreen = () => {
           </Paper>
         </Grid>
 
-        {/* Order Statistics */}
         <Grid item xs={12} sm={6} md={4} lg={3}>
           <Paper className={classes.paper}>
             <AssessmentIcon className={classes.icon} color="secondary" />
@@ -175,11 +174,11 @@ const DashboardScreen = () => {
           <Paper className={classes.paper}>
             <ViewCarouselIcon className={classes.icon} color="secondary" />
             <Typography variant="h6" component="h2">
-            Edit banner, slider
+              Edit banner, slider
             </Typography>
             <Button variant="contained" className={classes.button}>
               <Link to="/admin/home-content" className={classes.link}>
-              Got to edit
+                Got to edit
               </Link>
             </Button>
           </Paper>
