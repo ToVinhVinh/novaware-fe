@@ -19,6 +19,7 @@ import { useSelector } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import { useCreateReview } from "../../hooks/api/useProduct";
+import { useCreateUserInteraction } from "../../hooks/api/useUserInteraction";
 import Message from "../Message";
 import Loader from "../Loader";
 import female30 from "../../assets/images/female30.webp";
@@ -96,8 +97,10 @@ const ProductReview = ({ reviews, productId }) => {
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
+  const userId = userInfo?._id || userInfo?.id || "";
 
   const createReviewMutation = useCreateReview();
+  const createInteraction = useCreateUserInteraction();
   const { isLoading: loadingProductReview, isSuccess: successProductReview, error: errorProductReview } = createReviewMutation;
 
   const handleCommentChange = (e) => {
@@ -115,6 +118,17 @@ const ProductReview = ({ reviews, productId }) => {
           id: productId,
           body: { rating, comment }
         });
+
+        // Track REVIEW interaction
+        if (userId && productId) {
+          createInteraction.mutate({
+            product_id: productId,
+            interaction_type: 'review',
+            rating: rating || 5,
+            user_id: userId,
+          });
+        }
+
         setRating(0);
         setComment("");
       } catch (error) {
@@ -127,7 +141,7 @@ const ProductReview = ({ reviews, productId }) => {
 
   return (
     <>
-     <div className='w-full flex items-center justify-center gap-4 my-10'>
+      <div className='w-full flex items-center justify-center gap-4 my-10'>
         <div className='h-[1px] bg-primary flex-1'></div>
         <Typography variant="h5" align="center" className="tracking-widest">Reviews</Typography>
         <div className='h-[1px] bg-primary flex-1'></div>

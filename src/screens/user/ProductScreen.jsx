@@ -18,6 +18,7 @@ import { useGetProduct } from "../../hooks/api/useProduct";
 import { useGetUserById } from "../../hooks/api/useUser";
 import { useGetFavorites } from "../../hooks/api/useUser";
 import { useAddFavorite, useRemoveFavorite } from "../../hooks/api/useUser";
+import { useUpdateInteraction } from "../../hooks/api/useUserInteraction";
 import LottieLoading from "@/components/LottieLoading";
 
 const useStyles = makeStyles((theme) => ({
@@ -53,6 +54,7 @@ const ProductScreen = ({ setLoginModalOpen }) => {
   
   const addFavoriteMutation = useAddFavorite();
   const removeFavoriteMutation = useRemoveFavorite();
+  const updateInteraction = useUpdateInteraction(currentUserId);
   
   const error = productError?.message || (productError ? String(productError) : null);
 
@@ -64,6 +66,17 @@ const ProductScreen = ({ setLoginModalOpen }) => {
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   }, []);
+
+  // Track VIEW interaction when product is loaded
+  useEffect(() => {
+    if (product?._id && currentUserId) {
+      updateInteraction.mutate({
+        product_id: product._id,
+        interaction_type: 'view',
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product?._id, currentUserId]);
 
   useEffect(() => {
     if (userInfo && favoriteItems && product?._id) {
@@ -84,6 +97,15 @@ const ProductScreen = ({ setLoginModalOpen }) => {
     }
 
     dispatch(addToCart(productId, qty, size, color, colorName));
+    
+    // Track CART interaction
+    if (currentUserId && product?._id) {
+      updateInteraction.mutate({
+        product_id: product._id,
+        interaction_type: 'cart',
+      });
+    }
+    
     toast.success("Sản phẩm đã được thêm vào giỏ hàng!");
   };
 
@@ -94,6 +116,13 @@ const ProductScreen = ({ setLoginModalOpen }) => {
           userId: userInfo._id,
           body: { productId: product._id }
         });
+        // Track LIKE interaction
+        if (currentUserId) {
+          updateInteraction.mutate({
+            product_id: product._id,
+            interaction_type: 'like',
+          });
+        }
         toast.success("Đã thêm vào yêu thích!");
       } catch (error) {
         toast.error("Thêm vào yêu thích thất bại");

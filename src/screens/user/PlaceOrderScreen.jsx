@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useCreateOrder } from "../../hooks/api/useOrder";
+import { useUpdateInteraction } from "../../hooks/api/useUserInteraction";
 import { toast } from "react-toastify";
 import {
   Button,
@@ -94,6 +95,9 @@ const PlaceOrderScreen = ({ history }) => {
   const classes = useStyles();
 
   const cart = useSelector((state) => state.cart);
+  const { userInfo } = useSelector((state) => state.userLogin);
+  const userId = userInfo?._id || userInfo?.id || "";
+  const updateInteraction = useUpdateInteraction(userId);
 
   if (!cart.shippingAddress.address) {
     history.push("/shipping");
@@ -132,10 +136,23 @@ const PlaceOrderScreen = ({ history }) => {
 
   useEffect(() => {
     if (success && order?._id) {
+      // Track PURCHASE interaction for all products in the order
+      if (userId && selectedItems.length > 0) {
+        selectedItems.forEach((item) => {
+          if (item.product) {
+            updateInteraction.mutate({
+              product_id: item.product,
+              interaction_type: 'purchase',
+            });
+          }
+        });
+      }
+
       history.push(`/order/${order._id}`);
       toast.success("Order created successfully!");
     }
-  }, [history, success, order]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [history, success, order?._id, userId]);
 
   const placeOrderHandler = async () => {
     try {
@@ -270,11 +287,10 @@ const PlaceOrderScreen = ({ history }) => {
                                         Color: {colorName}
                                       </Box>
                                       <Box textAlign="center">
-                                        {`${item.qty} x $${
-                                          item.priceSale
-                                        } = $${(
-                                          item.qty * item.priceSale
-                                        ).toFixed(2)}`}
+                                        {`${item.qty} x $${item.priceSale
+                                          } = $${(
+                                            item.qty * item.priceSale
+                                          ).toFixed(2)}`}
                                       </Box>
                                     </Box>
                                   </Hidden>

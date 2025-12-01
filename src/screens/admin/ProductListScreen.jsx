@@ -521,7 +521,8 @@ const ProductListScreen = ({ history }) => {
                 setPage(0);
               }}
               onRowClick={(params) => {
-                history.push(`/admin/product/${params.row.id}/edit`);
+                const targetUrl = `/admin/product/${params.row.id}/edit`;
+                window.open(targetUrl, "_blank", "noopener,noreferrer");
               }}
               autoHeight
               components={{
