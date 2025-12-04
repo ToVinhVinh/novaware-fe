@@ -22,7 +22,7 @@ import male50 from "../assets/images/male50.webp";
 import female30 from "../assets/images/female30.webp";
 import female40 from "../assets/images/female40.webp";
 import female50 from "../assets/images/female50.webp";
-
+import defaultAvatar from "../assets/images/userPlaceholder.png";
 const StyledBadge = withStyles((theme) => ({
   root: {
     position: "relative",
@@ -69,15 +69,15 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.text.secondary,
   },
   avatar: {
-    width: theme.spacing(5.2),
-    height: theme.spacing(5.2),
+    width: theme.spacing(5),
+    height: theme.spacing(5),
     fontSize: 14,
   },
 }));
 
 const getAvatarImage = (age, gender) => {
   if (!age || !gender) {
-    return null;
+    return defaultAvatar;
   }
 
   const isMale = gender.toLowerCase() === "male";

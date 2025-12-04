@@ -28,7 +28,7 @@ import CallMadeIcon from "@material-ui/icons/CallMade";
 import { toast } from "react-toastify";
 import { useUpdateProfile } from "../../hooks/api/useUser";
 import InputController from "../InputController";
-
+import defaultAvatar from "../../assets/images/userPlaceholder.png";
 import male30 from "../../assets/images/male30.webp";
 import male40 from "../../assets/images/male40.webp";
 import male50 from "../../assets/images/male50.webp";
@@ -145,7 +145,7 @@ const useStyles = makeStyles((theme) => ({
 // Function to get avatar image based on age and gender
 const getAvatarImage = (age, gender) => {
   if (!age || !gender) {
-    return null;
+    return defaultAvatar;
   }
 
   const genderPrefix = gender.toLowerCase() === "male" ? "male" : "female";
@@ -187,34 +187,42 @@ const ProfileContent = ({ user, onItemClick }) => {
   }, [success]);
 
   const submitHandler = async (data) => {
-    if (user?._id) {
-      try {
-        const payload = {
-          name: data.name,
-          email: data.email,
-          gender: data.gender,
-        };
+    if (!user?._id && !user?.id) {
+      toast.error("User information not available. Please try again.");
+      return;
+    }
 
-        if (data.password && data.password.trim() !== "") {
-          payload.password = data.password;
-        }
+    try {
+      const payload = {
+        name: data.name,
+        email: data.email,
+      };
 
-        if (data.height && data.height !== "") {
-          payload.height = data.height;
-        }
-
-        if (data.weight && data.weight !== "") {
-          payload.weight = data.weight;
-        }
-
-        if (data.age && data.age !== "") {
-          payload.age = data.age;
-        }
-
-        await updateProfileMutation.mutateAsync(payload);
-      } catch (error) {
-        console.error("Failed to update profile:", error);
+      if (data.gender && data.gender.trim() !== "") {
+        payload.gender = data.gender;
       }
+
+      if (data.password && data.password.trim() !== "") {
+        payload.password = data.password;
+      }
+
+      if (data.height && data.height !== "") {
+        payload.height = Number(data.height);
+      }
+
+      if (data.weight && data.weight !== "") {
+        payload.weight = Number(data.weight);
+      }
+
+      if (data.age && data.age !== "") {
+        payload.age = Number(data.age);
+      }
+
+      console.log("Updating profile with payload:", payload);
+      await updateProfileMutation.mutateAsync(payload);
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      toast.error(error?.response?.data?.message || "Failed to update profile. Please try again.");
     }
   };
 
@@ -270,7 +278,10 @@ const ProfileContent = ({ user, onItemClick }) => {
       <FormProvider {...methods}>
         <form
           className={classes.form}
-          onSubmit={handleSubmit(submitHandler)}
+          onSubmit={handleSubmit(submitHandler, (errors) => {
+            console.error("Form validation errors:", errors);
+            toast.error("Please fill in all required fields correctly.");
+          })}
         >
           <Grid container spacing={2} className={classes.gridContainer}>
             <Grid item xs={12} sm={6} className={classes.gridItem}>
@@ -354,6 +365,20 @@ const ProfileContent = ({ user, onItemClick }) => {
                   label="Age"
                   type="number"
                   defaultValue={user?.age}
+                  inputProps={{
+                    min: 11,
+                  }}
+                  rules={{
+                    validate: {
+                      minAge: (value) => {
+                        if (!value || value === "") return true; // Allow empty
+                        const age = Number(value);
+                        if (isNaN(age)) return "Age must be a number";
+                        if (age <= 10) return "Age must be greater than 10";
+                        return true;
+                      },
+                    },
+                  }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">

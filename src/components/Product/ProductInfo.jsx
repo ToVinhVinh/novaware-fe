@@ -845,6 +845,10 @@ const ProductInfo = memo(
                     toast.info("Please sign in to see outfit recommendations.");
                     return;
                   }
+                  if (!user?.gender || !user?.age) {
+                    toast.info("Please update your profile with gender and age information to see outfit recommendations.");
+                    return;
+                  }
                   setOutfitModalOpen(true);
                 }}
                 style={{

@@ -79,6 +79,8 @@ export const useUpdateProfile = () => {
 		mutationFn: updateProfile,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['users', 'profile'] });
+			queryClient.invalidateQueries({ queryKey: ['users', 'detail'] });
+			queryClient.invalidateQueries({ queryKey: ['users', 'list'] });
 		},
 	});
 };

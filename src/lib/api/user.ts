@@ -28,7 +28,6 @@ export const getProfile = async (): Promise<IGetProfileResponse> => {
 	return await sendGet(`/users/profile`);
 };
 
-// Update Profile
 export const updateProfile = async (body: IUpdateProfileBody): Promise<IUpdateProfileResponse> => {
 	return await sendPut(`/users/profile`, body);
 };

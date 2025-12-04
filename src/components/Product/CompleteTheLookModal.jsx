@@ -736,18 +736,6 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
         }
     };
 
-    useEffect(() => {
-        if (!open) return;
-        if (!userId) {
-            toast.info("Please sign in to see outfit recommendations.");
-            onClose();
-            return;
-        }
-        if (!user?.gender) {
-            toast.info("Please update your profile with gender information to see outfit recommendations.");
-        }
-    }, [open, userId, user?.gender, onClose]);
-
     const handleTabChange = (event, newValue) => {
         setActiveTab(newValue);
     };

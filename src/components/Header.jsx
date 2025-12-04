@@ -218,9 +218,6 @@ const Header = ({
   const { pathname } = location;
   const currentPath = pathname.split("/")[1];
 
-  // Dropdowns are self-managed inside their components
-
-  // Hooks for API data
   const { data: favoritesResponse } = useGetFavorites(userInfo?._id || "");
 
   const favoriteItems = favoritesResponse?.data?.favoriteItems || [];
