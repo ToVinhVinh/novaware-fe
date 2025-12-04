@@ -917,7 +917,7 @@ const RecommendProductsScreen = () => {
               separator={<NavigateNextIcon fontSize="small" />}
               style={{ marginBottom: 24 }}
             >
-              <Link color="inherit" component={RouterLink} to="/admin/recommend-products">
+              <Link color="inherit" component={RouterLink} to="/admin/products">
                 Dashboard
               </Link>
               <Typography color="textPrimary">Recommend Products</Typography>

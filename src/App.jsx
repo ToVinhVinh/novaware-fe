@@ -60,7 +60,7 @@ const App = () => {
         <Switch>
           <Route path="/admin" exact>
             {userInfo && userInfo.isAdmin ? (
-              <Redirect to="/admin/recommend-products" />
+              <Redirect to="/admin/products" />
             ) : (
               <Redirect to="/" />
             )}
@@ -86,8 +86,8 @@ const App = () => {
                       <AdminChatScreen {...props} setHasNewMessageRef={hasNewMessageRef} />
                     )}
                   />
-                  <Route path="/admin/recommend-products" component={RecommendProductsScreen} />
-                  <Redirect to="/admin/recommend-products" />
+                  <Route path="/admin/products" component={RecommendProductsScreen} />
+                  <Redirect to="/admin/products" />
                 </Switch>
               </AdminLayout>
             ) : (

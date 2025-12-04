@@ -22,6 +22,7 @@ import {
 import Loader from "../../components/Loader";
 import Message from "../../components/Message";
 import SnackbarMessage from "../../components/SnackbarMessage";
+import ConfirmDialog from "../../components/Modal/ConfirmDialog";
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -63,6 +64,10 @@ const CategoryListScreen = ({ history }) => {
 
   const [categoryName, setCategoryName] = useState("");
   const [editMode, setEditMode] = useState(null);
+  const [confirmDialog, setConfirmDialog] = useState({
+    open: false,
+    categoryId: null,
+  });
 
   const userInfo = useSelector((state) => state.userLogin?.userInfo);
 
@@ -101,14 +106,23 @@ const CategoryListScreen = ({ history }) => {
     }
   }, [successDelete, successCreate, successUpdate]);
 
-  const deleteHandler = async (id) => {
-    if (window.confirm("Are you sure you want to delete this category?")) {
+  const handleDeleteClick = (id) => {
+    setConfirmDialog({ open: true, categoryId: id });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (confirmDialog.categoryId) {
       try {
-        await deleteCategoryMutation.mutateAsync(id);
+        await deleteCategoryMutation.mutateAsync(confirmDialog.categoryId);
+        setConfirmDialog({ open: false, categoryId: null });
       } catch (error) {
         console.error("Failed to delete category:", error);
       }
     }
+  };
+
+  const handleCloseConfirmDialog = () => {
+    setConfirmDialog({ open: false, categoryId: null });
   };
 
   const createCategoryHandler = async () => {
@@ -186,7 +200,7 @@ const CategoryListScreen = ({ history }) => {
             style={{ marginLeft: 8 }}
             className={classes.button}
             startIcon={<AiOutlineDelete />}
-            onClick={() => deleteHandler(params.id)}
+            onClick={() => handleDeleteClick(params.id)}
           />
         </Box>
       ),
@@ -261,6 +275,17 @@ const CategoryListScreen = ({ history }) => {
           </Grid>
         </Grid>
       )}
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onClose={handleCloseConfirmDialog}
+        onConfirm={handleConfirmDelete}
+        title="Delete Category"
+        message="Are you sure you want to delete this category? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        confirmColor="secondary"
+        loading={deleteCategoryMutation.isLoading}
+      />
     </Container>
   );
 };

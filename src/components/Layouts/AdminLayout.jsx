@@ -200,16 +200,16 @@ const AdminLayout = ({ children }) => {
 
   // Menu items (flat structure, no sub-menus)
   const menuItems = [
-    {
-      text: 'Recommend Products',
-      icon: <RecommendIcon />,
-      link: '/admin/recommend-products',
-    },
-    {
-      text: 'Order Statistics',
-      icon: <AssessmentIcon />,
-      link: '/admin/orderstats',
-    },
+    // {
+    //   text: 'Recommend Products',
+    //   icon: <RecommendIcon />,
+    //   link: '/admin/products',
+    // },
+    // {
+    //   text: 'Order Statistics',
+    //   icon: <AssessmentIcon />,
+    //   link: '/admin/orderstats',
+    // },
     {
       text: 'Products Management',
       icon: <ShoppingBasketIcon />,
@@ -249,8 +249,8 @@ const AdminLayout = ({ children }) => {
   const isActive = (link) => {
     const pathname = location.pathname;
 
-    if (link === '/admin/recommend-products') {
-      return pathname === '/admin/recommend-products';
+    if (link === '/admin/products') {
+      return pathname === '/admin/products';
     }
 
     if (link === '/admin/products') {
@@ -264,8 +264,8 @@ const AdminLayout = ({ children }) => {
         pathname.match(/^\/admin\/order\/[^/]+$/);
     }
 
-    if (link === '/admin/recommend-products') {
-      return pathname === '/admin/recommend-products';
+    if (link === '/admin/products') {
+      return pathname === '/admin/products';
     }
 
     if (link === '/admin/users') {

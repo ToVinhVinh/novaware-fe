@@ -39,6 +39,7 @@ import NavigateNextIcon from "@material-ui/icons/NavigateNext";
 import Meta from "../../components/Meta";
 import Loader from "../../components/Loader";
 import Message from "../../components/Message";
+import ConfirmDialog from "../../components/Modal/ConfirmDialog";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -120,6 +121,10 @@ const ProductListScreen = ({ history }) => {
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [ordering, setOrdering] = useState("");
+  const [confirmDialog, setConfirmDialog] = useState({
+    open: false,
+    productId: null,
+  });
 
   const userInfo = useSelector((state) => state.userLogin?.userInfo);
 
@@ -315,7 +320,7 @@ const ProductListScreen = ({ history }) => {
               style={{ marginLeft: 8 }}
               className={classes.button}
               startIcon={<AiOutlineDelete />}
-              onClick={() => deleteHandler(id)}
+              onClick={() => handleDeleteClick(id)}
             />
           </>
         );
@@ -360,14 +365,23 @@ const ProductListScreen = ({ history }) => {
     }
   }, [successDelete, errorDelete]);
 
-  const deleteHandler = async (id) => {
-    if (window.confirm("Are you sure")) {
+  const handleDeleteClick = (id) => {
+    setConfirmDialog({ open: true, productId: id });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (confirmDialog.productId) {
       try {
-        await deleteProductMutation.mutateAsync(String(id));
+        await deleteProductMutation.mutateAsync(String(confirmDialog.productId));
+        setConfirmDialog({ open: false, productId: null });
       } catch (error) {
         console.error("Failed to delete product:", error);
       }
     }
+  };
+
+  const handleCloseConfirmDialog = () => {
+    setConfirmDialog({ open: false, productId: null });
   };
 
   return (
@@ -380,7 +394,7 @@ const ProductListScreen = ({ history }) => {
               separator={<NavigateNextIcon fontSize="small" />}
               style={{ marginBottom: 24 }}
             >
-              <Link color="inherit" component={RouterLink} to="/admin/recommend-products">
+              <Link color="inherit" component={RouterLink} to="/admin/products">
                 Dashboard
               </Link>
               <Typography color="textPrimary">Products Management</Typography>
@@ -535,6 +549,17 @@ const ProductListScreen = ({ history }) => {
           </Grid>
         </Grid>
       )}
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onClose={handleCloseConfirmDialog}
+        onConfirm={handleConfirmDelete}
+        title="Delete Product"
+        message="Are you sure you want to delete this product? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        confirmColor="secondary"
+        loading={deleteProductMutation.isLoading}
+      />
     </Container>
   );
 };

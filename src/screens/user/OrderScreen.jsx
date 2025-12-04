@@ -37,6 +37,7 @@ import NavigateNextIcon from "@material-ui/icons/NavigateNext";
 import Meta from "../../components/Meta";
 import paypalImage from "../../assets/images/paypal.png";
 import StripePayment from "../../components/StripePayment";
+import ConfirmDialog from "../../components/Modal/ConfirmDialog";
 
 const useStyles = makeStyles((theme) => ({
   breadcrumbsContainer: {
@@ -125,7 +126,10 @@ const UserOrderScreen = ({ match, history }) => {
   const dispatch = useDispatch();
 
   const [sdkReady, setSdkReady] = useState(false);
-  
+  const [confirmDialog, setConfirmDialog] = useState({
+    open: false,
+  });
+
   const { data: orderResponse, isLoading: loading, error } = useGetOrder(orderId);
   const order = orderResponse?.data?.order;
 
@@ -207,14 +211,21 @@ const UserOrderScreen = ({ match, history }) => {
     }
   };
 
-  const handleCancelOrder = async () => {
-    if (window.confirm("Are you sure you want to cancel this order?")) {
-      try {
-        await cancelOrderMutation.mutateAsync(orderId);
-      } catch (error) {
-        console.error("Cancel order failed:", error);
-      }
+  const handleCancelOrderClick = () => {
+    setConfirmDialog({ open: true });
+  };
+
+  const handleConfirmCancelOrder = async () => {
+    try {
+      await cancelOrderMutation.mutateAsync(orderId);
+      setConfirmDialog({ open: false });
+    } catch (error) {
+      console.error("Cancel order failed:", error);
     }
+  };
+
+  const handleCloseConfirmDialog = () => {
+    setConfirmDialog({ open: false });
   };
 
   return loading ? (
@@ -384,9 +395,8 @@ const UserOrderScreen = ({ match, history }) => {
                                           Color: {item.colorSelected}
                                         </Box>
                                         <Box textAlign="center">
-                                          {`${item.qty} x ${item.priceSale} = ${
-                                            item.qty * item.priceSale
-                                          }`}
+                                          {`${item.qty} x ${item.priceSale} = ${item.qty * item.priceSale
+                                            }`}
                                         </Box>
                                       </Box>
                                     </Hidden>
@@ -499,7 +509,7 @@ const UserOrderScreen = ({ match, history }) => {
                     <Button
                       variant="contained"
                       color="secondary"
-                      onClick={handleCancelOrder}
+                      onClick={handleCancelOrderClick}
                       fullWidth
                       style={{ marginTop: 16 }}
                     >
@@ -532,6 +542,17 @@ const UserOrderScreen = ({ match, history }) => {
             </Grid>
           </Grid>
         </Paper>
+        <ConfirmDialog
+          open={confirmDialog.open}
+          onClose={handleCloseConfirmDialog}
+          onConfirm={handleConfirmCancelOrder}
+          title="Cancel Order"
+          message="Are you sure you want to cancel this order? This action cannot be undone."
+          confirmText="Cancel Order"
+          cancelText="Keep Order"
+          confirmColor="secondary"
+          loading={cancelOrderMutation.isLoading}
+        />
       </Container>
     )
   );

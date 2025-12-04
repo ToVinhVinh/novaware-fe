@@ -197,7 +197,7 @@ export default function HeaderUser({
                         id="menu-list-grow"
                         onKeyDown={handleListKeyDown}
                       >
-                        <MenuItem component={RouterLink} to={userInfo.isAdmin ? "/admin/recommend-products" : "/profile"} divider>
+                        <MenuItem component={RouterLink} to={userInfo.isAdmin ? "/admin/products" : "/profile"} divider>
                           <FaUser className={classes.menuItemIcon} />
                           View Profile
                         </MenuItem>

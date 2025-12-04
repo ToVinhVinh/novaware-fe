@@ -30,6 +30,7 @@ import NavigateNextIcon from "@material-ui/icons/NavigateNext";
 import Meta from "../../components/Meta";
 import Loader from "../../components/Loader";
 import Message from "../../components/Message";
+import ConfirmDialog from "../../components/Modal/ConfirmDialog";
 const useStyles = makeStyles((theme) => ({
   container: {
     marginTop: theme.spacing(-10),
@@ -77,7 +78,11 @@ const UserListScreen = ({ history: historyProp }) => {
 
   const [keyword, setKeyword] = useState("");
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(50);
+  const [pageSize, setPageSize] = useState(10);
+  const [confirmDialog, setConfirmDialog] = useState({
+    open: false,
+    userId: null,
+  });
 
   const userInfo = useSelector((state) => state.userLogin?.userInfo);
 
@@ -203,7 +208,7 @@ const UserListScreen = ({ history: historyProp }) => {
               startIcon={<AiOutlineDelete />}
               onClick={(e) => {
                 e.stopPropagation();
-                deleteHandler(id);
+                handleDeleteClick(id);
               }}
             />
           </>
@@ -231,14 +236,23 @@ const UserListScreen = ({ history: historyProp }) => {
     }
   }, [successDelete, errorDelete]);
 
-  const deleteHandler = async (id) => {
-    if (window.confirm("Are you sure to delete this user?")) {
+  const handleDeleteClick = (id) => {
+    setConfirmDialog({ open: true, userId: id });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (confirmDialog.userId) {
       try {
-        await deleteUserMutation.mutateAsync(id);
+        await deleteUserMutation.mutateAsync(confirmDialog.userId);
+        setConfirmDialog({ open: false, userId: null });
       } catch (error) {
         console.error("Failed to delete user:", error);
       }
     }
+  };
+
+  const handleCloseConfirmDialog = () => {
+    setConfirmDialog({ open: false, userId: null });
   };
   return (
     <Container disableGutters style={{ marginBottom: 140, maxWidth: "100%" }}>
@@ -250,12 +264,13 @@ const UserListScreen = ({ history: historyProp }) => {
               separator={<NavigateNextIcon fontSize="small" />}
               style={{ marginBottom: 24 }}
             >
-              <Link color="inherit" component={RouterLink} to="/admin/recommend-products">
+              <Link color="inherit" component={RouterLink} to="/admin/products">
                 Dashboard
               </Link>
               <Typography color="textPrimary">Users Management</Typography>
             </Breadcrumbs>
             <Box
+              className="bg-white"
               display="flex"
               justifyContent="space-between"
               width="100%"
@@ -328,6 +343,17 @@ const UserListScreen = ({ history: historyProp }) => {
           </Grid>
         </Grid>
       )}
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onClose={handleCloseConfirmDialog}
+        onConfirm={handleConfirmDelete}
+        title="Delete User"
+        message="Are you sure you want to delete this user? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        confirmColor="secondary"
+        loading={deleteUserMutation.isLoading}
+      />
     </Container>
   );
 };
