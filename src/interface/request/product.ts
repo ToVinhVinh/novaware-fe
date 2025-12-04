@@ -109,3 +109,19 @@ export interface IFilterProductsQuery {
 	perPage?: number;
 }
 
+export interface ISearchProductsByNameQuery {
+	q?: string;
+	query?: string;
+	search?: string;
+	category?: string;
+	articleType?: string;
+	gender?: string;
+	masterCategory?: string;
+	subCategory?: string;
+	min_price?: number;
+	max_price?: number;
+	sort_by?: "default" | "price_low_to_high" | "price_high_to_low" | "rating" | "name_asc" | "name_desc";
+	page?: number;
+	page_size?: number;
+}
+

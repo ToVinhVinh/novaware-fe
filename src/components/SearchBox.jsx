@@ -5,7 +5,7 @@ import { fade, makeStyles } from '@material-ui/core/styles';
 import { IconButton, InputBase } from '@material-ui/core';
 import { IoSearchOutline } from 'react-icons/io5';
 import { addSearchTerm } from '../actions/filterActions';
-import { useFilterProducts } from '../hooks/api/useProduct';
+import { useSearchProductsByName } from '../hooks/api/useProduct';
 import LottieLoading from './LottieLoading';
 
 const useStyles = makeStyles((theme) => ({
@@ -128,8 +128,8 @@ const SearchBox = (props) => {
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState(keyword);
 
-  const { data: productsResponse, isLoading: loading } = useFilterProducts(
-    debouncedKeyword ? { keyword: debouncedKeyword, perPage: 12 } : undefined
+  const { data: productsResponse, isLoading: loading } = useSearchProductsByName(
+    debouncedKeyword ? { q: debouncedKeyword, page_size: 15 } : undefined
   );
   const products = productsResponse?.data?.products || [];
 

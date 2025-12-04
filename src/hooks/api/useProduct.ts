@@ -12,6 +12,7 @@ import {
 	getRelatedProducts,
 	getProductsByPrice,
 	filterProducts,
+	searchProductsByName,
 } from '../../lib/api/product';
 import * as ProductTypes from '../../interface/response/product';
 import * as ProductRequestTypes from '../../interface/request/product';
@@ -70,6 +71,14 @@ export const useFilterProducts = (query?: ProductRequestTypes.IFilterProductsQue
 	return useQuery<ProductTypes.IFilterProductsResponse, Error>({
 		queryKey: ['products', 'filter', query],
 		queryFn: () => filterProducts(query),
+	});
+};
+
+export const useSearchProductsByName = (query?: ProductRequestTypes.ISearchProductsByNameQuery) => {
+	return useQuery<ProductTypes.ISearchProductsByNameResponse, Error>({
+		queryKey: ['products', 'search_by_name', query],
+		queryFn: () => searchProductsByName(query),
+		enabled: !!(query?.q || query?.query || query?.search), // Only run query if search term is provided
 	});
 };
 

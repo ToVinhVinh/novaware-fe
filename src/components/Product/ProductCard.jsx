@@ -55,7 +55,7 @@ const ProductCard = (props) => {
   return (
     <>
       <motion.div
-        className="group shadow-md h-full bg-white border border-pink-500 rounded-xl overflow-hidden transition-all duration-300"
+        className="group shadow-md h-full bg-white border border-pink-500 rounded-lg overflow-hidden transition-all duration-300"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -86,7 +86,7 @@ const ProductCard = (props) => {
                 {/* Back Image */}
                 {images[1] && (
                   <motion.img
-                    className="absolute inset-0 h-full w-full object-contain hover:scale-110 transition-all duration-300 ease-in-out"
+                    className="absolute inset-0 p-4 h-full w-full object-contain hover:scale-110 transition-all duration-300 ease-in-out"
                     src={images[1]}
                     alt={`${displayName} - back view`}
                     initial={{ opacity: 0 }}
@@ -97,7 +97,7 @@ const ProductCard = (props) => {
 
                 {/* Front Image with fade on hover */}
                 <motion.img
-                  className="absolute inset-0 h-full w-full object-contain bg-white hover:scale-110 transition-all duration-300 ease-in-out"
+                  className="absolute inset-0 p-4 h-full w-full object-contain bg-white hover:scale-110 transition-all duration-300 ease-in-out"
                   src={images[0]}
                   alt={displayName}
                   initial={{ opacity: 1 }}
@@ -119,7 +119,7 @@ const ProductCard = (props) => {
           </div>
 
           {/* Product Info */}
-          <div className="flex flex-1 flex-col p-3 bg-primary-gradient rounded-t-xl relative z-10">
+          <div className="flex flex-1 flex-col p-3 bg-primary-gradient relative z-10">
             <Tooltip title={displayName || ""} arrow>
               <h3 className="line-clamp-2 text-base font-light leading-6 text-white">
                 {displayName}

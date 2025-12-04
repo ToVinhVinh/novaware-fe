@@ -158,3 +158,21 @@ export interface IFilterProductsResponse {
 	};
 }
 
+export interface ISearchProductsByNameResponse {
+	success: boolean;
+	message: string;
+	data: {
+		products: IProduct[];
+		pagination: {
+			page: number;
+			page_size: number;
+			total_count: number;
+			total_pages: number;
+			has_next: boolean;
+			has_previous: boolean;
+		};
+		search_term: string;
+		search_field: string;
+	};
+}
+

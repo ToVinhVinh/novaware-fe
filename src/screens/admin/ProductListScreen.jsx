@@ -126,7 +126,6 @@ const ProductListScreen = ({ history }) => {
   const { data: categoriesResponse, isLoading: loadingCategories } = useGetCategories();
   const categories = categoriesResponse?.data?.categories || [];
 
-  // Build query parameters
   const queryParams = {
     pageNumber: page + 1,
     pageSize,

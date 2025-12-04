@@ -12,6 +12,7 @@ import {
 	IGetRelatedProductsResponse,
 	IGetProductsByPriceResponse,
 	IFilterProductsResponse,
+	ISearchProductsByNameResponse,
 } from "../../interface/response/product";
 import { IProduct, IProductColor, IProductVariant, IProductSize } from "../../interface/response/product";
 import {
@@ -25,6 +26,7 @@ import {
 	IGetRelatedProductsQuery,
 	IGetProductsByPriceQuery,
 	IFilterProductsQuery,
+	ISearchProductsByNameQuery,
 } from "../../interface/request/product";
 
 export const getProducts = async (query?: IGetProductsQuery): Promise<IGetProductsResponse> => {
@@ -266,5 +268,46 @@ export const getProductsByPrice = async (query?: IGetProductsByPriceQuery): Prom
 // Filter Products
 export const filterProducts = async (query?: IFilterProductsQuery): Promise<IFilterProductsResponse> => {
 	return await sendGet(`/products/filter`, query);
+};
+
+// Search Products By Name
+export const searchProductsByName = async (query?: ISearchProductsByNameQuery): Promise<ISearchProductsByNameResponse> => {
+	// Normalize query parameters: support q, query, or search
+	const normalizedQuery: Record<string, any> = {};
+	
+	if (query) {
+		// Use q, query, or search (whichever is provided)
+		const searchTerm = query.q || query.query || query.search;
+		if (searchTerm) {
+			normalizedQuery.q = searchTerm;
+		}
+		
+		// Copy other optional parameters
+		if (query.category) normalizedQuery.category = query.category;
+		if (query.articleType) normalizedQuery.articleType = query.articleType;
+		if (query.gender) normalizedQuery.gender = query.gender;
+		if (query.masterCategory) normalizedQuery.masterCategory = query.masterCategory;
+		if (query.subCategory) normalizedQuery.subCategory = query.subCategory;
+		if (query.min_price !== undefined) normalizedQuery.min_price = query.min_price;
+		if (query.max_price !== undefined) normalizedQuery.max_price = query.max_price;
+		if (query.sort_by) normalizedQuery.sort_by = query.sort_by;
+		if (query.page !== undefined) normalizedQuery.page = query.page;
+		if (query.page_size !== undefined) normalizedQuery.page_size = query.page_size;
+	}
+	
+	const response = await sendGet(`/products/search_by_name`, normalizedQuery);
+	
+	// Normalize products in response if they exist
+	if (response?.data?.products && Array.isArray(response.data.products)) {
+		return {
+			...response,
+			data: {
+				...response.data,
+				products: response.data.products.map((product: any) => normalizeProduct(product)),
+			},
+		};
+	}
+	
+	return response;
 };
 

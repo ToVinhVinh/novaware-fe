@@ -105,10 +105,8 @@ const PlaceOrderScreen = ({ history }) => {
     history.push("/payment");
   }
 
-  // Only selected items
   const selectedItems = cart.cartItems.filter((item) => item.selected);
 
-  // Calculate prices
   const addDecimals = (num) => {
     return (Math.round(num * 100) / 100).toFixed(2);
   };
