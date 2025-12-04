@@ -4,10 +4,6 @@ import {
   Box,
   Divider,
   Slider,
-  RadioGroup,
-  Radio,
-  FormControl,
-  FormControlLabel,
   AccordionSummary,
   AccordionDetails,
   Accordion,
@@ -17,11 +13,10 @@ import {
 import {
   addRangePrice,
   addCategories,
-  addSize,
-  addRating,
-  removeRating,
   setGenderFilter,
   clearGenderFilter,
+  setUsageFilter,
+  clearUsageFilter,
 } from "../../actions/filterActions";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
@@ -95,6 +90,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const GENDER_OPTIONS = ["Men", "Women", "Boys", "Girls", "Unisex"];
+const USAGE_OPTIONS = ["Casual", "Formal", "Sports", "Kids"];
 
 const ProductFilterBar = ({ sizeSelected, filter }) => {
   // Khởi tạo state và các hook
@@ -108,13 +104,11 @@ const ProductFilterBar = ({ sizeSelected, filter }) => {
     "priceRange",
     "categories",
     "gender",
-    "size",
-    "rating",
+    "usage",
   ]);
   const [price, setPrice] = useState(INITIAL_RANGE_PRICE);
-  const [size, setSize] = useState("");
-  const [rating, setRating] = useState(0);
   const [gender, setGender] = useState(filter?.gender || "");
+  const [usage, setUsage] = useState(filter?.usage || "");
 
   // Hooks for API data
   const { data: categoriesResponse, isLoading: loadingCategories, error: errorCategories } = useGetCategories();
@@ -140,12 +134,6 @@ const ProductFilterBar = ({ sizeSelected, filter }) => {
   }, [dispatch, price]);
 
   useEffect(() => {
-    if (!sizeSelected) {
-      setSize("");
-    }
-  }, [sizeSelected]);
-
-  useEffect(() => {
     if (onMobile) {
       setExpanded([]);
     }
@@ -166,31 +154,8 @@ const ProductFilterBar = ({ sizeSelected, filter }) => {
     );
   };
 
-  const handleRatingChange = (newRating) => {
-    if (newRating === rating) {
-      setRating(0);
-      dispatch(removeRating());
-    } else {
-      setRating(newRating);
-      dispatch(addRating(newRating));
-    }
-  };
-
   const handlePriceChange = (e, newValue) => {
     setPrice(newValue);
-  };
-
-  const handleSizeChange = (newSize) => {
-    setSize(newSize);
-    addSizeHandler(newSize);
-  };
-
-  const addCategoriesHandler = (category) => {
-    dispatch(addCategories(category));
-  };
-
-  const addSizeHandler = (size) => {
-    dispatch(addSize(size));
   };
 
   const handleGenderChange = (selectedGender) => {
@@ -203,10 +168,19 @@ const ProductFilterBar = ({ sizeSelected, filter }) => {
     }
   };
 
+  const handleUsageChange = (selectedUsage) => {
+    if (selectedUsage === usage) {
+      setUsage("");
+      dispatch(clearUsageFilter());
+    } else {
+      setUsage(selectedUsage);
+      dispatch(setUsageFilter(selectedUsage));
+    }
+  };
+
   const handleArticleTypeClick = (articleType) => {
     const queryParams = { ...query, articleType };
     if (currentArticleType === articleType) {
-      // If clicking the same articleType, remove it
       delete queryParams.articleType;
     }
     const queryStr = queryString.stringify(queryParams);
@@ -284,6 +258,7 @@ const ProductFilterBar = ({ sizeSelected, filter }) => {
           </Box>
         </AccordionDetails>
       </Accordion>
+      <Divider className={classes.divider} />
       <Accordion
         className={classes.accordion}
         expanded={expanded.indexOf("gender") >= 0}
@@ -309,71 +284,30 @@ const ProductFilterBar = ({ sizeSelected, filter }) => {
           </Box>
         </AccordionDetails>
       </Accordion>
-      <Accordion
-        className={classes.accordion}
-        expanded={expanded.indexOf("size") >= 0}
-        onChange={handleAccordionChange("size")}
-      >
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6" gutterBottom className={classes.title}>
-            Size
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <FormControl fullWidth component="fieldset">
-            <RadioGroup
-              className={classes.size}
-              value={size}
-              onChange={(e) => handleSizeChange(e.target.value)}
-            >
-              {["s", "m", "l", "xl"].map((value) => (
-                <FormControlLabel
-                  key={value}
-                  value={value}
-                  control={<Radio />}
-                  label={value.toUpperCase()}
-                />
-              ))}
-            </RadioGroup>
-          </FormControl>
-        </AccordionDetails>
-      </Accordion>
       <Divider className={classes.divider} />
       <Accordion
         className={classes.accordion}
-        expanded={expanded.indexOf("rating") >= 0}
-        onChange={handleAccordionChange("rating")}
+        expanded={expanded.indexOf("usage") >= 0}
+        onChange={handleAccordionChange("usage")}
       >
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography variant="h6" gutterBottom className={classes.title}>
-            Rating
+            Usage
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <FormControl fullWidth component="fieldset">
-            <RadioGroup
-              value={String(rating)}
-              onChange={(e) => handleRatingChange(Number(e.target.value))}
-            >
-              {[5, 4, 3, 2, 1].map((value) => (
-                <FormControlLabel
-                  key={value}
-                  value={String(value)}
-                  control={<Radio />}
-                  label={
-                    <Box display="flex" alignItems="center">
-                      <Rating
-                        name="rating-filter"
-                        value={value}
-                        readOnly
-                        style={{ marginRight: 8 }}
-                      />
-                    </Box>
-                  }
-                />
-              ))}
-            </RadioGroup>
-          </FormControl>
+          <Box className={classes.category} color="text.secondary">
+            {USAGE_OPTIONS.map((option) => (
+              <Chip
+                key={option}
+                label={option}
+                variant={usage === option ? "default" : "outlined"}
+                size="medium"
+                onClick={() => handleUsageChange(option)}
+                className={clsx(usage === option && classes.chipActive)}
+              />
+            ))}
+          </Box>
         </AccordionDetails>
       </Accordion>
       <Divider className={classes.divider} />

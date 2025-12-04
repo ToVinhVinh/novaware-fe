@@ -3,10 +3,9 @@ import {
   removeSearchTerm,
   removeRangePrice,
   removeCategory,
-  removeSize,
   removeBrand,
-  removeRating,
   clearGenderFilter,
+  clearUsageFilter,
 } from "../../actions/filterActions";
 import { useFilterProducts } from "../../hooks/api/useProduct";
 import {
@@ -124,17 +123,16 @@ const ShopScreen = ({ location, history }) => {
   const query = queryString.parse(location.search);
   let { sort_by = "default", page: pageNumber = 1, articleType } = query;
   const filter = useSelector((state) => state.filter);
-  const { searchTerm, categories, brands, size, priceMax, priceMin, rating, gender } =
+  const { searchTerm, categories, brands, priceMax, priceMin, gender, usage } =
     filter;
   const filterQuery = {
     keyword: searchTerm || undefined,
     categories: categories?.length ? categories.join(",") : undefined,
     brands: brands?.length ? brands.join(",") : undefined,
-    size: size || undefined,
     priceMin: priceMin || undefined,
     priceMax: priceMax || undefined,
-    rating: rating || undefined,
     gender: gender || undefined,
+    usage: usage || undefined,
     sort_by: sort_by || "default",
     articleType: articleType || undefined,
     pageNumber: pageNumber || 1,
@@ -182,7 +180,6 @@ const ShopScreen = ({ location, history }) => {
         <Grid item xs={12} md={3}>
           <ProductFilterBar
             products={products}
-            sizeSelected={size}
             filter={filter}
           />
         </Grid>
@@ -272,12 +269,12 @@ const ShopScreen = ({ location, history }) => {
                   onDelete={() => dispatch(clearGenderFilter())}
                 />
               )}
-              {size && (
+              {usage && (
                 <Chip
                   variant="outlined"
                   size="small"
-                  label={`Size: ${size.toUpperCase()}`}
-                  onDelete={() => dispatch(removeSize())}
+                  label={`Usage: ${usage}`}
+                  onDelete={() => dispatch(clearUsageFilter())}
                 />
               )}
               {brands.map((brand) => (
@@ -289,14 +286,6 @@ const ShopScreen = ({ location, history }) => {
                   onDelete={() => dispatch(removeBrand(brand))}
                 />
               ))}
-              {rating > 0 && (
-                <Chip
-                  variant="outlined"
-                  size="small"
-                  label={`Rating: ${rating} Star`}
-                  onDelete={() => dispatch(removeRating())}
-                />
-              )}
             </Box>
           </Box>
           {loading ? (

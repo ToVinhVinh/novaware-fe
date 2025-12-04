@@ -16,6 +16,8 @@ import {
   FILTER_REMOVE_RATING,
   FILTER_SET_GENDER,
   FILTER_REMOVE_GENDER,
+  FILTER_SET_USAGE,
+  FILTER_REMOVE_USAGE,
 } from '../constants/filterConstants';
 
 export const addSearchTerm = (term) => ({
@@ -106,4 +108,13 @@ export const setGenderFilter = (gender) => ({
 
 export const clearGenderFilter = () => ({
   type: FILTER_REMOVE_GENDER,
+});
+
+export const setUsageFilter = (usage) => ({
+  type: FILTER_SET_USAGE,
+  payload: usage,
+});
+
+export const clearUsageFilter = () => ({
+  type: FILTER_REMOVE_USAGE,
 });

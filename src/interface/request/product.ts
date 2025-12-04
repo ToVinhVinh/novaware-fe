@@ -98,9 +98,8 @@ export interface IFilterProductsQuery {
 	keyword?: string;
 	categories?: string; // comma-separated
 	brands?: string; // comma-separated
-	size?: "s" | "m" | "l" | "xl";
-	rating?: number;
 	gender?: string;
+	usage?: string;
 	priceMin?: number;
 	priceMax?: number;
 	sort_by?: "latest" | "rating" | "sale" | "priceAsc" | "priceDesc";

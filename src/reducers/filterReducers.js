@@ -16,6 +16,8 @@ import {
   FILTER_REMOVE_RATING,
   FILTER_SET_GENDER,
   FILTER_REMOVE_GENDER,
+  FILTER_SET_USAGE,
+  FILTER_REMOVE_USAGE,
 } from "../constants/filterConstants";
 import _omit from "lodash.omit";
 
@@ -85,6 +87,10 @@ export const filterReducer = (state = INITIAL_STATE, action) => {
       return { ...state, gender: action.payload };
     case FILTER_REMOVE_GENDER:
       return _omit(state, "gender");
+    case FILTER_SET_USAGE:
+      return { ...state, usage: action.payload };
+    case FILTER_REMOVE_USAGE:
+      return _omit(state, "usage");
     default:
       return state;
   }
