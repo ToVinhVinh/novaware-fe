@@ -63,7 +63,7 @@ const useStyles = makeStyles((theme) => ({
     border: '1px solid #ddd',
     borderRadius: 4,
     backgroundColor: '#fff',
-    maxHeight: 200,
+    maxHeight: 300,
     overflowY: 'auto',
     boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
   },
@@ -78,20 +78,65 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   productImage: {
-    width: 50,
-    height: 50,
+    width: 70,
+    height: 70,
     marginRight: 10,
     objectFit: 'cover',
+  },
+  productInfo: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 4,
   },
   productName: {
     margin: 0,
     fontWeight: 'bold',
-    flex: 1,
+    fontSize: '0.95em',
+    lineHeight: 1.3,
+    color: '#333',
+  },
+  productMeta: {
+    margin: 0,
+    fontSize: '0.75em',
+    color: '#888',
+    display: 'flex',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
+  productRating: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 4,
+    fontSize: '0.8em',
+  },
+  ratingStars: {
+    color: '#FFA500',
+    fontSize: '18px',
+  },
+  productPriceContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 4,
   },
   productPrice: {
     margin: 0,
     fontSize: '0.9em',
-    color: '#555',
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  productSalePrice: {
+    margin: 0,
+    fontSize: '0.9em',
+    fontWeight: 'bold',
+    color: '#e74c3c',
+  },
+  productOriginalPrice: {
+    margin: 0,
+    fontSize: '0.8em',
+    color: '#999',
+    textDecoration: 'line-through',
   },
   marqueeContainer: {
     position: 'absolute',
@@ -127,9 +172,10 @@ const SearchBox = (props) => {
 
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState(keyword);
+  const [showProductList, setShowProductList] = useState(true);
 
   const { data: productsResponse, isLoading: loading } = useSearchProductsByName(
-    debouncedKeyword ? { q: debouncedKeyword, page_size: 15 } : undefined
+    debouncedKeyword && showProductList ? { q: debouncedKeyword, page_size: 15 } : undefined
   );
   const products = productsResponse?.data?.products || [];
 
@@ -165,6 +211,7 @@ const SearchBox = (props) => {
     const newKeyword = e.target.value;
     setKeyword(newKeyword);
     setShowMarquee(false);
+    setShowProductList(true); // Hiển thị lại productList khi user nhập
   };
 
   const handleSubmit = (e) => {
@@ -188,7 +235,6 @@ const SearchBox = (props) => {
   return (
     <div>
       <form className={classes.search} onSubmit={handleSubmit}>
-        {/* Chỉ hiển thị marquee khi showMarquee là true */}
         {showMarquee && (
           <div className={classes.marqueeContainer}>
             <span className={classes.marqueeText}>{displayText}</span>
@@ -210,35 +256,99 @@ const SearchBox = (props) => {
       </form>
 
       {/* Hiển thị danh sách sản phẩm */}
-      {debouncedKeyword && (
+      {debouncedKeyword && showProductList && (
         <div className={classes.productList}>
           {loading ? (
             <LottieLoading />
           ) : products.length > 0 ? (
-            products.slice(0, 15).map((product) => (
-              <div
-                key={product._id}
-                className={classes.productItem}
-                onClick={() => {
-                  history.push(`/product?id=${product._id}`);
-                  setKeyword('');
-                  if (props.setOpenSearchDrawer) {
-                    props.setOpenSearchDrawer(false);
-                  }
-                }}
-              >
-                <img
-                  src={product.images[0]}
-                  alt={product.name}
-                  className={classes.productImage}
-                />
-                <div>
-                  <p className={classes.productName}>{product.name}</p>
-                  <p className={classes.productPrice}>{product.price} USD</p>
-                  <p className={classes.productPrice}>{product.sale} USD</p>
+            products.slice(0, 15).map((product) => {
+              // Tính giá sản phẩm
+              const variant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
+
+              // Giá gốc: lấy từ variants[0].price, fallback về product.price nếu không có variant
+              const basePrice = variant?.price || product.price || 0;
+
+              // Giá sale: tính bằng variants[0].price * (1 - sale/100)
+              let salePrice = null;
+              if (variant?.price && product.sale && product.sale > 0) {
+                salePrice = variant.price * (1 - product.sale / 100);
+              }
+
+              const displayPrice = salePrice || basePrice;
+
+              // Lấy tên hiển thị
+              const displayName = product.productDisplayName || product.name || 'Product';
+
+              // Lấy ảnh
+              const productImage = product.images && product.images.length > 0
+                ? product.images[0]
+                : 'https://www.lwf.org/images/emptyimg.png';
+
+              return (
+                <div
+                  key={product._id || product.id}
+                  className={classes.productItem}
+                  onClick={() => {
+                    // Clear keyword và ẩn productList ngay lập tức
+                    setKeyword('');
+                    setDebouncedKeyword('');
+                    setShowProductList(false);
+
+                    // Navigate đến trang chi tiết
+                    history.push(`/product?id=${product._id || product.id}`);
+
+                    // Đóng search drawer nếu có
+                    if (props.setOpenSearchDrawer) {
+                      props.setOpenSearchDrawer(false);
+                    }
+                  }}
+                >
+                  <img
+                    src={productImage}
+                    alt={displayName}
+                    className={classes.productImage}
+                    onError={(e) => {
+                      e.target.src = 'https://www.lwf.org/images/emptyimg.png';
+                    }}
+                  />
+                  <div className={classes.productInfo}>
+                    <p className={classes.productName}>{displayName}</p>
+
+                    {/* Meta information */}
+                    {(product.articleType || product.gender || product.baseColour) && (
+                      <p className={classes.productMeta}>
+                        {product.articleType && <span>{product.articleType}</span>}
+                        {product.gender && <span>• {product.gender}</span>}
+                        {product.baseColour && <span>• {product.baseColour}</span>}
+                      </p>
+                    )}
+
+                    {/* Rating */}
+                    {product.rating && (
+                      <div className={classes.productRating}>
+                        <span className={classes.ratingStars}>
+                          {'★'.repeat(Math.floor(product.rating))}
+                          {'☆'.repeat(5 - Math.floor(product.rating))}
+                        </span>
+                        <span>({product.rating.toFixed(1)})</span>
+                      </div>
+                    )}
+
+                    {/* Price */}
+                    <div className={classes.productPriceContainer}>
+                      {salePrice ? (
+                        <>
+                          <p className={classes.productSalePrice}>${salePrice.toFixed(2)}</p>
+                          <p className={classes.productOriginalPrice}>${basePrice.toFixed(2)}</p>
+                        </>
+                      ) : (
+                        <p className={classes.productPrice}>${displayPrice.toFixed(2)}</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           ) : (
             <p className={classes.noProductsFound}>No products found</p>
           )}
