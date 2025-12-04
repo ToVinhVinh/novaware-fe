@@ -208,6 +208,8 @@ const ProductScreen = ({ setLoginModalOpen }) => {
                 <ProductRelated
                   category={product.category}
                   excludeId={product._id}
+                  userId={currentUserId}
+                  productId={productId}
                 />
               )}
             </Grid>

@@ -55,7 +55,7 @@ const ProductCard = (props) => {
   return (
     <>
       <motion.div
-        className="group shadow-md h-full bg-white border border-pink-500 rounded-lg overflow-hidden transition-all duration-300"
+        className="group shadow-md h-full bg-white border border-pink-500 overflow-hidden transition-all duration-300"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -68,7 +68,6 @@ const ProductCard = (props) => {
             }
           }}
         >
-          {/* Image Container with proper aspect ratio */}
           <div className="relative w-full pb-[100%] -mb-10 overflow-hidden bg-gray-50 transition-all duration-300 ease-in-out z-0">
             {sale > 0 && (
               <div className="absolute top-3 left-3 z-20 bg-pink-600 px-2 py-1 text-xs font-semibold uppercase text-white">
@@ -79,11 +78,8 @@ const ProductCard = (props) => {
             <div className="absolute top-3 left-16 z-20 bg-pink-600 px-2 py-1 text-xs font-semibold uppercase text-white">
               {articleType}
             </div>
-
-            {/* Placeholder or Images */}
             {images && images.length > 0 ? (
               <>
-                {/* Back Image */}
                 {images[1] && (
                   <motion.img
                     className="absolute inset-0 p-4 h-full w-full object-contain hover:scale-110 transition-all duration-300 ease-in-out"
@@ -106,7 +102,6 @@ const ProductCard = (props) => {
                 />
               </>
             ) : (
-              /* Placeholder when no images */
               <motion.img
                 className="absolute inset-0 h-full w-full object-contain bg-white hover:scale-110 transition-all duration-300 ease-in-out"
                 src="https://www.lwf.org/images/emptyimg.png"
@@ -127,7 +122,7 @@ const ProductCard = (props) => {
             </Tooltip>
 
             {/* Rating display */}
-            {rating && (
+            {rating > 0 && (
               <div className="flex items-center gap-1">
                 <div className="flex text-yellow-400">
                   {[...Array(5)].map((_, i) => (
@@ -141,7 +136,7 @@ const ProductCard = (props) => {
             )}
 
             <div className="mt-auto flex flex-col gap-2">
-              <div className="flex items-center gap-2">
+              {finalPrice && finalPrice !== 0 && finalPrice !== null && <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-white">
                   ${finalPrice.toFixed(2)}
                 </span>
@@ -150,7 +145,7 @@ const ProductCard = (props) => {
                     ${basePrice.toFixed(2)}
                   </span>
                 )}
-              </div>
+              </div>}
 
               <div className="w-full md:hidden">
                 <button
@@ -164,7 +159,6 @@ const ProductCard = (props) => {
                 </button>
               </div>
             </div>
-            {/* Desktop Action Buttons */}
             <div
               className="grid grid-cols-2 gap-2 mt-2"
             >

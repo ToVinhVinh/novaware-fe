@@ -7,6 +7,7 @@ import { IoSearchOutline } from 'react-icons/io5';
 import { addSearchTerm } from '../actions/filterActions';
 import { useSearchProductsByName } from '../hooks/api/useProduct';
 import LottieLoading from './LottieLoading';
+import Loader from './Loader';
 
 const useStyles = makeStyles((theme) => ({
   search: {
@@ -169,22 +170,18 @@ const SearchBox = (props) => {
   const dispatch = useDispatch();
   const classes = useStyles(props);
   const history = useHistory();
-
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState(keyword);
   const [showProductList, setShowProductList] = useState(true);
-
   const { data: productsResponse, isLoading: loading } = useSearchProductsByName(
     debouncedKeyword && showProductList ? { q: debouncedKeyword, page_size: 15 } : undefined
   );
   const products = productsResponse?.data?.products || [];
-
   const [displayText, setDisplayText] = useState('');
   const fullText = "Type here to search for products ...";
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAdding, setIsAdding] = useState(true);
   const [showMarquee, setShowMarquee] = useState(true);
-
   useEffect(() => {
     const intervalId = setInterval(() => {
       if (isAdding) {
@@ -211,7 +208,7 @@ const SearchBox = (props) => {
     const newKeyword = e.target.value;
     setKeyword(newKeyword);
     setShowMarquee(false);
-    setShowProductList(true); // Hiển thị lại productList khi user nhập
+    setShowProductList(true);
   };
 
   const handleSubmit = (e) => {
@@ -254,32 +251,20 @@ const SearchBox = (props) => {
           <IoSearchOutline fontSize={20} />
         </IconButton>
       </form>
-
-      {/* Hiển thị danh sách sản phẩm */}
       {debouncedKeyword && showProductList && (
         <div className={classes.productList}>
           {loading ? (
-            <LottieLoading />
+            <Loader />
           ) : products.length > 0 ? (
             products.slice(0, 15).map((product) => {
-              // Tính giá sản phẩm
               const variant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
-
-              // Giá gốc: lấy từ variants[0].price, fallback về product.price nếu không có variant
               const basePrice = variant?.price || product.price || 0;
-
-              // Giá sale: tính bằng variants[0].price * (1 - sale/100)
               let salePrice = null;
               if (variant?.price && product.sale && product.sale > 0) {
                 salePrice = variant.price * (1 - product.sale / 100);
               }
-
               const displayPrice = salePrice || basePrice;
-
-              // Lấy tên hiển thị
               const displayName = product.productDisplayName || product.name || 'Product';
-
-              // Lấy ảnh
               const productImage = product.images && product.images.length > 0
                 ? product.images[0]
                 : 'https://www.lwf.org/images/emptyimg.png';
@@ -289,15 +274,10 @@ const SearchBox = (props) => {
                   key={product._id || product.id}
                   className={classes.productItem}
                   onClick={() => {
-                    // Clear keyword và ẩn productList ngay lập tức
                     setKeyword('');
                     setDebouncedKeyword('');
                     setShowProductList(false);
-
-                    // Navigate đến trang chi tiết
                     history.push(`/product?id=${product._id || product.id}`);
-
-                    // Đóng search drawer nếu có
                     if (props.setOpenSearchDrawer) {
                       props.setOpenSearchDrawer(false);
                     }
@@ -313,8 +293,6 @@ const SearchBox = (props) => {
                   />
                   <div className={classes.productInfo}>
                     <p className={classes.productName}>{displayName}</p>
-
-                    {/* Meta information */}
                     {(product.articleType || product.gender || product.baseColour) && (
                       <p className={classes.productMeta}>
                         {product.articleType && <span>{product.articleType}</span>}
@@ -322,8 +300,6 @@ const SearchBox = (props) => {
                         {product.baseColour && <span>• {product.baseColour}</span>}
                       </p>
                     )}
-
-                    {/* Rating */}
                     {product.rating && (
                       <div className={classes.productRating}>
                         <span className={classes.ratingStars}>
@@ -333,8 +309,6 @@ const SearchBox = (props) => {
                         <span>({product.rating.toFixed(1)})</span>
                       </div>
                     )}
-
-                    {/* Price */}
                     <div className={classes.productPriceContainer}>
                       {salePrice ? (
                         <>

@@ -13,6 +13,8 @@ import {
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import AddIcon from "@material-ui/icons/Add";
 import RemoveIcon from "@material-ui/icons/Remove";
+import LocalShippingIcon from "@material-ui/icons/LocalShipping";
+import ReplayIcon from "@material-ui/icons/Replay";
 import Link from "@material-ui/core/Link";
 import Rating from "@material-ui/lab/Rating";
 import Radio from "@material-ui/core/Radio";
@@ -222,6 +224,52 @@ const useStyles = makeStyles((theme) => ({
   },
   qtyIcon: {
     fontSize: 16,
+  },
+  policySection: {
+    marginTop: theme.spacing(3),
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+    gap: theme.spacing(2),
+  },
+  policyCard: {
+    display: "flex",
+    alignItems: "center",
+    padding: theme.spacing(2),
+    borderRadius: 12,
+    border: "1px solid #ccc",
+    cursor: "pointer",
+    transition: "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease",
+    background: "#fff",
+    "&:hover": {
+      transform: "translateY(-3px)",
+      boxShadow: "0 14px 28px rgba(15,23,42,0.16)",
+      borderColor: theme.palette.secondary.main,
+    },
+  },
+  policyIconWrap: {
+    width: 50,
+    height: 50,
+    borderRadius: "999px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fce7f3",
+    marginRight: theme.spacing(2),
+    color: theme.palette.secondary.main,
+  },
+  policyText: {
+    flex: 1,
+  },
+  policyTitle: {
+    fontWeight: 600,
+  },
+  policySubtitle: {
+    fontSize: 13,
+    color: theme.palette.text.secondary,
+  },
+  policyArrow: {
+    color: theme.palette.text.secondary,
+    marginLeft: theme.spacing(1),
   },
   pulseIcon: {
     animation: "$pulse 1.2s ease-in-out infinite",
@@ -517,9 +565,6 @@ const ProductInfo = memo(
             precision={0.5}
             readOnly
           />
-          <Typography component="span" style={{ marginLeft: 5 }}>
-            {`(${product.reviews?.length || 0} reviews) | `}
-          </Typography>
           <Typography
             component="span"
             style={{ marginLeft: 5 }}
@@ -636,18 +681,6 @@ const ProductInfo = memo(
                   }}
                 />
               </Box>
-              <Typography variant="body1" className={classes.description}>
-                {/* eslint-disable-next-line */}
-                <Link
-                  component="button"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    handleUpdateModalOpen();
-                  }}
-                >
-                  Update your status to get recommended size
-                </Link>
-              </Typography>
               <UpdateProfileModal
                 open={updateModalOpen}
                 onClose={handleUpdateModalClose}
@@ -669,7 +702,7 @@ const ProductInfo = memo(
                   className={classes.label1}
                   style={{ marginRight: "16px", marginBottom: "-2px" }}
                 >
-                  Color:
+                  Base color:
                 </FormLabel>
                 <Controller
                   name="color"
@@ -891,41 +924,41 @@ const ProductInfo = memo(
           error={getHybridRecommendations.error}
         />
 
-        <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="flex-start"
-          mt={2}
-        >
-          <Box
-            display="flex"
-            alignItems="center"
-            onClick={handleShippingClick}
-            style={{ cursor: "pointer" }}
-            mb={2}
-          >
-            <Typography variant="h6" component="div">
-              Shipping Policy
-              <Typography variant="body2" color="textSecondary">
-                Free shipping on orders over 1.000 $
+        <Box className={classes.policySection}>
+          <Box className={classes.policyCard} onClick={handleShippingClick}>
+            <Box className={classes.policyIconWrap}>
+              <LocalShippingIcon />
+            </Box>
+            <Box className={classes.policyText}>
+              <Typography variant="subtitle1" className={classes.policyTitle}>
+                Shipping Policy
               </Typography>
-            </Typography>
-            <ChevronRightIcon className={classes.NextIcon} />
+              <Typography className={classes.policySubtitle}>
+                Free shipping on orders over $1,000
+              </Typography>
+            </Box>
+            <ChevronRightIcon className={classes.policyArrow} />
           </Box>
 
           <Box
-            display="flex"
-            alignItems="center"
+            className={classes.policyCard}
             onClick={handleReturnClick}
-            style={{ cursor: "pointer" }}
           >
-            <Typography variant="h6" component="div">
-              Return Policy
-              <Typography variant="body2" color="textSecondary">
+            <Box
+              className={classes.policyIconWrap}
+              style={{ backgroundColor: "#fee2e2", boxShadow: "0 4px 10px rgba(248,113,113,0.25)" }}
+            >
+              <ReplayIcon />
+            </Box>
+            <Box className={classes.policyText}>
+              <Typography variant="subtitle1" className={classes.policyTitle}>
+                Return Policy
+              </Typography>
+              <Typography className={classes.policySubtitle}>
                 Free returns within 7 days
               </Typography>
-            </Typography>
-            <ChevronRightIcon className={classes.NextIcon} />
+            </Box>
+            <ChevronRightIcon className={classes.policyArrow} />
           </Box>
         </Box>
         <ShippingPolicy

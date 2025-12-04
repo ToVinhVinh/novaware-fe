@@ -241,13 +241,17 @@ export const createReview = async (id: string, body: ICreateReviewBody): Promise
 export const getTopProducts = async (query?: IGetTopProductsQuery): Promise<IGetTopProductsResponse> => {
 	const modifiedQuery = {
 		...query,
-		perPage: 12,
+		perPage: 10,
 	};
 	return await sendGet(`/products/top`, modifiedQuery);
 };
 
 export const getLatestProducts = async (query?: IGetLatestProductsQuery): Promise<IGetLatestProductsResponse> => {
-	return await sendGet(`/products/latest`, query);
+	const modifiedQuery = {
+		...query,
+		perPage: 10,
+	};
+	return await sendGet(`/products/latest`, modifiedQuery);
 };
 
 // Get Sale Products
@@ -255,7 +259,6 @@ export const getSaleProducts = async (query?: IGetSaleProductsQuery): Promise<IG
 	return await sendGet(`/products/sale`, query);
 };
 
-// Get Related Products
 export const getRelatedProducts = async (query?: IGetRelatedProductsQuery): Promise<IGetRelatedProductsResponse> => {
 	return await sendGet(`/products/related`, query);
 };
@@ -270,19 +273,14 @@ export const filterProducts = async (query?: IFilterProductsQuery): Promise<IFil
 	return await sendGet(`/products/filter`, query);
 };
 
-// Search Products By Name
 export const searchProductsByName = async (query?: ISearchProductsByNameQuery): Promise<ISearchProductsByNameResponse> => {
-	// Normalize query parameters: support q, query, or search
 	const normalizedQuery: Record<string, any> = {};
-	
 	if (query) {
-		// Use q, query, or search (whichever is provided)
 		const searchTerm = query.q || query.query || query.search;
 		if (searchTerm) {
 			normalizedQuery.q = searchTerm;
 		}
 		
-		// Copy other optional parameters
 		if (query.category) normalizedQuery.category = query.category;
 		if (query.articleType) normalizedQuery.articleType = query.articleType;
 		if (query.gender) normalizedQuery.gender = query.gender;
@@ -297,7 +295,6 @@ export const searchProductsByName = async (query?: ISearchProductsByNameQuery): 
 	
 	const response = await sendGet(`/products/search_by_name`, normalizedQuery);
 	
-	// Normalize products in response if they exist
 	if (response?.data?.products && Array.isArray(response.data.products)) {
 		return {
 			...response,

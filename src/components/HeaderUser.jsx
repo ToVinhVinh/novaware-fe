@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from "react";
-import UserIcon from "../assets/icons/user.svg?react";
+import { Avatar, Badge, withStyles } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { Link as RouterLink } from "react-router-dom";
 import { logout } from "../actions/userActions";
@@ -14,6 +14,46 @@ import Paper from "@material-ui/core/Paper";
 import Popper from "@material-ui/core/Popper";
 import MenuItem from "@material-ui/core/MenuItem";
 import MenuList from "@material-ui/core/MenuList";
+import { useGetUserById } from "../hooks/api/useUser";
+
+import male30 from "../assets/images/male30.webp";
+import male40 from "../assets/images/male40.webp";
+import male50 from "../assets/images/male50.webp";
+import female30 from "../assets/images/female30.webp";
+import female40 from "../assets/images/female40.webp";
+import female50 from "../assets/images/female50.webp";
+
+const StyledBadge = withStyles((theme) => ({
+  root: {
+    position: "relative",
+  },
+  badge: {
+    backgroundColor: "#44b700",
+    color: "#44b700",
+    boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+    "&::after": {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      borderRadius: "50%",
+      animation: "$ripple 1.2s infinite ease-in-out",
+      border: "1px solid currentColor",
+      content: '""',
+    },
+  },
+  "@keyframes ripple": {
+    "0%": {
+      transform: "scale(.8)",
+      opacity: 1,
+    },
+    "100%": {
+      transform: "scale(2.4)",
+      opacity: 0,
+    },
+  },
+}))(Badge);
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -28,7 +68,28 @@ const useStyles = makeStyles((theme) => ({
     marginRight: theme.spacing(1) + 4,
     color: theme.palette.text.secondary,
   },
+  avatar: {
+    width: theme.spacing(5.2),
+    height: theme.spacing(5.2),
+    fontSize: 14,
+  },
 }));
+
+const getAvatarImage = (age, gender) => {
+  if (!age || !gender) {
+    return null;
+  }
+
+  const isMale = gender.toLowerCase() === "male";
+
+  if (age <= 30) {
+    return isMale ? male30 : female30;
+  } else if (age <= 50) {
+    return isMale ? male40 : female40;
+  }
+
+  return isMale ? male50 : female50;
+};
 
 export default function HeaderUser({
   setLoginModalOpen,
@@ -38,6 +99,10 @@ export default function HeaderUser({
   const dispatch = useDispatch();
   const classes = useStyles();
   const { userInfo } = useSelector((state) => state.userLogin);
+  const currentUserId = userInfo?._id || "";
+  const { data: userResponse } = useGetUserById(currentUserId);
+  const fullUser = userResponse?.data?.user;
+  const mergedUser = fullUser || userInfo;
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
   const theme = useTheme();
@@ -45,6 +110,11 @@ export default function HeaderUser({
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
   };
+  const avatarImage = getAvatarImage(mergedUser?.age, mergedUser?.gender);
+  const avatarFallback =
+    mergedUser?.name?.trim()?.charAt(0)?.toUpperCase() ||
+    mergedUser?.email?.trim()?.charAt(0)?.toUpperCase() ||
+    "U";
 
   const handleLogout = () => {
     dispatch(logout());
@@ -90,7 +160,20 @@ export default function HeaderUser({
         {userInfo ? (
           <>
             <IconButton ref={anchorRef} onClick={handleToggle}>
-              <UserIcon style={{ fill: iconColor }} height={22} />
+              <StyledBadge
+                overlap="circular"
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                variant="dot"
+              >
+                <Avatar
+                  src={avatarImage}
+                  alt={mergedUser?.name || "Profile"}
+                  className={classes.avatar}
+                  style={{ backgroundColor: avatarImage ? "transparent" : iconColor }}
+                >
+                  {!avatarImage && avatarFallback}
+                </Avatar>
+              </StyledBadge>
             </IconButton>
             <Popper
               open={open}
@@ -116,7 +199,7 @@ export default function HeaderUser({
                       >
                         <MenuItem component={RouterLink} to={userInfo.isAdmin ? "/admin/recommend-products" : "/profile"} divider>
                           <FaUser className={classes.menuItemIcon} />
-                          {userInfo.name ? userInfo.name : "Profile"}
+                          View Profile
                         </MenuItem>
                         <MenuItem onClick={handleChat}>
                           <FaComments className={classes.menuItemIcon} />

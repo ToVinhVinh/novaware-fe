@@ -87,23 +87,18 @@ const ProductTabs = () => {
   const matches = useMediaQuery('(max-width:600px)');
   const titles = ['Latest Products', 'Sale Products', 'All Products'];
 
-  const { data: productLatestResponse, isLoading: loadingProductLatest, error: errorProductLatest } = useGetLatestProducts({ pageNumber: 1, perPage: 12 });
+  const { data: productLatestResponse, isLoading: loadingProductLatest, error: errorProductLatest } = useGetLatestProducts({ pageNumber: 1, perPage: 10 });
   const productsLatestRaw = productLatestResponse?.data?.products || [];
   const productsLatest = useMemo(() => productsLatestRaw.slice(0, 15).sort(() => 0.5 - Math.random()), [productsLatestRaw]);
-
-  const { data: productSaleResponse, isLoading: loadingProductSale, error: errorProductSale } = useGetSaleProducts({ pageNumber: 1, perPage: 12 });
+  const { data: productSaleResponse, isLoading: loadingProductSale, error: errorProductSale } = useGetSaleProducts({ pageNumber: 1, perPage: 10 });
   const productsSaleRaw = productSaleResponse?.data?.products || [];
   const productsSale = useMemo(() => productsSaleRaw.slice(0, 15).sort(() => 0.5 - Math.random()), [productsSaleRaw]);
-
-  const { data: productListResponse, isLoading: loadingProductList, error: errorProductList } = useGetProducts({ option: 'all', pageNumber: 1, pageSize: 15 });
-  const productsList = productListResponse?.data?.products || [];
-
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
   return (
-    <div className="mx-auto px-16">
+    <div className="mx-auto px-12">
       <div className='w-full flex items-center justify-center gap-4 my-10'>
         <div className='h-[1px] bg-primary flex-1'></div>
         <Typography variant="h5" align="center" className="tracking-widest">{titles[value] || ''}</Typography>
@@ -137,7 +132,7 @@ const ProductTabs = () => {
         ) : errorProductLatest ? (
           <LottieEmpty className="flex justify-center" />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
             {productsLatest &&
               productsLatest.map((product, index) => {
                 const key =

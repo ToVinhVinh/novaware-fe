@@ -22,8 +22,6 @@ import {
     CircularProgress,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { FaTshirt, FaChartLine, FaVenusMars, FaDollarSign, FaGem, FaFemale, FaShoePrints } from "react-icons/fa";
 import { PiPants } from "react-icons/pi";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
@@ -227,6 +225,10 @@ const useStyles = makeStyles((theme) => ({
         borderRadius: 0,
         boxShadow: "none",
         border: "1px solid #e0e0e0",
+        "&:hover": {
+            borderColor: "#F50057",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+        },
     },
     productImage: {
         width: "100%",
@@ -530,9 +532,52 @@ const normalizeCategoryName = (categoryName) => {
     return categoryMap[lower] || normalized.charAt(0).toUpperCase() + normalized.slice(1).toLowerCase();
 };
 
-// Lazy-loaded image component with loading state
+// Parse images which can be either an array or a JSON string like '["url"]'
+const parseImages = (images) => {
+    if (!images) return [];
+    if (Array.isArray(images)) return images;
+    if (typeof images === "string") {
+        try {
+            const parsed = JSON.parse(images);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    }
+    return [];
+};
+
+const getCategoryFromProductMeta = (product) => {
+    if (!product) return "Other";
+
+    const master = (product.masterCategory || "").toLowerCase();
+    const sub = (product.subCategory || "").toLowerCase();
+    const article = (product.articleType || "").toLowerCase();
+
+    if (sub === "topwear") {
+        if (article === "dress" || article === "dresses") {
+            return "Dresses";
+        }
+        return "Tops";
+    }
+
+    if (sub === "bottomwear" || ["jeans", "shorts", "trousers", "pants"].includes(article)) {
+        return "Bottoms";
+    }
+
+    if (master === "footwear" || sub === "shoes" || article.includes("shoe") || article.includes("flip flops")) {
+        return "Shoes";
+    }
+
+    if (master === "accessories" || sub === "accessories" || sub === "watches" || article === "watches") {
+        return "Accessories";
+    }
+
+    return normalizeCategoryName(article || sub || master || "Other");
+};
+
 const LazyProductImage = ({ src, alt, className, classes }) => {
-    const [imageState, setImageState] = useState("loading"); // loading, loaded, error
+    const [imageState, setImageState] = useState("loading");
     const imgRef = useRef(null);
 
     useEffect(() => {
@@ -591,78 +636,84 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
     const [activeTab, setActiveTab] = useState(0);
     const [carouselIndices, setCarouselIndices] = useState({});
     const iconStyle = useMemo(() => ({ color: ICON_COLOR }), []);
-
-    // Process personalized recommendations
     const personalizedData = useMemo(() => {
-        if (!recommendationData || !recommendationData.personalized) return [];
-        return recommendationData.personalized.map((item) => {
-            const variant = item.product?.variants && item.product.variants.length > 0 ? item.product.variants[0] : null;
+        if (!recommendationData || !Array.isArray(recommendationData.personalized_products)) return [];
+
+        return recommendationData.personalized_products.map((item) => {
+            const product = item.product || {};
+            const images = parseImages(product.images);
+
+            const firstVariantPrice = product.variants && product.variants.length > 0
+                ? product.variants[0].price || 0
+                : product.price || 0;
+
             return {
-                _id: item.product?.id,
-                product_id: item.product?.id,
-                name: item.product?.productDisplayName || item.product?.name || "Product",
-                images: item.product?.images || [],
-                price: variant?.price || item.product?.price || 0,
-                sale: variant?.sale || item.product?.sale || 0,
-                rating: item.product?.rating || 0,
-                score: item.score,
-                reason: item.reason,
-                gender: item.product?.gender,
-                baseColour: item.product?.baseColour,
-                articleType: item.product?.articleType,
-                usage: item.product?.usage,
-                season: item.product?.season,
+                _id: item.product_id,
+                product_id: item.product_id,
+                name: product.productDisplayName || item.name || "Product",
+                images,
+                price: firstVariantPrice,
+                sale: product.sale || 0,
+                rating: product.rating || 0,
+                score: item.priority_score,
+                priorityScore: item.priority_score,
+                gender: product.gender,
+                baseColour: product.baseColour,
+                articleType: product.articleType,
+                usage: product.usage,
+                season: product.season,
             };
         });
     }, [recommendationData]);
 
     const outfitData = useMemo(() => {
-        if (!recommendationData || !recommendationData.outfit) return [];
+        if (!recommendationData || !Array.isArray(recommendationData.outfits)) return [];
 
-        const products = [];
+        return recommendationData.outfits.map((outfit) => {
+            const products = [];
 
-        Object.entries(recommendationData.outfit).forEach(([categoryKey, categoryProducts]) => {
-            if (!Array.isArray(categoryProducts) || categoryProducts.length === 0) return;
-
-            const normalizedCategory = normalizeCategoryName(categoryKey);
-
-            categoryProducts.forEach((item) => {
-                if (!item.product) return;
-
+            (outfit.products || []).forEach((item) => {
                 const product = item.product;
-                const variant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
+                if (!product) return;
+
+                const category = getCategoryFromProductMeta(product);
+                const images = parseImages(product.images);
+
+                const firstVariantPrice = product.variants && product.variants.length > 0
+                    ? product.variants[0].price || 0
+                    : product.price || 0;
 
                 products.push({
-                    _id: product.id,
+                    _id: item.product_id,
                     name: product.productDisplayName || product.name || "Product",
-                    product_id: product.id,
-                    category: normalizedCategory,
-                    price: variant?.price || product.price || 0,
-                    sale: variant?.sale || product.sale || 0,
-                    images: product.images || [],
-                    score: item.score,
-                    reason: item.reason,
+                    product_id: item.product_id,
+                    category,
+                    // Use the price from the first variant as base price
+                    price: firstVariantPrice,
+                    sale: product.sale || 0,
+                    images,
                     articleType: product.articleType,
                     usage: product.usage,
                     season: product.season,
                 });
             });
+
+            // Calculate total price using first variant price and sale%
+            const totalPrice = products.reduce((sum, p) => {
+                const basePrice = p.price || 0;
+                const salePercent = p.sale || 0;
+                const salePrice = basePrice * salePercent / 100;
+                return sum + salePrice;
+            }, 0);
+
+            return {
+                name: `Outfit ${outfit.outfit_number}`,
+                products,
+                totalPrice,
+                compatibilityScore: outfit.score || 0,
+                gender: recommendationData.metadata?.user_gender || user?.gender || "Unisex",
+            };
         });
-
-        if (products.length === 0) return [];
-
-        // Calculate total price
-        const totalPrice = products.reduce((sum, p) => sum + (p.price || 0) * (1 - (p.sale || 0) / 100), 0);
-
-        const outfit = {
-            name: "Complete the Look",
-            products,
-            totalPrice,
-            compatibilityScore: recommendationData.outfit_complete_score || 0,
-            gender: user?.gender || "Unisex",
-        };
-
-        return [outfit];
     }, [recommendationData, user?.gender]);
 
     const getCategoryIcon = (categoryName) => {
@@ -774,13 +825,14 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                     <Typography className={classes.productName} variant="body2">
                         {product.name}
                     </Typography>
-                    {showReason && product.reason && (
-                        <Typography className={classes.reasonText} variant="caption">
-                            {product.reason}
-                        </Typography>
-                    )}
+                    {/* "highlights" / reason removed from UI */}
                     <Typography className={classes.productPrice}>
-                        ${((product.price || 0) * (1 - ((product.sale || 0) / 100))).toFixed(2)}
+                        {(() => {
+                            const basePrice = product.price || 0;
+                            const salePercent = product.sale || 0;
+                            const salePrice = salePercent ? basePrice * salePercent / 100 : basePrice;
+                            return `$${salePrice.toFixed(2)}`;
+                        })()}
                         {product.sale && product.sale > 0 && (
                             <Typography
                                 component="span"
@@ -809,7 +861,7 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                             e.stopPropagation();
                             window.open(`/product?id=${product._id || product.product_id || ''}`, "_blank");
                         }}
-                        endIcon={<CallMadeIcon style={iconStyle} />}
+                        endIcon={<CallMadeIcon />}
                     >
                         View details
                     </Button>
@@ -952,24 +1004,6 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                                                                         <TableCell key={category} className={classes.tableCell} align="center" style={{ verticalAlign: "top" }}>
                                                                             {products.length > 0 ? (
                                                                                 <Box className={classes.productCarouselContainer}>
-                                                                                    <div className="grid grid-cols-2 w-full">
-                                                                                        <Button
-                                                                                            className={classes.carouselNavButton}
-                                                                                            onClick={handleNext}
-                                                                                            disabled={currentIndex === products.length - 1}
-                                                                                            endIcon={<ExpandLessIcon style={iconStyle} />}
-                                                                                        >
-                                                                                            Next
-                                                                                        </Button>
-                                                                                        <Button
-                                                                                            className={classes.carouselNavButton}
-                                                                                            onClick={handlePrev}
-                                                                                            disabled={currentIndex === 0}
-                                                                                            startIcon={<ExpandMoreIcon style={iconStyle} />}
-                                                                                        >
-                                                                                            Prev
-                                                                                        </Button>
-                                                                                    </div>
                                                                                     <Box className={classes.carouselProductWrapper}>
                                                                                         {currentProduct && renderProductCard(currentProduct)}
                                                                                     </Box>
