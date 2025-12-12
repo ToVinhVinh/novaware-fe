@@ -13,6 +13,7 @@ import {
 	checkGender,
 	checkStylePreference,
 	getUsersForTesting,
+	saveOutfit,
 } from '../../lib/api/user';
 import * as UserTypes from '../../interface/response/user';
 import * as UserRequestTypes from '../../interface/request/user';
@@ -138,6 +139,21 @@ export const useRemoveFavorite = () => {
 		mutationFn: ({ userId, productId }) => removeFavorite(userId, productId),
 		onSuccess: (data, variables) => {
 			queryClient.invalidateQueries({ queryKey: ['users', 'favorites', variables.userId] });
+		},
+	});
+};
+
+export const useSaveOutfit = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation<
+		UserTypes.ISaveOutfitResponse,
+		Error,
+		{ userId: string; body: UserRequestTypes.ISaveOutfitBody }
+	>({
+		mutationFn: ({ userId, body }) => saveOutfit(userId, body),
+		onSuccess: (data, variables) => {
+			queryClient.invalidateQueries({ queryKey: ['users', 'detail', variables.userId] });
 		},
 	});
 };

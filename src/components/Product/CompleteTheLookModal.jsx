@@ -29,6 +29,8 @@ import LottieLoading from "../LottieLoading.jsx";
 import { toast } from "react-toastify";
 import CallMadeIcon from "@material-ui/icons/CallMade";
 import { getScoreChip } from "../../utils/chipUtils.jsx";
+import { useSaveOutfit } from "../../hooks/api/useUser";
+import { FaBookmark, FaBookmark as FaBookmarkSolid } from "react-icons/fa";
 
 const ICON_COLOR = "#ec4899";
 
@@ -165,9 +167,12 @@ const useStyles = makeStyles((theme) => ({
         position: "relative",
     },
     tableRow: {
+        borderTop: "none",
+        borderBottom: "none",
         backgroundColor: "#fce7f3",
         "& .MuiTableCell-root": {
             borderBottom: "none",
+            borderTop: "none",
         },
     },
     productCarouselContainer: {
@@ -175,7 +180,7 @@ const useStyles = makeStyles((theme) => ({
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        padding: "4px",
+        padding: "0px",
     },
     carouselHeader: {
         fontSize: "0.9rem",
@@ -450,7 +455,6 @@ const useStyles = makeStyles((theme) => ({
         fontWeight: 500,
         "&.Mui-selected": {
             color: "#ec4899 !important",
-            borderBottom: "2px solid #ec4899",
         },
     },
     tabIndicator: {
@@ -635,7 +639,9 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
     const theme = useTheme();
     const [activeTab, setActiveTab] = useState(0);
     const [carouselIndices, setCarouselIndices] = useState({});
+    const [savedOutfits, setSavedOutfits] = useState(new Set());
     const iconStyle = useMemo(() => ({ color: ICON_COLOR }), []);
+    const saveOutfitMutation = useSaveOutfit();
     const personalizedData = useMemo(() => {
         if (!recommendationData || !Array.isArray(recommendationData.personalized_products)) return [];
 
@@ -738,6 +744,49 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
 
     const handleTabChange = (event, newValue) => {
         setActiveTab(newValue);
+    };
+
+    const handleSaveOutfit = async (outfit, outfitIndex) => {
+        if (!userId) {
+            toast.warning("Please login to save outfits");
+            return;
+        }
+
+        const outfitKey = `outfit-${outfitIndex}`;
+        if (savedOutfits.has(outfitKey)) {
+            toast.info("This outfit is already saved");
+            return;
+        }
+
+        try {
+            const outfitBody = {
+                name: outfit.name || `Outfit ${outfitIndex + 1}`,
+                products: outfit.products.map((p) => ({
+                    product_id: p._id || p.product_id,
+                    name: p.name,
+                    category: p.category,
+                    price: p.price,
+                    sale: p.sale,
+                    images: p.images || [],
+                })),
+                totalPrice: outfit.totalPrice,
+                compatibilityScore: outfit.compatibilityScore,
+                gender: outfit.gender,
+                style: outfit.style,
+                description: outfit.description,
+            };
+
+            await saveOutfitMutation.mutateAsync({
+                userId,
+                body: outfitBody,
+            });
+
+            setSavedOutfits((prev) => new Set([...prev, outfitKey]));
+            toast.success("Outfit saved successfully!");
+        } catch (error) {
+            console.error("Failed to save outfit:", error);
+            toast.error(error?.message || "Failed to save outfit. Please try again.");
+        }
     };
 
     const renderProductCard = (product, showReason = false, showScore = false) => {
@@ -960,8 +1009,37 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                                                         }
                                                     });
 
+                                                    const outfitKey = `outfit-${outfitIndex}`;
+                                                    const isSaved = savedOutfits.has(outfitKey);
+
                                                     return (
                                                         <React.Fragment key={outfitIndex}>
+                                                            {/* Row 0: Outfit header with save button */}
+                                                            <TableRow className={classes.tableRow}>
+                                                                <TableCell colSpan={5} style={{ padding: "12px 16px", backgroundColor: "#fff" }}>
+                                                                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                                                                        <Box>
+                                                                            <Typography variant="h6" style={{ fontWeight: 600, marginBottom: 4 }}>
+                                                                                {outfit.name}
+                                                                            </Typography>
+                                                                        </Box>
+                                                                        <Button
+                                                                            variant={isSaved ? "contained" : "outlined"}
+                                                                            color="secondary"
+                                                                            size="small"
+                                                                            startIcon={isSaved ? <FaBookmarkSolid /> : <FaBookmark />}
+                                                                            onClick={() => handleSaveOutfit(outfit, outfitIndex)}
+                                                                            disabled={saveOutfitMutation.isLoading || isSaved}
+                                                                            style={{
+                                                                                textTransform: "none",
+                                                                                borderRadius: 8,
+                                                                            }}
+                                                                        >
+                                                                            {isSaved ? "Saved" : "Save Outfit"}
+                                                                        </Button>
+                                                                    </Box>
+                                                                </TableCell>
+                                                            </TableRow>
                                                             {/* Row 1: Product cards */}
                                                             <TableRow className={classes.tableRow}>
                                                                 {categories.map((category) => {

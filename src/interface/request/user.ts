@@ -62,3 +62,20 @@ export interface IGetUsersForTestingQuery {
 	perPage?: number;
 }
 
+export interface ISaveOutfitBody {
+	name?: string;
+	products: Array<{
+		product_id: string | number;
+		name: string;
+		category?: string;
+		price?: number;
+		sale?: number;
+		images?: string[];
+	}>;
+	totalPrice?: number;
+	compatibilityScore?: number;
+	gender?: string;
+	style?: string;
+	description?: string;
+}
+

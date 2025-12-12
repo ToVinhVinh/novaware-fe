@@ -13,6 +13,7 @@ import {
 	ICheckGenderResponse,
 	ICheckStylePreferenceResponse,
 	IGetUsersForTestingResponse,
+	ISaveOutfitResponse,
 } from "../../interface/response/user";
 import {
 	IUpdateProfileBody,
@@ -21,6 +22,7 @@ import {
 	IAddFavoriteBody,
 	IGetFavoritesQuery,
 	IGetUsersForTestingQuery,
+	ISaveOutfitBody,
 } from "../../interface/request/user";
 
 // Get Profile
@@ -85,5 +87,10 @@ export const checkStylePreference = async (userId: string): Promise<ICheckStyleP
 // Get Users for Testing
 export const getUsersForTesting = async (query: IGetUsersForTestingQuery): Promise<IGetUsersForTestingResponse> => {
 	return await sendGet(`/users/testing`, query);
+};
+
+// Save Outfit
+export const saveOutfit = async (userId: string, body: ISaveOutfitBody): Promise<ISaveOutfitResponse> => {
+	return await sendPost(`/users/${userId}/outfits`, body);
 };
 

@@ -180,3 +180,11 @@ export interface IGetUsersForTestingResponse {
 	};
 }
 
+export interface ISaveOutfitResponse {
+	status?: string;
+	message: string;
+	data?: {
+		outfit?: any;
+	};
+}
+
