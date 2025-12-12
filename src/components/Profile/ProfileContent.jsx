@@ -123,12 +123,12 @@ const useStyles = makeStyles((theme) => ({
     backdropFilter: "blur(10px)",
   },
   interactionText: {
-    color: "#eee",
+    color: "#ccc",
     fontSize: 14,
     flex: 1,
   },
   arrowButton: {
-    color: "#eee",
+    color: "#ccc",
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     padding: theme.spacing(1),
     minWidth: "auto",
@@ -249,10 +249,10 @@ const ProfileContent = ({ user, onItemClick }) => {
         </StyledBadge>
         <Typography
           className="tracking-widest"
-          style={{ marginTop: 40, fontSize: 20, color: "#eee", }}>{user?.name}</Typography>
+          style={{ marginTop: 40, fontSize: 20, color: "#ccc", }}>{user?.name}</Typography>
         <Typography
           variant="caption"
-          style={{ color: "#eee", fontSize: 14 }}
+          style={{ color: "#ccc", fontSize: 14 }}
         >
           {user?.email}
         </Typography>

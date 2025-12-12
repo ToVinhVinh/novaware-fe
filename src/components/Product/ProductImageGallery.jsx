@@ -51,11 +51,12 @@ const ProductImageGallery = memo(({ product }) => {
                   src={image}
                   alt={`${product.name} thumbnail ${i + 1}`}
                   style={{
+                    borderRadius: 8,
                     width: 80,
                     height: 80,
                     objectFit: "cover",
                     marginBottom: 10,
-                    border: index === i ? "2px solid #f50057" : "1px solid #eee",
+                    border: index === i ? "2px solid #f50057" : "1px solid #ccc",
                     cursor: "pointer",
                   }}
                   onClick={() => setIndex(i)}
@@ -68,7 +69,7 @@ const ProductImageGallery = memo(({ product }) => {
               <img
                 src={product.images[index]}
                 alt={product.name}
-                style={{ width: "100%", aspectRatio: "1 / 1", objectFit: "contain" }}
+                style={{ width: "100%", aspectRatio: "1 / 1", objectFit: "contain", borderRadius: 16, border: "1px solid #ccc", }}
               />
               {product.sale > 0 && (
                 <div className={classes.sale}>{`- ${product.sale}% `}</div>

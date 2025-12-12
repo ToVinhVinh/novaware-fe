@@ -6,6 +6,8 @@ const useCartStore = create(
     (set, get) => ({
       cartItems: [],
       isDrawerOpen: false,
+      shippingAddress: {},
+      paymentMethod: "",
       addToCart: (productData, qty, sizeSelected, colorHex, colorName) => {
         const { cartItems } = get();
         let variantPrice = productData.price || 0;
@@ -32,6 +34,11 @@ const useCartStore = create(
 
         const productId = productData._id || productData.id || "";
         
+        // Calculate priceSale and round to 2 decimal places
+        const salePercent = productData.sale || 0;
+        const calculatedPriceSale = variantPrice * (1 - salePercent / 100);
+        const roundedPriceSale = Math.round(calculatedPriceSale * 100) / 100;
+        
         const newItem = {
           product: productId,
           name: productData.name || productData.productDisplayName || "Product",
@@ -41,9 +48,9 @@ const useCartStore = create(
           size: productData.size,
           color: productData.colors,
           images: productData.images || [],
-          price: variantPrice,
-          sale: productData.sale || 0,
-          priceSale: variantPrice * (1 - (productData.sale || 0) / 100),
+          price: Math.round(variantPrice * 100) / 100,
+          sale: salePercent,
+          priceSale: roundedPriceSale,
           countInStock: variantStock,
           selected: true, // Default to selected
         };
@@ -143,6 +150,16 @@ const useCartStore = create(
       // Clear cart
       clearCart: () => {
         set({ cartItems: [] });
+      },
+
+      // Save shipping address
+      saveShippingAddress: (address) => {
+        set({ shippingAddress: address });
+      },
+
+      // Save payment method
+      savePaymentMethod: (method) => {
+        set({ paymentMethod: method });
       },
     }),
     {

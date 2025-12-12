@@ -1,9 +1,10 @@
 import React, { useEffect } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useCreateOrder } from "../../hooks/api/useOrder";
 import { useUpdateInteraction } from "../../hooks/api/useUserInteraction";
 import { toast } from "react-toastify";
+import useCartStore from "../../store/cartStore";
 import {
   Button,
   Container,
@@ -91,41 +92,40 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PlaceOrderScreen = ({ history }) => {
-  const dispatch = useDispatch();
   const classes = useStyles();
 
-  const cart = useSelector((state) => state.cart);
+  const { cartItems, shippingAddress, paymentMethod } = useCartStore();
   const { userInfo } = useSelector((state) => state.userLogin);
   const userId = userInfo?._id || userInfo?.id || "";
   const updateInteraction = useUpdateInteraction(userId);
 
-  if (!cart.shippingAddress.address) {
+  if (!shippingAddress?.address) {
     history.push("/shipping");
-  } else if (!cart.paymentMethod) {
+  } else if (!paymentMethod) {
     history.push("/payment");
   }
 
-  const selectedItems = cart.cartItems.filter((item) => item.selected);
+  const selectedItems = cartItems.filter((item) => item.selected);
 
   const addDecimals = (num) => {
     return (Math.round(num * 100) / 100).toFixed(2);
   };
 
-  const address = Object.values(cart.shippingAddress)
+  const address = Object.values(shippingAddress || {})
     .filter((value) => typeof value === "string")
     .join(", ");
 
-  cart.itemsPrice = addDecimals(
-    selectedItems.reduce((acc, item) => acc + item.priceSale * item.qty, 0)
+  const itemsPrice = addDecimals(
+    selectedItems.reduce((acc, item) => acc + (item.priceSale || item.price || 0) * (item.qty || 0), 0)
   );
-  cart.shippingPrice = addDecimals(
-    cart.itemsPrice > 1000 ? 0 : cart.itemsPrice > 30 ? 5 : 30
+  const shippingPrice = addDecimals(
+    Number(itemsPrice) > 1000 ? 0 : Number(itemsPrice) > 30 ? 5 : 30
   );
-  cart.taxPrice = addDecimals(Number((0.05 * cart.itemsPrice).toFixed(2)));
-  cart.totalPrice = (
-    Number(cart.itemsPrice) +
-    Number(cart.shippingPrice) +
-    Number(cart.taxPrice)
+  const taxPrice = addDecimals(Number((0.05 * Number(itemsPrice)).toFixed(2)));
+  const totalPrice = (
+    Number(itemsPrice) +
+    Number(shippingPrice) +
+    Number(taxPrice)
   ).toFixed(2);
 
   const createOrderMutation = useCreateOrder();
@@ -133,7 +133,10 @@ const PlaceOrderScreen = ({ history }) => {
   const order = orderResponse?.data?.order;
 
   useEffect(() => {
-    if (success && order?._id) {
+    // Check for order ID (could be _id or id)
+    const orderId = order?._id || order?.id;
+    
+    if (success && orderId) {
       if (userId && selectedItems.length > 0) {
         selectedItems.forEach((item) => {
           if (item.product) {
@@ -145,25 +148,67 @@ const PlaceOrderScreen = ({ history }) => {
         });
       }
 
-      history.push(`/order/${order._id}`);
-      toast.success("Order created successfully!");
+      // Get message from API response, fallback to default message
+      const successMessage = orderResponse?.message || "Order created successfully!";
+      toast.success(successMessage);
+      
+      history.push(`/order/${orderId}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [history, success, order?._id, userId]);
+  }, [history, success, order, userId, orderResponse]);
 
   const placeOrderHandler = async () => {
     try {
+      // Format orderItems to ensure validation passes
+      const formattedOrderItems = selectedItems.map((item) => {
+        // Ensure priceSale is rounded to 2 decimal places
+        const priceSale = item.priceSale || item.price || 0;
+        const roundedPriceSale = Math.round(priceSale * 100) / 100;
+
+        // Ensure sizeSelected and colorSelected are not empty
+        const sizeSelected = item.sizeSelected?.trim() || "";
+        const colorSelected = item.colorSelected?.trim() || "";
+
+        if (!sizeSelected || !colorSelected) {
+          toast.error(`Item "${item.name}" is missing size or color selection.`);
+          throw new Error("Invalid item data");
+        }
+
+        return {
+          ...item,
+          priceSale: roundedPriceSale,
+          price: item.price ? Math.round(item.price * 100) / 100 : roundedPriceSale,
+          sizeSelected: sizeSelected,
+          colorSelected: colorSelected,
+        };
+      });
+
+      // Get or create guest user ID if not logged in
+      let guestUserId = null;
+      if (!userId) {
+        // Try to get guest user ID from localStorage, or create one
+        guestUserId = localStorage.getItem('guest_user_id');
+        if (!guestUserId) {
+          // Generate a temporary guest user ID
+          guestUserId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          localStorage.setItem('guest_user_id', guestUserId);
+        }
+      }
+
       await createOrderMutation.mutateAsync({
-        orderItems: selectedItems,
-        shippingAddress: cart.shippingAddress,
-        paymentMethod: cart.paymentMethod,
-        itemsPrice: cart.itemsPrice,
-        shippingPrice: cart.shippingPrice,
-        taxPrice: cart.taxPrice,
-        totalPrice: cart.totalPrice,
+        orderItems: formattedOrderItems,
+        shippingAddress: shippingAddress,
+        paymentMethod: paymentMethod,
+        itemsPrice: Number(itemsPrice),
+        shippingPrice: Number(shippingPrice),
+        taxPrice: Number(taxPrice),
+        totalPrice: Number(totalPrice),
+        user_id: userId || guestUserId,
       });
     } catch (error) {
-      toast.error("Failed to create order");
+      if (error.message !== "Invalid item data") {
+        toast.error("Failed to create order");
+      }
     }
   };
 
@@ -199,11 +244,10 @@ const PlaceOrderScreen = ({ history }) => {
                   secondary={
                     <>
                       {address}
-                      {cart.shippingAddress.recipientPhoneNumber && (
-                        <Typography variant="body2">
-                          Recipient's Phone:{" "}
-                          {cart.shippingAddress.recipientPhoneNumber}
-                        </Typography>
+                      {shippingAddress?.recipientPhoneNumber && (
+                        <Box component="span" display="block" mt={0.5}>
+                          Recipient's Phone: {shippingAddress.recipientPhoneNumber}
+                        </Box>
                       )}
                     </>
                   }
@@ -215,7 +259,7 @@ const PlaceOrderScreen = ({ history }) => {
                 </ListItemIcon>
                 <ListItemText
                   primary="Payment Method"
-                  secondary={cart.paymentMethod}
+                  secondary={paymentMethod}
                 />
                 <ListItemAvatar>
                   <img src={paypalImage} alt="" width="80px" height="30px" />
@@ -334,19 +378,19 @@ const PlaceOrderScreen = ({ history }) => {
               <List style={{ padding: "10px 20px 20px" }}>
                 <ListItem divider disableGutters>
                   <ListItemText primary="Items:" />
-                  <Typography>${cart.itemsPrice}</Typography>
+                  <Typography>${itemsPrice}</Typography>
                 </ListItem>
                 <ListItem divider disableGutters>
                   <ListItemText primary="Shipping:" />
-                  <Typography>${cart.shippingPrice}</Typography>
+                  <Typography>${shippingPrice}</Typography>
                 </ListItem>
                 <ListItem divider disableGutters>
                   <ListItemText primary="Tax:" />
-                  <Typography>${cart.taxPrice}</Typography>
+                  <Typography>${taxPrice}</Typography>
                 </ListItem>
                 <ListItem disableGutters>
                   <ListItemText primary="Total:" />
-                  <Typography color="secondary">${cart.totalPrice}</Typography>
+                  <Typography color="secondary">${totalPrice}</Typography>
                 </ListItem>
               </List>
               <Button

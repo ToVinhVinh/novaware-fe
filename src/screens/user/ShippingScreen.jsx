@@ -15,7 +15,7 @@ import {
 } from "@material-ui/core";
 import Banner from "../../assets/images/shipping.svg?react";
 import { Link as RouterLink } from "react-router-dom";
-import { saveShippingAddress } from "../../actions/cartActions";
+import useCartStore from "../../store/cartStore";
 import { makeStyles, withStyles, fade } from "@material-ui/core/styles";
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import { logout } from "../../actions/userActions";
@@ -71,8 +71,7 @@ const ShippingScreen = ({ history }) => {
   const methods = useForm();
   const { handleSubmit, control } = methods;
   const dispatch = useDispatch();
-  const cart = useSelector((state) => state.cart);
-  const { shippingAddress } = cart;
+  const { shippingAddress, saveShippingAddress } = useCartStore();
   const { userInfo } = useSelector((state) => state.userLogin);
   const onSubmit = ({
     address,
@@ -81,15 +80,13 @@ const ShippingScreen = ({ history }) => {
     country,
     recipientPhoneNumber,
   }) => {
-    dispatch(
-      saveShippingAddress({
-        address,
-        city,
-        postalCode,
-        country,
-        recipientPhoneNumber,
-      })
-    );
+    saveShippingAddress({
+      address,
+      city,
+      postalCode,
+      country,
+      recipientPhoneNumber,
+    });
     history.push("/payment");
   };
 

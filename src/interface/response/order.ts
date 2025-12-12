@@ -1,55 +1,87 @@
 export interface IOrderItem {
-	product: string;
+	product?: string;
+	product_id?: string | number;
 	name: string;
 	image?: string;
 	images?: string[];
-	price: number;
+	price?: number;
 	priceSale?: number;
+	price_sale?: number;
 	qty: number;
-	sizeSelected: string;
+	sizeSelected?: string;
+	size_selected?: string;
 	colorSelected?: string;
+	color_selected?: string;
 }
 
 export interface IShippingAddress {
 	address: string;
 	city: string;
-	postalCode: string;
+	postalCode?: string;
+	postal_code?: string;
 	country: string;
+	recipientPhoneNumber?: string;
+	recipient_phone_number?: string;
 }
 
 export interface IOrder {
-	_id: string;
+	_id?: string;
+	id?: string;
+	user_id?: string;
 	user?: {
 		_id: string;
 		name: string;
 		email: string;
 	};
-	orderItems: IOrderItem[];
-	shippingAddress: IShippingAddress;
-	paymentMethod: string;
+	orderItems?: IOrderItem[];
+	items?: IOrderItem[];
+	shippingAddress?: IShippingAddress;
+	shipping_address?: IShippingAddress;
+	paymentMethod?: string;
+	payment_method?: string;
 	paymentResult?: {
 		id: string;
 		status: string;
 		update_time: string;
 		email_address: string;
 	};
-	itemsPrice: number;
-	taxPrice: number;
-	shippingPrice: number;
-	totalPrice: number;
-	isPaid: boolean;
+	payment_result?: {
+		id: string;
+		status: string;
+		update_time: string;
+		email_address: string;
+	};
+	itemsPrice?: number;
+	taxPrice?: number;
+	tax_price?: number;
+	shippingPrice?: number;
+	shipping_price?: number;
+	totalPrice?: number;
+	total_price?: number;
+	isPaid?: boolean;
+	is_paid?: boolean;
 	paidAt?: string;
-	isDelivered: boolean;
+	paid_at?: string | null;
+	isDelivered?: boolean;
+	is_delivered?: boolean;
 	deliveredAt?: string;
+	delivered_at?: string | null;
 	isCancelled?: boolean;
+	is_cancelled?: boolean;
 	cancelledAt?: string;
+	cancelled_at?: string | null;
 	isConfirmed?: boolean;
+	is_processing?: boolean;
+	is_outfit_purchase?: boolean;
 	confirmedAt?: string;
 	createdAt?: string;
+	created_at?: string;
 	updatedAt?: string;
+	updated_at?: string;
 }
 
 export interface ICreateOrderResponse {
+	status?: string;
 	message: string;
 	data: {
 		order: IOrder;

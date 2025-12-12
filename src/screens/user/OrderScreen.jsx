@@ -145,42 +145,56 @@ const UserOrderScreen = ({ match, history }) => {
     dispatch(openAdminChatDrawer());
   };
 
-  if (!loading && order) {
+  // Normalize order data to handle both camelCase and snake_case
+  const normalizedOrder = order ? {
+    id: order.id || order._id,
+    userId: order.user_id,
+    user: order.user,
+    items: order.items || order.orderItems || [],
+    shippingAddress: order.shippingAddress || order.shipping_address,
+    paymentMethod: order.paymentMethod || order.payment_method,
+    paymentResult: order.paymentResult || order.payment_result,
+    itemsPrice: order.itemsPrice,
+    taxPrice: order.taxPrice || order.tax_price,
+    shippingPrice: order.shippingPrice || order.shipping_price,
+    totalPrice: order.totalPrice || order.total_price,
+    isPaid: order.isPaid ?? order.is_paid ?? false,
+    paidAt: order.paidAt || order.paid_at,
+    isDelivered: order.isDelivered ?? order.is_delivered ?? false,
+    deliveredAt: order.deliveredAt || order.delivered_at,
+    isCancelled: order.isCancelled ?? order.is_cancelled ?? false,
+    isProcessing: order.is_processing ?? false,
+    isOutfitPurchase: order.is_outfit_purchase ?? false,
+    createdAt: order.createdAt || order.created_at,
+    updatedAt: order.updatedAt || order.updated_at,
+  } : null;
+
+  // Support both 'items' and 'orderItems' from API response
+  const orderItems = normalizedOrder?.items || [];
+
+  if (!loading && normalizedOrder) {
     const addDecimals = (num) => {
       return (Math.round(num * 100) / 100).toFixed(2);
     };
 
-    order.itemsPrice = addDecimals(
-      order?.orderItems.reduce(
-        (acc, item) => acc + item.priceSale * item.qty,
-        0
-      )
-    );
+    if (orderItems.length > 0) {
+      normalizedOrder.itemsPrice = addDecimals(
+        orderItems.reduce(
+          (acc, item) => acc + (item.priceSale || item.price_sale || 0) * (item.qty || 0),
+          0
+        )
+      );
+    }
   }
 
   useEffect(() => {
     if (!userInfo) {
       history.push("/login");
     }
-
-    const addPayPalScript = async () => {
-      const { data: clientId } = await axios.get("/api/config/paypal");
-      const script = document.createElement("script");
-      script.type = "text/javascript";
-      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}`;
-      script.async = true;
-      script.onload = () => {
-        setSdkReady(true);
-      };
-      document.body.appendChild(script);
-    };
-
-    if (!order?.isPaid && !window.paypal) {
-      addPayPalScript();
-    } else if (!order?.isPaid && window.paypal) {
+    if (!normalizedOrder?.isPaid && window.paypal) {
       setSdkReady(true);
     }
-  }, [orderId, order, userInfo]);
+  }, [orderId, normalizedOrder, userInfo]);
 
   const handleStripePayment = async (paymentIntent) => {
     try {
@@ -191,7 +205,7 @@ const UserOrderScreen = ({ match, history }) => {
           status: paymentIntent.status,
           update_time: new Date().toISOString(),
           payer: {
-            email_address: order.user.email,
+            email_address: normalizedOrder?.user?.email || userInfo?.email || "",
           },
         }
       });
@@ -233,7 +247,7 @@ const UserOrderScreen = ({ match, history }) => {
   ) : error ? (
     <Message mt={100}>{error}</Message>
   ) : (
-    order && (
+    normalizedOrder && (
       <Container style={{ marginBottom: 140, maxWidth: "100%" }}>
         <Meta title="Order | FashionShop" />
         <Grid container className={classes.breadcrumbsContainer}>
@@ -258,7 +272,7 @@ const UserOrderScreen = ({ match, history }) => {
                 <ListItem divider>
                   <ListItemText
                     primary={`Order`}
-                    secondary={`id: ${order._id}`}
+                    secondary={`id: ${normalizedOrder.id}`}
                   />
                 </ListItem>
                 <ListItem divider>
@@ -267,7 +281,7 @@ const UserOrderScreen = ({ match, history }) => {
                   </ListItemIcon>
                   <ListItemText
                     primary="Receiver"
-                    secondary={`${order.user.name}, email: ${order.user.email}`}
+                    secondary={normalizedOrder.user ? `${normalizedOrder.user.name}, email: ${normalizedOrder.user.email}` : "N/A"}
                   />
                 </ListItem>
                 <ListItem divider style={{ flexWrap: "wrap" }}>
@@ -278,25 +292,27 @@ const UserOrderScreen = ({ match, history }) => {
                     primary="Shipping"
                     secondary={
                       <>
-                        {Object.values(order.shippingAddress)
+                        {normalizedOrder.shippingAddress ? Object.values(normalizedOrder.shippingAddress)
                           .filter((value) => typeof value === "string")
-                          .join(", ")}
-                        {order.shippingAddress.recipientPhoneNumber && (
+                          .join(", ") : "N/A"}
+                        {(normalizedOrder.shippingAddress?.recipientPhoneNumber || normalizedOrder.shippingAddress?.recipient_phone_number) && (
                           <Typography variant="body2" component="span">
                             {" "}
                             Recipient's Phone:{" "}
-                            {order.shippingAddress.recipientPhoneNumber}
+                            {normalizedOrder.shippingAddress.recipientPhoneNumber || normalizedOrder.shippingAddress.recipient_phone_number}
                           </Typography>
                         )}
                       </>
                     }
                   />
-                  {order.isDelivered ? (
+                  {normalizedOrder.isDelivered ? (
                     <Message severity="success" mt={8}>
-                      Delivered on {new Date(order.updatedAt).toLocaleString()}
+                      Delivered on {normalizedOrder.deliveredAt ? new Date(normalizedOrder.deliveredAt).toLocaleString() : "N/A"}
                     </Message>
                   ) : (
-                    <Message mt={8}>Not Delivered</Message>
+                    <Typography variant="body2" color="textSecondary" mt={2}>
+                      Not Delivered
+                    </Typography>
                   )}
                 </ListItem>
 
@@ -306,14 +322,14 @@ const UserOrderScreen = ({ match, history }) => {
                     <GrProjects fontSize={22} />
                   </ListItemIcon>
                   <ListItemText primary="Processing Status" />
-                  {order.isProcessing ? (
+                  {normalizedOrder.isProcessing ? (
                     <Message severity="success" mt={8} mb={8}>
-                      Confirmed at {new Date(order.updatedAt).toLocaleString()}
+                      Confirmed at {normalizedOrder.updatedAt ? new Date(normalizedOrder.updatedAt).toLocaleString() : "N/A"}
                     </Message>
                   ) : (
-                    <Message severity="warning" mt={8} mb={8}>
+                    <Typography variant="body2" color="textSecondary" mt={2} mb={2}>
                       Not Confirmed
-                    </Message>
+                    </Typography>
                   )}
                 </ListItem>
                 <ListItem divider style={{ flexWrap: "wrap" }}>
@@ -322,17 +338,19 @@ const UserOrderScreen = ({ match, history }) => {
                   </ListItemIcon>
                   <ListItemText
                     primary="Payment Method"
-                    secondary={order.paymentMethod}
+                    secondary={normalizedOrder.paymentMethod || "N/A"}
                   />
                   <ListItemAvatar>
                     <img src={paypalImage} alt="" width="80px" height="30px" />
                   </ListItemAvatar>
-                  {order.isPaid ? (
+                  {normalizedOrder.isPaid ? (
                     <Message severity="success" mt={8}>
-                      Paid on {new Date(order.updatedAt).toLocaleString()}
+                      Paid on {normalizedOrder.paidAt ? new Date(normalizedOrder.paidAt).toLocaleString() : "N/A"}
                     </Message>
                   ) : (
-                    <Message mt={8}>Not Paid</Message>
+                    <Typography variant="body2" color="textSecondary" mt={2}>
+                      Not Paid
+                    </Typography>
                   )}
                 </ListItem>
                 <ListItem className={classes.orderItems}>
@@ -340,7 +358,7 @@ const UserOrderScreen = ({ match, history }) => {
                     <GrProjects fontSize={22} />
                   </ListItemIcon>
                   <ListItemText primary="Order Items" />
-                  {order.orderItems.length > 0 ? (
+                  {orderItems.length > 0 ? (
                     <div className={classes.items}>
                       <TableContainer component={Paper} elevation={0}>
                         <Table>
@@ -355,11 +373,17 @@ const UserOrderScreen = ({ match, history }) => {
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {order.orderItems.map((item) => {
+                            {orderItems.map((item) => {
+                              // Support both camelCase and snake_case
+                              const sizeSelected = item.sizeSelected || item.size_selected || "";
+                              const colorSelected = item.colorSelected || item.color_selected || "";
+                              const priceSale = item.priceSale || item.price_sale || 0;
+                              const qty = item.qty || 0;
+
                               const colorName =
                                 item.colors && item.colors.name
                                   ? item.colors.name
-                                  : item.colorSelected;
+                                  : colorSelected;
 
                               return (
                                 <TableRow key={item.name}>
@@ -375,7 +399,7 @@ const UserOrderScreen = ({ match, history }) => {
                                       </ListItemAvatar>
                                       <ListItemText
                                         primary={item.name}
-                                        secondary={`Size: ${item.sizeSelected}, Color: ${item.colorSelected}`}
+                                        secondary={`Size: ${sizeSelected}, Color: ${colorSelected}`}
                                         className={classes.itemName}
                                         style={{ marginLeft: 16 }}
                                       />
@@ -389,28 +413,27 @@ const UserOrderScreen = ({ match, history }) => {
                                       >
                                         <Box textAlign="center">
                                           Size:{" "}
-                                          {item.sizeSelected.toUpperCase()}
+                                          {sizeSelected.toUpperCase()}
                                         </Box>
                                         <Box textAlign="center">
-                                          Color: {item.colorSelected}
+                                          Color: {colorSelected}
                                         </Box>
                                         <Box textAlign="center">
-                                          {`${item.qty} x ${item.priceSale} = ${item.qty * item.priceSale
-                                            }`}
+                                          {`${qty} x $${priceSale} = $${(qty * priceSale).toFixed(2)}`}
                                         </Box>
                                       </Box>
                                     </Hidden>
                                   </TableCell>
                                   <Hidden smDown>
                                     <TableCell align="right">
-                                      {item.sizeSelected.toUpperCase()}
+                                      {sizeSelected.toUpperCase()}
                                     </TableCell>
                                     <TableCell align="right">
                                       {colorName}
                                     </TableCell>
                                     <TableCell align="right">
-                                      {`${item.qty} x $${item.priceSale} = $${(
-                                        item.qty * item.priceSale
+                                      {`${qty} x $${priceSale} = $${(
+                                        qty * priceSale
                                       ).toFixed(2)}`}
                                     </TableCell>
                                   </Hidden>
@@ -443,34 +466,34 @@ const UserOrderScreen = ({ match, history }) => {
                 <List style={{ padding: "10px 20px 20px" }}>
                   <ListItem divider disableGutters>
                     <ListItemText primary="Items:" />
-                    <Typography>${order.itemsPrice}</Typography>
+                    <Typography>${normalizedOrder.itemsPrice || "0.00"}</Typography>
                   </ListItem>
                   <ListItem divider disableGutters>
                     <ListItemText primary="Shipping:" />
-                    <Typography>${order.shippingPrice}</Typography>
+                    <Typography>${normalizedOrder.shippingPrice || "0.00"}</Typography>
                   </ListItem>
                   <ListItem divider disableGutters>
                     <ListItemText primary="Tax:" />
-                    <Typography>${order.taxPrice}</Typography>
+                    <Typography>${normalizedOrder.taxPrice || "0.00"}</Typography>
                   </ListItem>
                   <ListItem disableGutters>
                     <ListItemText primary="Total:" />
                     <Typography color="secondary">
-                      ${order.totalPrice}
+                      ${normalizedOrder.totalPrice || "0.00"}
                     </Typography>
                   </ListItem>
                 </List>
                 {/* Payment */}
-                {!order.isPaid && (
+                {!normalizedOrder.isPaid && (
                   <Box style={{ width: "100%" }}>
-                    {order.paymentMethod === "PayPal" && (
+                    {normalizedOrder.paymentMethod === "PayPal" && (
                       <>
                         {loadingPay && <Loader />}
                         {!sdkReady ? (
                           <Loader />
                         ) : (
                           <PayPalButton
-                            amount={order.totalPrice}
+                            amount={normalizedOrder.totalPrice}
                             onSuccess={successPaymentHandler}
                             style={{ width: "100%" }}
                           />
@@ -478,15 +501,15 @@ const UserOrderScreen = ({ match, history }) => {
                       </>
                     )}
 
-                    {order.paymentMethod === "Stripe" && (
+                    {normalizedOrder.paymentMethod === "Stripe" && (
                       <StripePayment
                         orderId={orderId}
-                        totalPrice={order.totalPrice}
+                        totalPrice={normalizedOrder.totalPrice}
                         handleStripePayment={handleStripePayment}
                       />
                     )}
 
-                    {order.paymentMethod === "COD" && (
+                    {normalizedOrder.paymentMethod === "COD" && (
                       <Box
                         p={2}
                         border="1px solid #ccc"
@@ -503,9 +526,9 @@ const UserOrderScreen = ({ match, history }) => {
                     )}
                   </Box>
                 )}
-                {!order.isDelivered &&
-                  !order.isCancelled &&
-                  !order.isProcessing && (
+                {!normalizedOrder.isDelivered &&
+                  !normalizedOrder.isCancelled &&
+                  !normalizedOrder.isProcessing && (
                     <Button
                       variant="contained"
                       color="secondary"
@@ -516,12 +539,12 @@ const UserOrderScreen = ({ match, history }) => {
                       Cancel Order
                     </Button>
                   )}
-                {order.isCancelled && (
+                {normalizedOrder.isCancelled && (
                   <>
                     <Message severity="error" mt={8}>
                       This order has been cancelled.
                     </Message>
-                    {order.paymentMethod !== "COD" && (
+                    {normalizedOrder.paymentMethod !== "COD" && (
                       <Typography variant="body2" color="textSecondary" mt={8}>
                         If you have paid using online methods, please contact
                         admin{" "}

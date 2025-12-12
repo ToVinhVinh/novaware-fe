@@ -209,6 +209,7 @@ const ProductScreen = ({ setLoginModalOpen }) => {
               border: "1px solid #e0e0e0",
               display: "flex",
               flexDirection: "row",
+              gap: 20,
             }}
           >
             <Grid item xs={12} md={6} style={{ paddingLeft: 0, paddingRight: 0 }}>

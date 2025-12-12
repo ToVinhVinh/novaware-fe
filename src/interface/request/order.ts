@@ -25,6 +25,7 @@ export interface ICreateOrderBody {
 	taxPrice: number;
 	shippingPrice: number;
 	totalPrice: number;
+	user_id?: string;
 }
 
 export interface IGetOrdersQuery {

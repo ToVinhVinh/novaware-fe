@@ -1,7 +1,7 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import CheckoutSteps from "../../components/CheckoutSteps";
-import { savePaymentMethod } from "../../actions/cartActions";
+import useCartStore from "../../store/cartStore";
 import Meta from "../../components/Meta";
 import {
   Button,
@@ -51,20 +51,18 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PaymentScreen = ({ history }) => {
-  const dispatch = useDispatch();
   const classes = useStyles();
   const methods = useForm();
   const { handleSubmit, control } = methods;
 
-  const cart = useSelector((state) => state.cart);
-  const { shippingAddress } = cart;
+  const { shippingAddress, savePaymentMethod } = useCartStore();
 
-  if (!shippingAddress.address) {
+  if (!shippingAddress?.address) {
     history.push("/shipping");
   }
 
   const submitHandler = ({ paymentMethod }) => {
-    dispatch(savePaymentMethod(paymentMethod));
+    savePaymentMethod(paymentMethod);
     history.push("/placeorder");
   };
 

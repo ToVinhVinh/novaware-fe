@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     height: "100%",
     overflow: "hidden",
-    backgroundColor: "#eee",
+    backgroundColor: "#ccc",
   },
   gnnLikeSwiper: {
     width: '100%',
@@ -160,7 +160,7 @@ const useStyles = makeStyles((theme) => ({
 const YouMightAlsoLikeModal = ({ open, onClose, userId, productId }) => {
   const classes = useStyles();
   const [recommendationData, setRecommendationData] = useState(null);
-  
+
   const getHybridRecommendations = useHybridModelRecommendations();
 
   // Fetch recommendations when modal opens
@@ -179,7 +179,7 @@ const YouMightAlsoLikeModal = ({ open, onClose, userId, productId }) => {
           top_k_outfit: 5,
           alpha: 0.5, // Default alpha for hybrid model
         };
-        
+
         const result = await getHybridRecommendations.mutateAsync(requestData);
         setRecommendationData(result);
       } catch (error) {
@@ -218,8 +218,8 @@ const YouMightAlsoLikeModal = ({ open, onClose, userId, productId }) => {
       ?.map((item) => item.reason)
       .filter((r) => r && r.trim().length > 0) || [];
 
-    const explanation = reasons.length > 0 
-      ? reasons.join(". ") + "." 
+    const explanation = reasons.length > 0
+      ? reasons.join(". ") + "."
       : "We recommend these products based on your preferences and similar users' choices.";
 
     return {
