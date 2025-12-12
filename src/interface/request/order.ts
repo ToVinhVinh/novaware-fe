@@ -32,6 +32,7 @@ export interface IGetOrdersQuery {
 	pageNumber?: number;
 	perPage?: number;
 	keyword?: string;
+	user_id?: string;
 }
 
 export interface IUpdateOrderToPaidBody {

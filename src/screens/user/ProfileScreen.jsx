@@ -41,7 +41,11 @@ const ProfileScreen = ({ history }) => {
   const { data: userResponse, isLoading: loading, error } = useGetUserById(currentUserId);
   const user = userResponse?.data?.user;
 
-  const { data: ordersResponse, isLoading: loadingOrders, error: errorOrders } = useGetMyOrders();
+  // Get user ID for orders query
+  const userId = userInfo?._id || userInfo?.id || currentUserId;
+  const { data: ordersResponse, isLoading: loadingOrders, error: errorOrders } = useGetMyOrders(
+    userId ? { user_id: userId } : undefined
+  );
   const orders = ordersResponse?.data?.orders || [];
 
   useEffect(() => {
