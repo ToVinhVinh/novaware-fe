@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import clsx from "clsx";
-import { useDispatch } from "react-redux";
-import { addToCart, removeFromCart } from "../../actions/cartActions";
 import { toast } from "react-toastify";
+import useCartStore from "../../store/cartStore";
 import {
   FormControl,
   InputLabel,
@@ -26,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
 
 const ProductFormSelect = ({ item, className }) => {
   const classes = useStyles();
-  const dispatch = useDispatch();
+  const { addToCart, removeFromCart } = useCartStore();
   const { control, handleSubmit, setValue } = useForm();
   const [selectedColor, setSelectedColor] = useState(null);
 
@@ -59,9 +58,23 @@ const ProductFormSelect = ({ item, className }) => {
       return;
     }
 
-    dispatch(removeFromCart(id, oldSize, oldColor));
+    // Tạo productData từ item hiện tại
+    const productData = {
+      _id: item.product,
+      id: item.product,
+      name: item.name,
+      productDisplayName: item.name,
+      price: item.price,
+      sale: item.sale || 0,
+      variants: [], // Có thể cần thêm variants nếu có
+      colors: item.color || [],
+      images: item.images || [],
+      size: item.size || {},
+      countInStock: item.countInStock || 0,
+    };
 
-    dispatch(addToCart(id, data.qty, newSize, data.color, newColor));
+    removeFromCart(id, oldSize, oldColor);
+    addToCart(productData, data.qty, newSize, data.color, newColor);
     toast.success("Product updated successfully!");
   };
 

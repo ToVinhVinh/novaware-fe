@@ -18,10 +18,11 @@ import { Link as RouterLink } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import ClearIcon from "@material-ui/icons/Clear";
 import DeleteIcon from "@material-ui/icons/Delete";
-import { useDispatch, useSelector } from "react-redux";
-import { removeFromCart, setOpenCartDrawer } from "../../actions/cartActions";
-import emptyGif from "../../assets/images/Empty.gif";
+import AddIcon from "@material-ui/icons/Add";
+import RemoveIcon from "@material-ui/icons/Remove";
 import { Link as LinkRouter } from "react-router-dom";
+import useCartStore from "../../store/cartStore";
+import emptyGif from "../../assets/images/Empty.gif";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -38,7 +39,11 @@ const useStyles = makeStyles((theme) => ({
   },
   large: {
     width: theme.spacing(12),
-    height: theme.spacing(15),
+    height: theme.spacing(12),
+    borderRadius: 8,
+    overflow: "hidden",
+    marginRight: 10,
+    border: `1px solid ${theme.palette.divider}`,
   },
   listProduct: {
     overflowY: "auto",
@@ -72,30 +77,46 @@ const useStyles = makeStyles((theme) => ({
     ...theme.mixins.customize.centerFlex("column wrap"),
     marginTop: 30,
   },
+  quantityControl: {
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(1),
+    marginTop: theme.spacing(1),
+  },
+  quantityButton: {
+    padding: 4,
+    minWidth: 32,
+    height: 32,
+  },
+  quantityText: {
+    minWidth: 30,
+    textAlign: "center",
+    fontWeight: 500,
+  },
+  itemContent: {
+    display: "flex",
+    flexDirection: "column",
+    flex: 1,
+  },
 }));
 
 const CartPreview = () => {
   const classes = useStyles();
-  const dispatch = useDispatch();
-
-  const isOpenDrawer = useSelector((state) => state.cartOpenDrawer);
-  const { cartItems } = useSelector((state) => state.cart);
+  const { cartItems, isDrawerOpen, removeFromCart, setDrawerOpen, updateItemQty } = useCartStore();
 
   const [selectedItems, setSelectedItems] = useState([]);
 
   const removeFromCartHandler = (item) => {
-    dispatch(
-      removeFromCart(item.product, item.sizeSelected, item.colorSelected)
-    );
+    removeFromCart(item.product, item.sizeSelected, item.colorSelected);
     setSelectedItems((prev) => prev.filter((pid) => !(pid === item.product)));
   };
 
   const onDrawerOpen = () => {
-    dispatch(setOpenCartDrawer(true));
+    setDrawerOpen(true);
   };
 
   const onDrawerClose = () => {
-    dispatch(setOpenCartDrawer(false));
+    setDrawerOpen(false);
   };
 
   const toggleItemSelection = (productId) => {
@@ -106,25 +127,35 @@ const CartPreview = () => {
     );
   };
 
-  // Chọn tất cả khi mở Drawer
+  const handleIncreaseQty = (item) => {
+    const newQty = (item.qty || 1) + 1;
+    updateItemQty(item.product, item.sizeSelected, item.colorSelected, newQty);
+  };
+
+  const handleDecreaseQty = (item) => {
+    const currentQty = item.qty || 1;
+    if (currentQty > 1) {
+      const newQty = currentQty - 1;
+      updateItemQty(item.product, item.sizeSelected, item.colorSelected, newQty);
+    }
+  };
+
   useEffect(() => {
-    if (isOpenDrawer) {
+    if (isDrawerOpen) {
       setSelectedItems(cartItems.map((item) => item.product));
     }
-  }, [isOpenDrawer, cartItems]);
+  }, [isDrawerOpen, cartItems]);
 
   return (
     <SwipeableDrawer
       anchor="right"
-      open={isOpenDrawer}
+      open={isDrawerOpen}
       onClose={onDrawerClose}
       onOpen={onDrawerOpen}
     >
       <div className={classes.root}>
         <div className={classes.title}>
-          <Typography variant="h5" component="h2" gutterBottom>
-            Cart ({cartItems.length})
-          </Typography>
+          <Typography variant="h5" align="center" className="tracking-widest"> Cart ({cartItems.length})</Typography>
           <IconButton color="secondary" onClick={onDrawerClose}>
             <ClearIcon />
           </IconButton>
@@ -144,8 +175,10 @@ const CartPreview = () => {
                   ? selectedColor.name
                   : item.colorSelected;
 
+                const itemKey = `${item.product}-${item.sizeSelected || ""}-${item.colorSelected || ""}`;
+
                 return (
-                  <ListItem divider disableGutters key={item.product}>
+                  <ListItem divider disableGutters key={itemKey}>
                     <ListItemAvatar style={{ position: "relative" }}>
                       <Avatar
                         variant="square"
@@ -160,27 +193,50 @@ const CartPreview = () => {
                           position: "absolute",
                           top: 0,
                           left: 0,
-                          backgroundColor: "white",
                           borderRadius: 4,
                           padding: 2,
                         }}
                         color="primary"
                       />
                     </ListItemAvatar>
-                    <ListItemText
-                      primary={item.name}
-                      secondary={`${item.qty} x $${item.priceSale} | Size: ${
-                        item.sizeSelected?.toUpperCase() || "N/A"
-                      } | Color: ${colorName}`}
-                    />
-                    <ListItemSecondaryAction>
-                      <IconButton
-                        edge="end"
-                        onClick={() => removeFromCartHandler(item)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </ListItemSecondaryAction>
+                    <div className={classes.itemContent}>
+                      <ListItemText
+                        primary={item.name}
+                        secondary={`$${(item.priceSale || item.price || 0).toFixed(2)} | Size: ${item.sizeSelected?.toUpperCase() || "N/A"
+                          } | Color: ${colorName || "N/A"}`}
+                      />
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <div className={classes.quantityControl}>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDecreaseQty(item)}
+                            disabled={item.qty <= 1}
+                            className={classes.quantityButton}
+                            color="primary"
+                          >
+                            <RemoveIcon fontSize="small" />
+                          </IconButton>
+                          <Typography variant="body2" className={classes.quantityText}>
+                            {item.qty || 1}
+                          </Typography>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleIncreaseQty(item)}
+                            className={classes.quantityButton}
+                            color="primary"
+                          >
+                            <AddIcon fontSize="small" />
+                          </IconButton>
+                        </div>
+                        <IconButton
+                          onClick={() => removeFromCartHandler(item)}
+                          color="secondary"
+                          size="medium"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </div>
+                    </div>
                   </ListItem>
                 );
               })}
@@ -199,7 +255,7 @@ const CartPreview = () => {
                 $
                 {cartItems
                   .filter((item) => selectedItems.includes(item.product))
-                  .reduce((acc, item) => acc + item.priceSale * item.qty, 0)
+                  .reduce((acc, item) => acc + (item.priceSale || item.price || 0) * (item.qty || 1), 0)
                   .toFixed(2)}
               </Typography>
             </div>

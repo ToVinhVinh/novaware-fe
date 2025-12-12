@@ -1,8 +1,8 @@
 import React from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { removeFromCart } from "../../actions/cartActions";
+import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import useCartStore from "../../store/cartStore";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Avatar,
@@ -32,10 +32,6 @@ import Meta from "../../components/Meta";
 import ProductFormSelect from "../../components/Product/ProductFormSelect";
 import NavigateNextIcon from "@material-ui/icons/NavigateNext";
 import DeleteIcon from "@material-ui/icons/Delete";
-import {
-  CART_TOGGLE_SELECT_ITEM,
-  CART_SELECT_ALL_ITEMS,
-} from "../../constants/cartConstants";
 
 const useStyles = makeStyles((theme) => ({
   breadcrumbsContainer: {
@@ -71,10 +67,8 @@ const useStyles = makeStyles((theme) => ({
 
 const CartScreen = ({ history }) => {
   const classes = useStyles();
-  const dispatch = useDispatch();
-
   const { userInfo } = useSelector((state) => state.userLogin);
-  const { cartItems } = useSelector((state) => state.cart);
+  const { cartItems, toggleItemSelection, selectAllItems, removeFromCart } = useCartStore();
 
   // Tạo key định danh duy nhất cho item
   const getItemKey = (item) =>
@@ -82,24 +76,19 @@ const CartScreen = ({ history }) => {
 
   // Toggle chọn 1 item
   const handleToggle = (item) => {
-    dispatch({
-      type: CART_TOGGLE_SELECT_ITEM,
-      payload: getItemKey(item),
-    });
+    toggleItemSelection(item.product);
   };
 
-  // Kiểm tra tất cả item đã được chọn chưa
   const allSelected =
     cartItems.length > 0 && cartItems.every((item) => item.selected);
 
-  // Chọn hoặc bỏ chọn tất cả
   const handleSelectAll = () => {
-    dispatch({ type: CART_SELECT_ALL_ITEMS, payload: !allSelected });
+    selectAllItems(!allSelected);
   };
 
   const removeFromCartHandler = (id, sizeSelected, colorSelected) => {
-    dispatch(removeFromCart(id, sizeSelected, colorSelected));
-    toast.success("Sản phẩm đã được xóa khỏi giỏ hàng!");
+    removeFromCart(id, sizeSelected, colorSelected);
+    toast.success("Product removed from cart successfully!");
   };
 
   // Tính tổng giá của những item được chọn
@@ -112,7 +101,7 @@ const CartScreen = ({ history }) => {
     const selectedProducts = cartItems.filter((item) => item.selected);
 
     if (selectedProducts.length === 0) {
-      toast.warning("Vui lòng chọn ít nhất một sản phẩm.");
+      toast.warning("Please select at least one product.");
       return;
     }
 

@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Link as LinkRouter } from "react-router-dom";
+import React from "react";
+import { Link as LinkRouter, useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -17,6 +17,7 @@ import {
 } from "@material-ui/core";
 import { closeFavoriteDrawer } from "../../actions/favoriteActions";
 import { useGetFavorites, useRemoveFavorite } from "../../hooks/api/useUser";
+import { toast } from "react-toastify";
 import ClearIcon from "@material-ui/icons/Clear";
 import DeleteIcon from "@material-ui/icons/Delete";
 import emptyGif from "../../assets/images/Empty.gif";
@@ -75,6 +76,7 @@ const useStyles = makeStyles((theme) => ({
 const FavoritePreview = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
+  const history = useHistory();
 
   const favoriteDrawer = useSelector((state) => state.favoriteDrawer || { open: false });
   const isOpenDrawer = favoriteDrawer.open || false;
@@ -86,16 +88,29 @@ const FavoritePreview = () => {
 
   const removeFavoriteMutation = useRemoveFavorite();
 
-  const removeFromFavoritesHandler = async (productId) => {
+  const removeFromFavoritesHandler = async (e, productId) => {
+    e.stopPropagation(); // Prevent navigation when clicking delete
     if (userInfo?._id) {
       try {
         await removeFavoriteMutation.mutateAsync({
           userId: userInfo._id,
           productId: productId
         });
+        toast.success("Đã xóa khỏi yêu thích!");
       } catch (error) {
         console.error("Failed to remove favorite:", error);
+        toast.error("Xóa khỏi yêu thích thất bại");
       }
+    } else {
+      toast.info("Vui lòng đăng nhập để sử dụng tính năng này");
+    }
+  };
+
+  const handleItemClick = (productId) => {
+    if (productId) {
+      const safeProductId = String(productId);
+      history.push(`/product?id=${safeProductId}`);
+      dispatch(closeFavoriteDrawer());
     }
   };
 
@@ -108,7 +123,7 @@ const FavoritePreview = () => {
       anchor="right"
       open={isOpenDrawer}
       onClose={onDrawerClose}
-      onOpen={() => {}} // No action needed to open
+      onOpen={() => { }} // No action needed to open
     >
       <div className={classes.root}>
         <div className={classes.title}>
@@ -123,31 +138,54 @@ const FavoritePreview = () => {
         {favoriteItems && favoriteItems.length > 0 ? (
           <>
             <List className={classes.listProduct}>
-              {favoriteItems.map((item) => (
-                <ListItem divider disableGutters key={item._id}>
-                  <ListItemAvatar>
-                    <Avatar
-                      variant="square"
-                      src={item.images && item.images[0]}
-                      alt="product image"
-                      className={classes.large}
+              {favoriteItems.map((item, index) => {
+                // Safely extract productId and ensure it's a string
+                const rawProductId = item._id || item.productId || item.product?._id;
+                const productId = rawProductId ? String(rawProductId) : `item-${index}`;
+
+                const productName = item.name || item.productDisplayName || item.product?.name || "Unknown Product";
+
+                // Safely extract and convert price to number
+                const rawPrice = item.price || item.variants?.[0]?.price || item.product?.price || 0;
+                const productPrice = typeof rawPrice === 'number' ? rawPrice : (typeof rawPrice === 'string' ? parseFloat(rawPrice) || 0 : 0);
+
+                const productImage = item.images?.[0] || item.product?.images?.[0] || "";
+                const productCategory = item.category || item.masterCategory || item.product?.category || "";
+
+                return (
+                  <ListItem
+                    divider
+                    disableGutters
+                    key={productId}
+                    button
+                    onClick={() => handleItemClick(productId)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <ListItemAvatar>
+                      <Avatar
+                        variant="square"
+                        src={productImage}
+                        alt={productName}
+                        className={classes.large}
+                      />
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={productName}
+                      secondary={`$${productPrice.toFixed(2)}${productCategory ? ` | ${productCategory}` : ''}`}
+                      style={{ marginLeft: 10 }}
                     />
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={item.name}
-                    secondary={`$${item.price} | ${item.category}`} // Customize as needed
-                    style={{ marginLeft: 10 }}
-                  />
-                  <ListItemSecondaryAction>
-                    <IconButton
-                      edge="end"
-                      onClick={() => removeFromFavoritesHandler(item._id)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </ListItemSecondaryAction>
-                </ListItem>
-              ))}
+                    <ListItemSecondaryAction>
+                      <IconButton
+                        edge="end"
+                        onClick={(e) => removeFromFavoritesHandler(e, productId)}
+                        color="secondary"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                );
+              })}
             </List>
             <Divider variant="fullWidth" />
             {/* You can add more details or buttons here if needed */}

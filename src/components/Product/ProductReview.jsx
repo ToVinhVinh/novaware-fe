@@ -14,6 +14,7 @@ import {
 } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Rating from "@material-ui/lab/Rating";
+import Alert from "@material-ui/lab/Alert";
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
@@ -242,7 +243,7 @@ const ProductReview = ({ reviews, productId }) => {
                         </Button>
                       </form>
                     ) : (
-                      <Message severity="info">
+                      <Alert severity="info">
                         Please{" "}
                         <Link
                           component={RouterLink}
@@ -251,7 +252,7 @@ const ProductReview = ({ reviews, productId }) => {
                           login
                         </Link>{" "}
                         to write a review
-                      </Message>
+                      </Alert>
                     )}
                   </Grid>
                 </Grid>

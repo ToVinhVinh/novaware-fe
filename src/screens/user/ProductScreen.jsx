@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
-import { addToCart } from "../../actions/cartActions";
 import { toast } from "react-toastify";
+import useCartStore from "../../store/cartStore";
 import { Grid, Container, Link } from "@material-ui/core";
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import NavigateNextIcon from "@material-ui/icons/NavigateNext";
@@ -32,9 +32,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ProductScreen = ({ setLoginModalOpen }) => {
-  const dispatch = useDispatch();
   const classes = useStyles();
   const location = useLocation();
+  const { addToCart, setDrawerOpen } = useCartStore();
 
   const searchParams = new URLSearchParams(location.search);
   const productId = searchParams.get('id');
@@ -78,8 +78,12 @@ const ProductScreen = ({ setLoginModalOpen }) => {
 
   useEffect(() => {
     if (userInfo && favoriteItems && product?._id) {
+      const productId = String(product._id);
       const isProductInFavorites = favoriteItems.some(
-        (item) => item._id === product._id
+        (item) => {
+          const itemId = item._id ? String(item._id) : null;
+          return itemId === productId;
+        }
       );
       setIsFavorite(isProductInFavorites);
     }
@@ -94,7 +98,9 @@ const ProductScreen = ({ setLoginModalOpen }) => {
       colorName = color || "";
     }
 
-    dispatch(addToCart(productId, qty, size, color, colorName));
+    // Sử dụng dữ liệu sản phẩm đã có sẵn, không cần gọi API
+    setDrawerOpen(true);
+    addToCart(product, qty, size, color, colorName);
 
     if (currentUserId && product?._id) {
       updateInteraction.mutate({
@@ -103,42 +109,66 @@ const ProductScreen = ({ setLoginModalOpen }) => {
       });
     }
 
-    toast.success("Sản phẩm đã được thêm vào giỏ hàng!");
+    toast.success("Product added to cart successfully!");
   };
 
   const handleAddToFavorites = async () => {
-    if (userInfo && product?._id) {
-      try {
-        await addFavoriteMutation.mutateAsync({
-          userId: userInfo._id,
-          body: { productId: product._id }
-        });
-        if (currentUserId) {
-          updateInteraction.mutate({
-            product_id: product._id,
-            interaction_type: 'like',
-          });
-        }
-        toast.success("Đã thêm vào yêu thích!");
-      } catch (error) {
-        toast.error("Thêm vào yêu thích thất bại");
-      }
-    } else {
+    if (!userInfo) {
+      toast.info("Please login to add products to your wishlist");
       setLoginModalOpen(true);
+      return;
+    }
+
+    if (!product?._id) {
+      toast.error("Product information is not available");
+      return;
+    }
+
+    // Optimistically update state
+    setIsFavorite(true);
+    try {
+      await addFavoriteMutation.mutateAsync({
+        userId: userInfo._id,
+        body: { productId: product._id }
+      });
+      if (currentUserId) {
+        updateInteraction.mutate({
+          product_id: product._id,
+          interaction_type: 'like',
+        });
+      }
+      toast.success("Product added to favorites successfully!");
+    } catch (error) {
+      // Revert on error
+      setIsFavorite(false);
+      toast.error("Failed to add product to favorites");
     }
   };
 
   const handleRemoveFromFavorites = async () => {
-    if (userInfo && product?._id) {
-      try {
-        await removeFavoriteMutation.mutateAsync({
-          userId: userInfo._id,
-          productId: product._id
-        });
-        toast.info("Đã xóa khỏi yêu thích!");
-      } catch (error) {
-        toast.error("Xóa khỏi yêu thích thất bại");
-      }
+    if (!userInfo) {
+      toast.info("Please login to manage your wishlist");
+      return;
+    }
+
+    if (!product?._id) {
+      toast.error("Product information is not available");
+      return;
+    }
+
+    // Optimistically update state
+    setIsFavorite(false);
+    try {
+      await removeFavoriteMutation.mutateAsync({
+        userId: userInfo._id,
+        productId: product._id
+      });
+      toast.info("Product removed from favorites successfully!");
+    } catch (error) {
+      // Revert on error
+      setIsFavorite(true);
+      console.error("Remove from favorites error:", error);
+      toast.error("Failed to remove product from favorites");
     }
   };
 
@@ -202,18 +232,20 @@ const ProductScreen = ({ setLoginModalOpen }) => {
             </Grid>
           </Grid>
 
-          <Grid container>
-            <Grid item xs={12}>
-              {product && (
-                <ProductRelated
-                  category={product.category}
-                  excludeId={product._id}
-                  userId={currentUserId}
-                  productId={productId}
-                />
-              )}
+          {userInfo && (
+            <Grid container>
+              <Grid item xs={12}>
+                {product && (
+                  <ProductRelated
+                    category={product.category}
+                    excludeId={product._id}
+                    userId={currentUserId}
+                    productId={productId}
+                  />
+                )}
+              </Grid>
             </Grid>
-          </Grid>
+          )}
         </>
       ) : null}
     </Container>

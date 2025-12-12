@@ -2,12 +2,10 @@ import React, { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { motion } from "framer-motion";
 import AddShoppingCartOutlinedIcon from "@material-ui/icons/AddShoppingCartOutlined";
-import VisibilityOutlinedIcon from "@material-ui/icons/VisibilityOutlined";
 import { RiShoppingBag3Fill } from "react-icons/ri";
 import Tooltip from "@material-ui/core/Tooltip";
 import ProductModalView from "./ProductModalView";
-import { addToCart, setOpenCartDrawer } from "../../actions/cartActions";
-import { useDispatch } from "react-redux";
+import useCartStore from "../../store/cartStore";
 
 const ProductCard = (props) => {
   const {
@@ -30,7 +28,7 @@ const ProductCard = (props) => {
   const displayName = productDisplayName || name || "Product";
   const [openModal, setOpenModal] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const dispatch = useDispatch();
+  const { addToCart, setDrawerOpen } = useCartStore();
   const variant = variants && variants.length > 0 ? variants[0] : null;
 
   const basePrice = variant?.price || price || 50; // fallback price
@@ -42,20 +40,34 @@ const ProductCard = (props) => {
     if (!idToAdd) {
       return;
     }
-    dispatch(setOpenCartDrawer(true));
-    dispatch(addToCart(idToAdd, 1, variant?.size || "M", variant?.color || ""));
-  };
-  const handleOpenQuickView = (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    setOpenModal(true);
+    const selectedSize = variant?.size || "M";
+    const selectedColorHex = variant?.color || "";
+    const selectedColorName = selectedColorHex || "";
+
+    // Sử dụng dữ liệu sản phẩm đã có sẵn, không cần gọi API
+    const productData = {
+      _id: productId,
+      id: productId,
+      name: displayName,
+      productDisplayName: displayName,
+      price: basePrice,
+      sale: sale || 0,
+      variants: variants || [],
+      colors: props.colors || [],
+      images: images || [],
+      size: props.size || [],
+      countInStock: variant?.stock || props.countInStock || 0,
+    };
+
+    setDrawerOpen(true);
+    addToCart(productData, 1, selectedSize, selectedColorHex, selectedColorName);
   };
 
 
   return (
     <>
       <motion.div
-        className="group shadow-md h-full bg-white border border-pink-500 overflow-hidden transition-all duration-300"
+        className="group shadow-md p-2 rounded-lg bg-primary h-full border border-pink-500 overflow-hidden transition-all duration-300"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -68,21 +80,21 @@ const ProductCard = (props) => {
             }
           }}
         >
-          <div className="relative w-full pb-[100%] -mb-10 overflow-hidden bg-gray-50 transition-all duration-300 ease-in-out z-0">
+          <div className="relative bg-red-500 w-full pb-[100%] overflow-hidden rounded-lg  transition-all duration-300 ease-in-out z-0">
             {sale > 0 && (
-              <div className="absolute top-3 left-3 z-20 bg-pink-600 px-2 py-1 text-xs font-semibold uppercase text-white">
+              <div className="absolute rounded-lg -top-1 left-0 z-20 border-[2px] border-primary px-2 text-base font-semibold uppercase text-white bg-primary rounded-t-none rounded-bl-none">
                 -{Math.round(sale)}%
               </div>
             )}
 
-            <div className="absolute top-3 left-16 z-20 bg-pink-600 px-2 py-1 text-xs font-semibold uppercase text-white">
+            {/* <div className="absolute top-2 rounded-lg left-16 z-20 border-[2px] border-blue-600 p-2 py-1 text-xs font-semibold uppercase text-blue-600">
               {articleType}
-            </div>
+            </div> */}
             {images && images.length > 0 ? (
               <>
                 {images[1] && (
                   <motion.img
-                    className="absolute inset-0 p-4 h-full w-full object-contain hover:scale-110 transition-all duration-300 ease-in-out"
+                    className="absolute inset-0 bg-red-500 h-full w-full object-contain hover:scale-110 transition-all duration-300 ease-in-out rounded-lg"
                     src={images[1]}
                     alt={`${displayName} - back view`}
                     initial={{ opacity: 0 }}
@@ -93,7 +105,7 @@ const ProductCard = (props) => {
 
                 {/* Front Image with fade on hover */}
                 <motion.img
-                  className="absolute inset-0 p-4 h-full w-full object-contain bg-white hover:scale-110 transition-all duration-300 ease-in-out"
+                  className="absolute inset-0 h-full w-full object-contain bg-white hover:scale-110 transition-all duration-300 ease-in-out rounded-lg"
                   src={images[0]}
                   alt={displayName}
                   initial={{ opacity: 1 }}
@@ -103,7 +115,7 @@ const ProductCard = (props) => {
               </>
             ) : (
               <motion.img
-                className="absolute inset-0 h-full w-full object-contain bg-white hover:scale-110 transition-all duration-300 ease-in-out"
+                className="absolute inset-0 h-full w-full object-contain bg-white hover:scale-110 transition-all duration-300 ease-in-out rounded-lg"
                 src="https://www.lwf.org/images/emptyimg.png"
                 alt="No Image Available"
                 initial={{ opacity: 1 }}
@@ -114,9 +126,9 @@ const ProductCard = (props) => {
           </div>
 
           {/* Product Info */}
-          <div className="flex flex-1 flex-col p-3 bg-primary-gradient relative z-10">
+          <div className="flex flex-1 flex-col relative z-10 mt-2">
             <Tooltip title={displayName || ""} arrow>
-              <h3 className="line-clamp-2 text-base font-light leading-6 text-white">
+              <h3 className="text-base leading-6 text-white font-semibold line-clamp-1">
                 {displayName}
               </h3>
             </Tooltip>
@@ -126,7 +138,7 @@ const ProductCard = (props) => {
               <div className="flex items-center gap-1">
                 <div className="flex text-yellow-400">
                   {[...Array(5)].map((_, i) => (
-                    <span style={{ fontSize: "24px" }} key={i} className={i < rating ? "text-yellow-400" : "text-gray-300"}>
+                    <span style={{ fontSize: "20px" }} key={i} className={i < rating ? "text-yellow-400" : "text-gray-300"}>
                       ★
                     </span>
                   ))}
@@ -159,24 +171,13 @@ const ProductCard = (props) => {
                 </button>
               </div>
             </div>
-            <div
-              className="grid grid-cols-2 gap-2 mt-2"
+            <button
+              onClick={(e) => handleAddToCart(e, productId)}
+              className="h-10 rounded-lg mt-2 w-full flex items-center gap-2 justify-center border border-white text-white hover:bg-pink-600"
             >
-              <button
-                onClick={handleOpenQuickView}
-                className="h-10 flex items-center gap-2 justify-center border border-white text-white hover:bg-pink-600"
-              >
-                <VisibilityOutlinedIcon fontSize="small" className="text-white" />
-                View
-              </button>
-              <button
-                onClick={(e) => handleAddToCart(e, productId)}
-                className="h-10 flex items-center gap-2 justify-center border border-white text-white hover:bg-pink-600"
-              >
-                <AddShoppingCartOutlinedIcon fontSize="small" className="text-white" />
-                Add
-              </button>
-            </div>
+              <AddShoppingCartOutlinedIcon fontSize="small" className="text-white" />
+              Add to Cart
+            </button>
           </div>
         </RouterLink>
       </motion.div>

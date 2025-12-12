@@ -10,55 +10,84 @@ import {
 export const addToCart =
   (id, qty, sizeSelected, colorHex, colorName) =>
   async (dispatch, getState) => {
-    const { data } = await axios.get(`/api/products/${id}`);
+    try {
+      const { data } = await axios.get(`/api/products/${id}`);
 
-    const newItem = {
-      product: data._id,
-      name: data.name,
-      qty,
-      sizeSelected: sizeSelected.toLowerCase(),
-      colorSelected: colorName,
-      size: data.size,
-      color: data.colors,
-      images: data.images,
-      price: data.price,
-      sale: data.sale,
-      priceSale: data.price * (1 - data.sale / 100),
-      countInStock: data.countInStock,
-    };
+      // Find the matching variant if variants exist
+      let variantPrice = data.price;
+      let variantStock = data.countInStock;
+      
+      if (data.variants && data.variants.length > 0) {
+        const matchingVariant = data.variants.find(
+          (v) =>
+            v.size?.toLowerCase() === sizeSelected?.toLowerCase() &&
+            (v.color === colorHex || v.color === colorName)
+        );
+        
+        if (matchingVariant) {
+          variantPrice = matchingVariant.price || data.price;
+          variantStock = matchingVariant.stock || data.countInStock;
+        } else if (data.variants.length > 0) {
+          // Use first variant as fallback
+          variantPrice = data.variants[0].price || data.price;
+          variantStock = data.variants[0].stock || data.countInStock;
+        }
+      }
 
-    const {
-      cart: { cartItems },
-    } = getState();
+      const normalizedSize = sizeSelected ? String(sizeSelected).toLowerCase() : "";
+      const normalizedColor = colorName || colorHex || "";
 
-    const existItemIndex = cartItems.findIndex(
-      (item) =>
-        item.product === newItem.product &&
-        item.sizeSelected === newItem.sizeSelected &&
-        item.colorSelected === newItem.colorSelected
-    );
-
-    let updatedCartItems;
-
-    if (existItemIndex !== -1) {
-      updatedCartItems = [...cartItems];
-      updatedCartItems[existItemIndex] = {
-        ...updatedCartItems[existItemIndex],
-        qty: updatedCartItems[existItemIndex].qty + newItem.qty,
+      const newItem = {
+        product: data._id || data.id || id,
+        name: data.name || data.productDisplayName || "Product",
+        qty: Number(qty) || 1,
+        sizeSelected: normalizedSize,
+        colorSelected: normalizedColor,
+        size: data.size,
+        color: data.colors,
+        images: data.images || [],
+        price: variantPrice,
+        sale: data.sale || 0,
+        priceSale: variantPrice * (1 - (data.sale || 0) / 100),
+        countInStock: variantStock,
+        selected: true, // Default to selected
       };
-    } else {
-      updatedCartItems = [...cartItems, newItem];
+
+      const {
+        cart: { cartItems },
+      } = getState();
+
+      const existItemIndex = cartItems.findIndex(
+        (item) =>
+          String(item.product) === String(newItem.product) &&
+          String(item.sizeSelected).toLowerCase() === String(newItem.sizeSelected).toLowerCase() &&
+          String(item.colorSelected) === String(newItem.colorSelected)
+      );
+
+      let updatedCartItems;
+
+      if (existItemIndex !== -1) {
+        updatedCartItems = [...cartItems];
+        updatedCartItems[existItemIndex] = {
+          ...updatedCartItems[existItemIndex],
+          qty: updatedCartItems[existItemIndex].qty + newItem.qty,
+        };
+      } else {
+        updatedCartItems = [...cartItems, newItem];
+      }
+
+      dispatch({
+        type: CART_ADD_ITEM,
+        payload: updatedCartItems,
+      });
+
+      localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      throw error;
     }
-
-    dispatch({
-      type: CART_ADD_ITEM,
-      payload: updatedCartItems,
-    });
-
-    localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
   };
 
-// Xóa sản phẩm khỏi giỏ hàng
 export const removeFromCart =
   (id, sizeSelected, colorSelected) => (dispatch, getState) => {
     const {
@@ -107,7 +136,6 @@ export const setOpenCartDrawer = (isOpen) => {
   return { type: CART_OPEN_DRAWER_PREVIEW, payload: isOpen };
 };
 
-// Cập nhật các sản phẩm được chọn
 export const setSelectedCartItems = (selectedKeys) => (dispatch) => {
   dispatch({
     type: "SET_SELECTED_CART_ITEMS",

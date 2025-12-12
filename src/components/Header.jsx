@@ -6,7 +6,7 @@ import { useMediaQuery } from "@material-ui/core";
 import SearchIcon from "../assets/icons/search.svg?react";
 import CartIcon from "../assets/icons/cart.svg?react";
 import ChatIcon from "../assets/icons/ai-icon.svg?react";
-import { setOpenCartDrawer } from "../actions/cartActions";
+import useCartStore from "../store/cartStore";
 import { logout } from "../actions/userActions";
 import { openChatDrawer } from "../actions/chatActions";
 import { useGetFavorites } from "../hooks/api/useUser";
@@ -207,7 +207,7 @@ const Header = ({
   setForgotPasswordModalOpen,
 }) => {
   const dispatch = useDispatch();
-  const { cartItems } = useSelector((state) => state.cart);
+  const { cartItems, setDrawerOpen } = useCartStore();
   const { userInfo } = useSelector((state) => state.userLogin);
   const [mobile, setMobile] = useState(false);
   const [openSearchDrawer, setOpenSearchDrawer] = useState(false);
@@ -459,7 +459,7 @@ const Header = ({
           {/* Cart */}
           <IconButton
             color="inherit"
-            onClick={() => dispatch(setOpenCartDrawer(true))}
+            onClick={() => setDrawerOpen(true)}
           >
             <Badge badgeContent={cartItems.length} color="secondary" overlap="rectangular">
               <CartIcon />

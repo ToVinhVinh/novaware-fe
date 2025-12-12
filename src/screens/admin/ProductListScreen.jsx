@@ -359,7 +359,7 @@ const ProductListScreen = ({ history }) => {
 
   useEffect(() => {
     if (successDelete) {
-      toast.success("Sản phẩm đã được xóa!");
+      toast.success("Product deleted successfully!");
     } else if (errorDelete) {
       toast.error(errorDelete.message || String(errorDelete));
     }

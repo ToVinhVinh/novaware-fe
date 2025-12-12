@@ -865,8 +865,8 @@ const ProductInfo = memo(
               <Button
                 variant="contained"
                 color="secondary"
-                startIcon={<FaHeart />}
-                disabled={totalInventory === 0}
+                startIcon={isFavorite ? <FaHeart /> : <FaRegHeart />}
+                disabled={false}
                 type="button"
                 onClick={
                   isFavorite ? handleRemoveFromFavorites : handleAddToFavorites
@@ -876,6 +876,7 @@ const ProductInfo = memo(
                   width: "100%",
                   height: 48,
                   borderRadius: 0,
+                  backgroundColor: isFavorite ? "#f50057" : undefined,
                 }}
               >
                 {isFavorite ? (
