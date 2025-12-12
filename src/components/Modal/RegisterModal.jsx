@@ -41,11 +41,14 @@ const useStyles = makeStyles((theme) => ({
     ...theme.mixins.customize.centerFlex(),
     height: "auto",
     fontFamily: "Inter, sans-serif",
+    borderRadius: theme.spacing(2),
+    overflow: "hidden",
   },
   container: {
     height: "auto",
-    width: "500px",
+    width: "450px",
     border: "1px solid #f50057",
+    borderRadius: theme.spacing(2),
     backgroundColor: theme.palette.background.paper,
     overflow: "hidden",
     boxShadow: "0px 10px 25px rgba(0,0,0,0.5), 0px 5px 15px rgba(0,0,0,0.3)",
@@ -58,14 +61,16 @@ const useStyles = makeStyles((theme) => ({
   content: {
     position: "relative",
     ...theme.mixins.customize.flexMixin("flex-start", "center", "column"),
-    padding: "32px",
+    padding: theme.spacing(2.5),
+    paddingTop: theme.spacing(5),
+    paddingBottom: theme.spacing(5),
     height: "100%",
     [theme.breakpoints.down("xs")]: {
-      padding: "24px 10%",
+      padding: theme.spacing(2),
     },
   },
   form: {
-    paddingTop: theme.spacing(1),
+    paddingTop: theme.spacing(2),
   },
   backIcon: {
     position: "absolute",
@@ -131,7 +136,7 @@ const RegisterModal = ({
         }}
       >
         <Fade in={open}>
-          <Paper className={classes.root} square>
+          <Paper className={classes.root}>
             <Grid container component={Paper} className={classes.container}>
               <Grid item sm={12} md={12}>
                 <Box className={classes.content}>

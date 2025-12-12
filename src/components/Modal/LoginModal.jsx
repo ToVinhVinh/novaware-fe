@@ -21,6 +21,7 @@ import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
 import Link from "@material-ui/core/Link";
 import Button from "@material-ui/core/Button";
+import Divider from "@material-ui/core/Divider";
 import FormControl from "@material-ui/core/FormControl";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
@@ -49,12 +50,14 @@ const useStyles = makeStyles((theme) => ({
     ...theme.mixins.customize.centerFlex(),
     height: "auto",
     fontFamily: "Inter, sans-serif",
+    borderRadius: theme.spacing(2),
+    overflow: "hidden",
   },
   container: {
     height: "auto",
-    width: "500px",
+    width: "450px",
     border: "1px solid #f50057",
-
+    borderRadius: theme.spacing(2),
     backgroundColor: theme.palette.background.paper,
     overflow: "hidden",
     boxShadow: "0px 10px 25px rgba(0,0,0,0.5), 0px 5px 15px rgba(0,0,0,0.3)",
@@ -67,14 +70,16 @@ const useStyles = makeStyles((theme) => ({
   content: {
     position: "relative",
     ...theme.mixins.customize.flexMixin("flex-start", "center", "column"),
-    padding: "32px",
+    padding: theme.spacing(2.5),
+    paddingTop: theme.spacing(5),
+    paddingBottom: theme.spacing(5),
     height: "100%",
     [theme.breakpoints.down("xs")]: {
-      padding: "24px 10%",
+      padding: theme.spacing(2),
     },
   },
   form: {
-    paddingTop: theme.spacing(6),
+    paddingTop: theme.spacing(3),
   },
   backIcon: {
     position: "absolute",
@@ -87,19 +92,38 @@ const useStyles = makeStyles((theme) => ({
   },
   socialButtonsContainer: {
     marginTop: theme.spacing(2),
-    display: "flex",
-    justifyContent: "space-between",
-    gap: theme.spacing(2),
+    width: "100%",
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: theme.spacing(1.5),
   },
   socialButton: {
-    borderRadius: "10px",
-    backgroundColor: "#f50057",
+    borderRadius: "9999px",
     color: "white",
     fontSize: "13px",
-    padding: "5px 10px",
+    padding: "8px 16px",
+    textTransform: "none",
+    fontWeight: 500,
     "&:hover": {
-      backgroundColor: "#c42e4f",
-      color: "white",
+      opacity: 0.9,
+    },
+  },
+  googleButton: {
+    backgroundColor: "#EA4335",
+    "&:hover": {
+      backgroundColor: "#D33B2C",
+    },
+  },
+  facebookButton: {
+    backgroundColor: "#1877F2",
+    "&:hover": {
+      backgroundColor: "#166FE5",
+    },
+  },
+  twitterButton: {
+    backgroundColor: "#1DA1F2",
+    "&:hover": {
+      backgroundColor: "#1A91DA",
     },
   },
   closeIcon: {
@@ -111,6 +135,10 @@ const useStyles = makeStyles((theme) => ({
     "&:hover": {
       color: theme.palette.text.primary,
     },
+  },
+  divider: {
+    margin: theme.spacing(2, 0),
+    width: "100%",
   },
 }));
 
@@ -275,7 +303,7 @@ const LoginModal = ({
         }}
       >
         <Fade in={open}>
-          <Paper className={classes.root} square>
+          <Paper className={classes.root}>
             <Grid container component={Paper} className={classes.container}>
               <Grid item sm={12} md={12}>
                 <Box className={classes.content}>
@@ -361,7 +389,7 @@ const LoginModal = ({
                       </Button>
                     </form>
                   </FormProvider>
-                  <Box my={4}>
+                  <Box mt={2}>
                     New customer?{" "}
                     <Link
                       component={RouterLink}
@@ -370,27 +398,25 @@ const LoginModal = ({
                       Create Account
                     </Link>
                   </Box>
+                  <Divider className={classes.divider} />
                   <p>Or login with</p>
                   <Box className={classes.socialButtonsContainer}>
                     <Button
-                      className={classes.socialButton}
-                      color="secondary"
+                      className={`${classes.socialButton} ${classes.googleButton}`}
                       onClick={() => dispatch(socialLogin("google"))}
                       startIcon={<FaGoogle />}
                     >
                       Google
                     </Button>
                     <Button
-                      className={classes.socialButton}
-                      color="secondary"
+                      className={`${classes.socialButton} ${classes.facebookButton}`}
                       onClick={() => dispatch(socialLogin("facebook"))}
                       startIcon={<FaFacebook />}
                     >
                       Facebook
                     </Button>
                     <Button
-                      className={classes.socialButton}
-                      color="secondary"
+                      className={`${classes.socialButton} ${classes.twitterButton}`}
                       onClick={() => dispatch(socialLogin("twitter"))}
                       startIcon={<FaTwitter />}
                     >
