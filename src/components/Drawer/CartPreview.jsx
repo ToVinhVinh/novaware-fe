@@ -44,6 +44,7 @@ const useStyles = makeStyles((theme) => ({
     overflow: "hidden",
     marginRight: 10,
     border: `1px solid ${theme.palette.divider}`,
+    padding: 4,
   },
   listProduct: {
     overflowY: "auto",
@@ -262,25 +263,14 @@ const CartPreview = () => {
             <Divider variant="fullWidth" />
             <Button
               variant="contained"
-              color="primary"
-              fullWidth
-              component={RouterLink}
-              to="/cart"
-              onClick={onDrawerClose}
-              className={classes.button}
-            >
-              View Shopping Cart
-            </Button>
-            <Button
-              variant="contained"
               color="secondary"
               fullWidth
               className={classes.button}
               component={RouterLink}
-              to="/shipping"
+              to="/cart"
               onClick={onDrawerClose}
             >
-              Checkout
+              View Shopping Cart & Checkout
             </Button>
           </>
         ) : (

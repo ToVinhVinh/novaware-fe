@@ -39,29 +39,78 @@ const useStyles = makeStyles((theme) => ({
   },
   largeImage: {
     width: theme.spacing(12),
-    height: theme.spacing(15),
+    height: theme.spacing(12),
+    borderRadius: 8,
+    overflow: "hidden",
+    marginRight: 10,
+    border: `1px solid ${theme.palette.divider}`,
+    padding: 4,
   },
   cartTotalWrapper: {
-    padding: 20,
+    padding: theme.spacing(3),
     fontSize: 16,
-    backgroundColor: "#F4F4F4",
+    backgroundColor: "#fff",
+    borderRadius: theme.spacing(2),
+    border: `1px solid ${theme.palette.divider}`,
+    position: "sticky",
+    top: theme.spacing(2),
+  },
+  orderSummaryTitle: {
+    fontWeight: 600,
+    fontSize: "1.5rem",
+    marginBottom: theme.spacing(2),
+    color: theme.palette.text.primary,
   },
   cartTotal: {
-    fontSize: 18,
-    marginBottom: 8,
-    "&:nth-child(2)": {
-      color: theme.palette.secondary.main,
+    fontSize: 16,
+    marginBottom: theme.spacing(2),
+    padding: theme.spacing(1, 0),
+    "&:last-of-type": {
+      marginBottom: 0,
     },
   },
+  cartTotalLabel: {
+    fontWeight: 500,
+    color: theme.palette.text.secondary,
+  },
+  cartTotalValue: {
+    fontWeight: 600,
+    color: theme.palette.text.primary,
+    fontSize: "1.1rem",
+  },
+  totalPriceWrapper: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: theme.spacing(2, 0),
+    marginTop: theme.spacing(1),
+    borderTop: `2px solid ${theme.palette.divider}`,
+  },
+  totalPriceLabel: {
+    fontWeight: 600,
+    fontSize: "1.2rem",
+    color: theme.palette.text.primary,
+  },
+  totalPriceValue: {
+    fontWeight: 700,
+    fontSize: "1.5rem",
+    color: theme.palette.secondary.main,
+  },
   divider: {
-    margin: "8px 0",
-    width: 60,
-    height: 2,
-    backgroundColor: "#2a2a2a",
+    margin: theme.spacing(2, 0),
+    width: "100%",
+    height: 1,
+    backgroundColor: theme.palette.divider,
   },
   empty: {
     padding: 24,
     textAlign: "center",
+  },
+  tableContainer: {
+    borderRadius: theme.spacing(2),
+    border: `1px solid ${theme.palette.divider}`,
+    backgroundColor: "#fff",
+    overflow: "hidden",
   },
 }));
 
@@ -69,10 +118,6 @@ const CartScreen = ({ history }) => {
   const classes = useStyles();
   const { userInfo } = useSelector((state) => state.userLogin);
   const { cartItems, toggleItemSelection, selectAllItems, removeFromCart } = useCartStore();
-
-  // Tạo key định danh duy nhất cho item
-  const getItemKey = (item) =>
-    `${item.product}-${item.sizeSelected}-${item.colorSelected}`;
 
   // Toggle chọn 1 item
   const handleToggle = (item) => {
@@ -91,11 +136,9 @@ const CartScreen = ({ history }) => {
     toast.success("Product removed from cart successfully!");
   };
 
-  // Tính tổng giá của những item được chọn
   const totalPrice = cartItems
     .filter((item) => item.selected)
-    .reduce((acc, item) => acc + item.qty * item.priceSale, 0)
-    .toFixed(2);
+    .reduce((acc, item) => acc + (item.qty || 0) * (item.priceSale || item.price || 0), 0);
 
   const checkoutHandler = () => {
     const selectedProducts = cartItems.filter((item) => item.selected);
@@ -108,7 +151,7 @@ const CartScreen = ({ history }) => {
     if (userInfo) {
       history.push("/shipping");
     } else {
-      history.push("/login?redirect=shipping");
+      toast.info("Please login to proceed to checkout.");
     }
   };
 
@@ -131,7 +174,7 @@ const CartScreen = ({ history }) => {
       <Grid container spacing={4}>
         <Grid item xs={12} lg={8}>
           {cartItems.length > 0 ? (
-            <TableContainer component={Paper} elevation={0}>
+            <TableContainer component={Paper} elevation={0} className={classes.tableContainer}>
               <Table>
                 <TableHead>
                   <TableRow>
@@ -149,7 +192,7 @@ const CartScreen = ({ history }) => {
                     <TableCell>Products</TableCell>
                     <Hidden smDown>
                       <TableCell align="right">Price</TableCell>
-                      <TableCell align="center">Size & Qty & Color</TableCell>
+                      <TableCell align="center">Size & Quantity & Color</TableCell>
                       <TableCell align="right">Action</TableCell>
                     </Hidden>
                   </TableRow>
@@ -191,7 +234,7 @@ const CartScreen = ({ history }) => {
                             alignItems="center"
                             mt={2}
                           >
-                            <Box>${item.priceSale}</Box>
+                            <Box>${item.priceSale.toFixed(2)}</Box>
                             <Box>
                               <ProductFormSelect item={item} />
                             </Box>
@@ -213,7 +256,7 @@ const CartScreen = ({ history }) => {
                       </TableCell>
 
                       <Hidden smDown>
-                        <TableCell align="right">${item.priceSale}</TableCell>
+                        <TableCell align="right">${item.priceSale?.toFixed(2)}</TableCell>
                         <TableCell align="center">
                           <ProductFormSelect item={item} />
                         </TableCell>
@@ -250,41 +293,41 @@ const CartScreen = ({ history }) => {
 
         <Grid item xs={12} lg={4}>
           <Paper elevation={0} className={classes.cartTotalWrapper}>
-            <Typography variant="h6" gutterBottom>
-              Order Summary
-            </Typography>
+            <Typography variant="h5" align="self-start" className="tracking-widest">Order Summary</Typography>
             <Divider className={classes.divider} />
             <Box
               display="flex"
               justifyContent="space-between"
               className={classes.cartTotal}
             >
-              <Typography>Selected Items:</Typography>
-              <Typography>
+              <Typography className={classes.cartTotalLabel}>
+                Selected Items:
+              </Typography>
+              <Typography className={classes.cartTotalValue}>
                 {cartItems.filter((item) => item.selected).length}
               </Typography>
             </Box>
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              className={classes.cartTotal}
-            >
-              <Typography>Total Price:</Typography>
-              <Typography>${totalPrice}</Typography>
+            <Box className={classes.totalPriceWrapper}>
+              <Typography className={classes.totalPriceLabel}>
+                Total Price:
+              </Typography>
+              <Typography className={classes.totalPriceValue}>
+                ${totalPrice?.toFixed(2)}
+              </Typography>
             </Box>
 
-            <Divider className={classes.divider} />
-
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              size="large"
-              disabled={cartItems.filter((item) => item.selected).length === 0}
-              onClick={checkoutHandler}
-            >
-              Proceed To Checkout
-            </Button>
+            <Box mt={3}>
+              <Button
+                fullWidth
+                variant="contained"
+                color="secondary"
+                size="large"
+                disabled={cartItems.filter((item) => item.selected).length === 0}
+                onClick={checkoutHandler}
+              >
+                Proceed To Checkout
+              </Button>
+            </Box>
           </Paper>
         </Grid>
       </Grid>
