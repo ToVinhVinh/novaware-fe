@@ -70,8 +70,12 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   largeImage: {
-    width: theme.spacing(6),
-    height: theme.spacing(8),
+    padding: 4,
+    height: 100,
+    width: 100,
+    borderRadius: 8,
+    border: "1px solid #ccc",
+    objectFit: "cover",
   },
   empty: {
     ...theme.mixins.customize.centerFlex("column wrap"),

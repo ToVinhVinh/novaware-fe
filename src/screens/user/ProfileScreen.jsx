@@ -29,6 +29,12 @@ const useStyles = makeStyles((theme) => ({
       justifyContent: "flex-start",
     },
   },
+  contentGrid: {
+    paddingLeft: "0px !important",
+    [theme.breakpoints.up("lg")]: {
+      paddingLeft: "0px !important",
+    },
+  },
 }));
 
 const ProfileScreen = ({ history }) => {
@@ -114,7 +120,7 @@ const ProfileScreen = ({ history }) => {
             onItemClick={handleItemClick}
           />
         </Grid>
-        <Grid item xs={12} lg={9}>
+        <Grid item xs={12} lg={9} className={classes.contentGrid}>
           {renderContent()}
         </Grid>
       </Grid>

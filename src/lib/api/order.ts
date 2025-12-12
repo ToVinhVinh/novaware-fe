@@ -29,7 +29,6 @@ export const getOrder = async (id: string): Promise<IGetOrderResponse> => {
 	return await sendGet(`/orders/${id}`);
 };
 
-// Get My Orders
 export const getMyOrders = async (query?: IGetOrdersQuery): Promise<IGetOrdersResponse> => {
 	return await sendGet(`/orders/my/orders`, query);
 };
