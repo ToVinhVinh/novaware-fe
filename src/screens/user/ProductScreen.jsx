@@ -4,7 +4,7 @@ import { Link as RouterLink, useLocation } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import { toast } from "react-toastify";
 import useCartStore from "../../store/cartStore";
-import { Grid, Container, Link } from "@material-ui/core";
+import { Grid, Container, Link, Box } from "@material-ui/core";
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import NavigateNextIcon from "@material-ui/icons/NavigateNext";
 import Meta from "../../components/Meta";
@@ -195,13 +195,22 @@ const ProductScreen = ({ setLoginModalOpen }) => {
                   component={RouterLink}
                   to={`/product?id=${product._id}`}
                 >
-                  {product.name || "Not found product"}
+                  {product?.productDisplayName || "Not found product"}
                 </Link>
               </Breadcrumbs>
             </Grid>
           </Grid>
 
-          <Grid container spacing={8} style={{ paddingLeft: 64, paddingRight: 64 }}>
+          <Box
+            style={{
+              borderRadius: 12,
+              backgroundColor: "#fff",
+              padding: 24,
+              border: "1px solid #e0e0e0",
+              display: "flex",
+              flexDirection: "row",
+            }}
+          >
             <Grid item xs={12} md={6} style={{ paddingLeft: 0, paddingRight: 0 }}>
               <ProductImageGallery product={product} />
             </Grid>
@@ -224,7 +233,7 @@ const ProductScreen = ({ setLoginModalOpen }) => {
                 handleRemoveFromFavorites={handleRemoveFromFavorites}
               />
             </Grid>
-          </Grid>
+          </Box>
 
           <Grid container>
             <Grid item xs={12}>

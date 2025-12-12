@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { FiShoppingBag } from "react-icons/fi";
-import { FaTags, FaShareAlt, FaHeart, FaRegHeart, FaTrademark, FaBoxOpen, FaTshirt, FaThumbsUp } from "react-icons/fa";
+import { FaTags, FaShareAlt, FaHeart, FaRegHeart, FaTrademark, FaBoxOpen, FaTshirt, FaThumbsUp, FaUser, FaPalette, FaCalendarAlt } from "react-icons/fa";
 import {
   Box,
   Button,
@@ -35,9 +35,9 @@ import { useHybridModelRecommendations } from "../../hooks/api/useRecommend";
 
 const useStyles = makeStyles((theme) => ({
   price: {
-    fontSize: "1.6rem",
+    fontSize: "2rem",
     fontWeight: 600,
-    color: (props) => props.sale > 0 && "#DD8190",
+    color: (props) => props.sale > 0 && "#F50057",
   },
   rootPrice: {
     fontSize: "1.3rem",
@@ -280,6 +280,49 @@ const useStyles = makeStyles((theme) => ({
     "50%": { transform: "scale(1.2)" },
     "100%": { transform: "scale(1)" },
   },
+  productDetailsSection: {
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+    padding: theme.spacing(2),
+    backgroundColor: theme.palette.background.paper,
+    borderRadius: theme.spacing(1),
+    border: `1px solid ${theme.palette.divider}`,
+  },
+  detailGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: theme.spacing(2),
+    [theme.breakpoints.down("sm")]: {
+      gridTemplateColumns: "repeat(2, 1fr)",
+    },
+    [theme.breakpoints.down("xs")]: {
+      gridTemplateColumns: "1fr",
+    },
+  },
+  detailRow: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: theme.spacing(0.5),
+  },
+  detailLabel: {
+    minWidth: 120,
+    fontSize: 14,
+    fontWeight: 600,
+    color: theme.palette.text.secondary,
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(1),
+  },
+  detailValue: {
+    fontSize: 14,
+    color: theme.palette.text.primary,
+  },
+  detailChip: {
+    fontSize: 12,
+    height: 24,
+    marginRight: theme.spacing(0.5),
+  },
 }));
 
 const ProductInfo = memo(
@@ -507,6 +550,17 @@ const ProductInfo = memo(
 
     const shouldRenderSizeSelector = sizeOptions.length > 0;
     const shouldRenderColorSelector = availableColorOptions.length > 0;
+    const currentStock = useMemo(() => {
+      if (selectedVariant) {
+        return safeNumber(selectedVariant.stock);
+      }
+      // If no variant selected but has variants, return 0
+      if (hasVariants) {
+        return 0;
+      }
+      // If no variants at all, return 0
+      return 0;
+    }, [selectedVariant, hasVariants, safeNumber]);
     const totalInventory = useMemo(() => {
       if (hasVariants && product.variants) {
         return product.variants.reduce((sum, v) => sum + safeNumber(v.stock), 0);
@@ -515,29 +569,12 @@ const ProductInfo = memo(
     }, [hasVariants, product.variants, selectedVariant?.stock, safeNumber]);
     const isOutOfStock =
       (!hasVariants && shouldRenderSizeSelector && !selectedSize && totalInventory === 0) ||
-      totalInventory === 0;
+      (hasVariants && currentStock === 0) ||
+      (!hasVariants && totalInventory === 0);
 
     return (
       <>
         <Box display="flex" alignItems="center" mb={1}>
-          {product.masterCategory && (
-            <Chip
-              size="small"
-              color="primary"
-              icon={<FaTags style={{ fontSize: 14 }} />}
-              label={product.masterCategory}
-              style={{ marginRight: 8, padding: "0 8px" }}
-            />
-          )}
-          {product.subCategory && (
-            <Chip
-              size="small"
-              color="primary"
-              icon={<FaTags style={{ fontSize: 14 }} />}
-              label={product.subCategory}
-              style={{ marginRight: 8, padding: "0 8px" }}
-            />
-          )}
           {product.articleType && (
             <Chip
               size="small"
@@ -547,54 +584,63 @@ const ProductInfo = memo(
               style={{ marginRight: 8, padding: "0 8px" }}
             />
           )}
-          <Chip
-            size="small"
-            color={totalInventory > 0 ? "primary" : "default"}
-            icon={<FaBoxOpen style={{ fontSize: 14 }} />}
-            label={`${totalInventory > 0 ? `${totalInventory} in stock` : "Out of stock"}`}
-            style={{ padding: "0 8px" }}
-          />
+          {product.usage && (
+            <Chip
+              size="small"
+              color="primary"
+              icon={<FaTags style={{ fontSize: 14 }} />}
+              label={product.usage}
+              style={{ marginRight: 8, padding: "0 8px" }}
+            />
+          )}
+          {product.gender && (
+            <Chip
+              size="small"
+              color="primary"
+              icon={<FaTags style={{ fontSize: 14 }} />}
+              label={product.gender}
+              style={{ marginRight: 8, padding: "0 8px" }}
+            />
+          )}
         </Box>
         <Typography variant="h5" component="h1" gutterBottom>
           {product.productDisplayName || product.name || "Product"}
         </Typography>
         <Box display="flex" alignItems="center" mb={1}>
-          <Rating
+          {/* Price */}
+          <Typography
+            variant="h4"
+            color="textPrimary"
+            component="div"
+            className={classes.price}
+          >
+            {product.sale && product.sale > 0 ? (
+              <Typography
+                variant="h4"
+                color="textSecondary"
+                component="span"
+                className={classes.rootPrice}
+              >
+                ${currentPrice.toFixed(2)}
+              </Typography>
+            ) : null}
+            {"  "}${(currentPrice * (1 - (product.sale || 0) / 100)).toFixed(2)}
+          </Typography>
+          {/* <Rating
             name="read-only"
             value={product.rating || 0}
             precision={0.5}
             readOnly
+          /> */}
+          <Chip
+            size="small"
+            color={currentStock > 0 ? "primary" : "default"}
+            icon={<FaBoxOpen style={{ fontSize: 14 }} />}
+            label={`${currentStock > 0 ? `${currentStock} in stock` : "Out of stock"}`}
+            style={{ padding: "0 8px", marginLeft: 8 }}
           />
-          <Typography
-            component="span"
-            style={{ marginLeft: 5 }}
-            color={totalInventory > 0 ? "secondary" : "black"}
-          >
-            {`Status: ${totalInventory > 0 ? "In Stock" : "Out of Stock"
-              }`}
-          </Typography>
         </Box>
 
-        {/* Price */}
-        <Typography
-          variant="h6"
-          color="textPrimary"
-          component="div"
-          className={classes.price}
-          gutterBottom
-        >
-          {product.sale && product.sale > 0 ? (
-            <Typography
-              variant="subtitle2"
-              color="textSecondary"
-              component="span"
-              className={classes.rootPrice}
-            >
-              ${currentPrice.toFixed(2)}
-            </Typography>
-          ) : null}
-          {"  "}${(currentPrice * (1 - (product.sale || 0) / 100)).toFixed(2)}
-        </Typography>
 
         {/* Form */}
         <form onSubmit={handleSubmit(addToCartHandler)}>
@@ -689,226 +735,224 @@ const ProductInfo = memo(
             </FormControl>
           )}
 
-          {/* Color Selection */}
-          {shouldRenderColorSelector && (
-            <FormControl
-              fullWidth
-              component="fieldset"
-              className={classes.colorFormControl}
-            >
+          {/* Color Selection and Quantity Row */}
+          <Box className={classes.colorFormControl} display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
+            {/* Color Selection */}
+            {shouldRenderColorSelector && (
+              <FormControl component="fieldset" style={{ flex: 1, minWidth: 200 }}>
+                <Box display="flex" alignItems="center">
+                  <FormLabel
+                    component="legend"
+                    className={classes.label1}
+                    style={{ marginRight: "16px", marginBottom: "-2px" }}
+                  >
+                    Base color:
+                  </FormLabel>
+                  <Controller
+                    name="color"
+                    control={control}
+                    defaultValue=""
+                    render={({ field, fieldState: { error } }) => (
+                      <>
+                        <RadioGroup {...field} row>
+                          {availableColorOptions.map((color, index) => {
+                            const colorHex = color.hexCode || color.name;
+                            const isSelected = field.value === colorHex;
+                            const isAvailable = isColorAvailable(colorHex);
+                            return (
+                              <FormControlLabel
+                                key={index}
+                                value={colorHex}
+                                control={<Radio style={{ display: "none" }} />}
+                                label={
+                                  <Box
+                                    className={classes.colorOption}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      if (!isAvailable) return;
+                                      const next = isSelected ? "" : colorHex;
+                                      field.onChange(next);
+                                    }}
+                                    style={{
+                                      opacity: isAvailable ? 1 : 0.5,
+                                      pointerEvents: isAvailable ? "auto" : "none",
+                                    }}
+                                  >
+                                    <Box
+                                      className={clsx(
+                                        classes.colorCircle,
+                                        isSelected && classes.colorCircleSelected,
+                                        !isAvailable && classes.colorCircleDisabled
+                                      )}
+                                      style={{ backgroundColor: colorHex || "#ccc" }}
+                                    />
+                                  </Box>
+                                }
+                              />
+                            );
+                          })}
+                        </RadioGroup>
+                        {error && (
+                          <FormHelperText error>{error.message}</FormHelperText>
+                        )}
+                      </>
+                    )}
+                    rules={{
+                      required: shouldRenderColorSelector
+                        ? "Please select a color!"
+                        : false,
+                    }}
+                  />
+                </Box>
+              </FormControl>
+            )}
+
+            {/* Quantity */}
+            <FormControl variant="outlined" style={{ flexShrink: 0 }}>
               <Box display="flex" alignItems="center">
                 <FormLabel
                   component="legend"
+                  color="secondary"
                   className={classes.label1}
                   style={{ marginRight: "16px", marginBottom: "-2px" }}
                 >
-                  Base color:
+                  Quantity:
                 </FormLabel>
                 <Controller
-                  name="color"
+                  name="qty"
                   control={control}
-                  defaultValue=""
-                  render={({ field, fieldState: { error } }) => (
-                    <>
-                      <RadioGroup {...field} row>
-                        {availableColorOptions.map((color, index) => {
-                          const colorHex = color.hexCode || color.name;
-                          const isSelected = field.value === colorHex;
-                          const isAvailable = isColorAvailable(colorHex);
-                          return (
-                            <FormControlLabel
-                              key={index}
-                              value={colorHex}
-                              control={<Radio style={{ display: "none" }} />}
-                              label={
-                                <Box
-                                  className={classes.colorOption}
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    if (!isAvailable) return;
-                                    const next = isSelected ? "" : colorHex;
-                                    field.onChange(next);
-                                  }}
-                                  style={{
-                                    opacity: isAvailable ? 1 : 0.5,
-                                    pointerEvents: isAvailable ? "auto" : "none",
-                                  }}
-                                >
-                                  <Box
-                                    className={clsx(
-                                      classes.colorCircle,
-                                      isSelected && classes.colorCircleSelected,
-                                      !isAvailable && classes.colorCircleDisabled
-                                    )}
-                                    style={{ backgroundColor: colorHex || "#ccc" }}
-                                  />
-                                </Box>
-                              }
-                            />
-                          );
-                        })}
-                      </RadioGroup>
-                      {error && (
-                        <FormHelperText error>{error.message}</FormHelperText>
-                      )}
-                    </>
-                  )}
-                  rules={{
-                    required: shouldRenderColorSelector
-                      ? "Please select a color!"
-                      : false,
+                  defaultValue={1}
+                  render={({ field }) => {
+                    const value = Number(field.value) || 1;
+                    const min = 1;
+                    const max = Math.max(0, safeNumber(selectedVariant?.stock ?? 0));
+                    const disabled =
+                      max === 0 ||
+                      (shouldRenderSizeSelector && !selectedSize) ||
+                      (shouldRenderColorSelector && !selectedColor && hasVariants);
+                    const handleChange = (next) => {
+                      if (disabled) return;
+                      const clamped = Math.min(Math.max(next, min), Math.max(min, max));
+                      field.onChange(clamped);
+                    };
+                    return (
+                      <Box>
+                        <Box className={classes.qtyContainer} aria-disabled={disabled}>
+                          <Box className={classes.qtyNumber}>
+                            <Typography>{disabled ? 0 : value}</Typography>
+                          </Box>
+                          <Box className={classes.qtySide}>
+                            <Box
+                              className={classes.qtyBtn}
+                              onClick={() => handleChange(value + 1)}
+                              style={{ opacity: disabled || value >= max ? 0.4 : 1, pointerEvents: disabled || value >= max ? "none" : "auto" }}
+                              title={disabled ? "Out of stock" : "Increase"}
+                            >
+                              <AddIcon className={classes.qtyIcon} />
+                            </Box>
+                            <Box className={classes.qtyDivider} />
+                            <Box
+                              className={classes.qtyBtn}
+                              onClick={() => handleChange(value - 1)}
+                              style={{ opacity: disabled || value <= min ? 0.4 : 1, pointerEvents: disabled || value <= min ? "none" : "auto" }}
+                              title={disabled ? "Out of stock" : "Decrease"}
+                            >
+                              <RemoveIcon className={classes.qtyIcon} />
+                            </Box>
+                          </Box>
+                        </Box>
+                        {disabled && (
+                          <FormHelperText error>
+                            {max === 0
+                              ? "Out of stock"
+                              : shouldRenderSizeSelector && !selectedSize
+                                ? "Please select size"
+                                : shouldRenderColorSelector && !selectedColor
+                                  ? "Please select color"
+                                  : "Out of stock"}
+                          </FormHelperText>
+                        )}
+                      </Box>
+                    );
                   }}
                 />
               </Box>
             </FormControl>
-          )}
-
-          {/* Quantity */}
-          <FormControl className={classes.colorFormControl} variant="outlined">
-            <Box display="flex" alignItems="center">
-              <FormLabel
-                component="legend"
-                color="secondary"
-                className={classes.label1}
-                style={{ marginRight: "16px", marginBottom: "-2px" }}
-              >
-                Quantity:
-              </FormLabel>
-              <Controller
-                name="qty"
-                control={control}
-                defaultValue={1}
-                render={({ field }) => {
-                  const value = Number(field.value) || 1;
-                  const min = 1;
-                  // Use variant stock if available
-                  const max = Math.max(0, safeNumber(selectedVariant?.stock ?? 0));
-                  const disabled =
-                    max === 0 ||
-                    (shouldRenderSizeSelector && !selectedSize) ||
-                    (shouldRenderColorSelector && !selectedColor && hasVariants);
-                  const handleChange = (next) => {
-                    if (disabled) return;
-                    const clamped = Math.min(Math.max(next, min), Math.max(min, max));
-                    field.onChange(clamped);
-                  };
-                  return (
-                    <Box>
-                      <Box className={classes.qtyContainer} aria-disabled={disabled}>
-                        <Box className={classes.qtyNumber}>
-                          <Typography>{disabled ? 0 : value}</Typography>
-                        </Box>
-                        <Box className={classes.qtySide}>
-                          <Box
-                            className={classes.qtyBtn}
-                            onClick={() => handleChange(value + 1)}
-                            style={{ opacity: disabled || value >= max ? 0.4 : 1, pointerEvents: disabled || value >= max ? "none" : "auto" }}
-                            title={disabled ? "Out of stock" : "Increase"}
-                          >
-                            <AddIcon className={classes.qtyIcon} />
-                          </Box>
-                          <Box className={classes.qtyDivider} />
-                          <Box
-                            className={classes.qtyBtn}
-                            onClick={() => handleChange(value - 1)}
-                            style={{ opacity: disabled || value <= min ? 0.4 : 1, pointerEvents: disabled || value <= min ? "none" : "auto" }}
-                            title={disabled ? "Out of stock" : "Decrease"}
-                          >
-                            <RemoveIcon className={classes.qtyIcon} />
-                          </Box>
-                        </Box>
-                      </Box>
-                      {disabled && (
-                        <FormHelperText error>
-                          {max === 0
-                            ? "Out of stock"
-                            : shouldRenderSizeSelector && !selectedSize
-                              ? "Please select size"
-                              : shouldRenderColorSelector && !selectedColor
-                                ? "Please select color"
-                                : "Out of stock"}
-                        </FormHelperText>
-                      )}
-                    </Box>
-                  );
-                }}
-              />
-            </Box>
-            <Box className={classes.buttonGroup}>
-              <Button
-                variant="contained"
-                color="default"
-                startIcon={<FaThumbsUp />}
-                type="button"
-                onClick={() => {
-                  if (!currentUserId) {
-                    toast.info("Please sign in to see outfit recommendations.");
-                    return;
-                  }
-                  if (!user?.gender || !user?.age) {
-                    toast.info("Please update your profile with gender and age information to see outfit recommendations.");
-                    return;
-                  }
-                  setOutfitModalOpen(true);
-                }}
-                style={{
-                  backgroundColor: "#00bcd4",
-                  color: "#fff",
-                  whiteSpace: "nowrap",
-                  width: "100%",
-                  height: 48,
-                  borderRadius: 0,
-                }}
-              >
-                Recommendation
-              </Button>
-              <Button
-                variant="contained"
-                color="secondary"
-                startIcon={isFavorite ? <FaHeart /> : <FaRegHeart />}
-                disabled={false}
-                type="button"
-                onClick={
-                  isFavorite ? handleRemoveFromFavorites : handleAddToFavorites
+          </Box>
+          <Box className={classes.buttonGroup}>
+            <Button
+              variant="contained"
+              color="default"
+              startIcon={<FaThumbsUp />}
+              type="button"
+              onClick={() => {
+                if (!currentUserId) {
+                  toast.info("Please sign in to see outfit recommendations.");
+                  return;
                 }
-                style={{
-                  whiteSpace: "nowrap",
-                  width: "100%",
-                  height: 48,
-                  borderRadius: 0,
-                  backgroundColor: isFavorite ? "#f50057" : undefined,
-                }}
-              >
-                {isFavorite ? (
-                  <span style={{ whiteSpace: "nowrap", wordBreak: "keep-all" }}>
-                    Remove from wishlist
-                  </span>
-                ) : (
-                  <span style={{ whiteSpace: "nowrap", wordBreak: "keep-all" }}>
-                    Add to wishlist
-                  </span>
-                )}
-              </Button>
-              <Button
-                variant="contained"
-                color="secondary"
-                startIcon={<FiShoppingBag />}
-                disabled={
-                  isOutOfStock ||
-                  (shouldRenderSizeSelector && !selectedSize) ||
-                  (shouldRenderColorSelector && !selectedColor && hasVariants)
+                if (!user?.gender || !user?.age) {
+                  toast.info("Please update your profile with gender and age information to see outfit recommendations.");
+                  return;
                 }
-                type="submit"
-                style={{
-                  width: "100%",
-                  height: 48,
-                  borderRadius: 0,
-                }}
-              >
-                Add to Cart
-              </Button>
-            </Box>
-          </FormControl>
+                setOutfitModalOpen(true);
+              }}
+              style={{
+                backgroundColor: "#00bcd4",
+                color: "#fff",
+                whiteSpace: "nowrap",
+                width: "100%",
+                height: 48,
+                borderRadius: 0,
+              }}
+            >
+              Recommendation
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              startIcon={isFavorite ? <FaHeart /> : <FaRegHeart />}
+              disabled={false}
+              type="button"
+              onClick={
+                isFavorite ? handleRemoveFromFavorites : handleAddToFavorites
+              }
+              style={{
+                whiteSpace: "nowrap",
+                width: "100%",
+                height: 48,
+                borderRadius: 0,
+                backgroundColor: isFavorite ? "#f50057" : undefined,
+              }}
+            >
+              {isFavorite ? (
+                <span style={{ whiteSpace: "nowrap", wordBreak: "keep-all" }}>
+                  Remove from wishlist
+                </span>
+              ) : (
+                <span style={{ whiteSpace: "nowrap", wordBreak: "keep-all" }}>
+                  Add to wishlist
+                </span>
+              )}
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              startIcon={<FiShoppingBag />}
+              disabled={
+                isOutOfStock ||
+                (shouldRenderSizeSelector && !selectedSize) ||
+                (shouldRenderColorSelector && !selectedColor && hasVariants)
+              }
+              type="submit"
+              style={{
+                width: "100%",
+                height: 48,
+                borderRadius: 0,
+              }}
+            >
+              Add to Cart
+            </Button>
+          </Box>
         </form>
 
         <YouMightAlsoLikeModal
