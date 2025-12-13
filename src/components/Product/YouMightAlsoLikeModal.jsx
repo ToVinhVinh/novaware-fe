@@ -24,7 +24,6 @@ import "swiper/css";
 import "swiper/css/effect-cards";
 import { makeStyles } from "@material-ui/core/styles";
 import clsx from "clsx";
-import { formatPriceDollar } from "../../utils/formatPrice.js";
 import LottieLoading from "../LottieLoading.jsx";
 import { toast } from "react-toastify";
 import { useHybridModelRecommendations } from "../../hooks/api/useRecommend";
@@ -322,7 +321,7 @@ const YouMightAlsoLikeModal = ({ open, onClose, userId, productId }) => {
                             </Typography>
                             {p.price > 0 ? (
                               <Typography variant="subtitle2" color="secondary">
-                                {formatPriceDollar(p.price * (1 - (p.sale || 0) / 100))}
+                                ${(p.price - (p.price * (p.sale || 0) / 100)).toFixed(2)}
                               </Typography>
                             ) : (
                               <Typography variant="subtitle2" color="textSecondary">

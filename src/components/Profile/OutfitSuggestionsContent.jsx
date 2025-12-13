@@ -14,12 +14,10 @@ import {
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useGNNModelRecommendations } from "../../hooks/api/useRecommend";
-import { useGetUserById, useGetFavorites } from "../../hooks/api/useUser";
+import { useGetUserById, useGetFavorites, useGetOutfits } from "../../hooks/api/useUser";
 import Message from "../Message";
 import Loader from "../Loader";
-import StarIcon from "@material-ui/icons/Star";
 import VisibilityIcon from "@material-ui/icons/Visibility";
-import { formatPriceDollar } from "../../utils/formatPrice";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -94,23 +92,6 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 600,
     marginTop: "auto",
   },
-  outfitFooter: {
-    padding: theme.spacing(2),
-    borderTop: `1px solid ${theme.palette.divider}`,
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  totalPrice: {
-    fontSize: "1.1rem",
-    fontWeight: 600,
-    color: theme.palette.secondary.main,
-  },
-  compatibilityScore: {
-    display: "flex",
-    alignItems: "center",
-    gap: theme.spacing(0.5),
-  },
   viewButton: {
     textTransform: "none",
   },
@@ -165,6 +146,9 @@ const OutfitSuggestionsContent = () => {
   const { data: favoritesResponse } = useGetFavorites(currentUserId);
   const favorites = favoritesResponse?.data?.favorites || [];
 
+  const { data: savedOutfitsResponse, isLoading: isLoadingSavedOutfits } = useGetOutfits(currentUserId);
+  const savedOutfits = savedOutfitsResponse?.data?.outfits || [];
+
   const getGNNRecommendations = useGNNModelRecommendations();
   const [recommendationData, setRecommendationData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -181,7 +165,8 @@ const OutfitSuggestionsContent = () => {
     const productId = favorites.length > 0 ? favorites[0]._id : null;
 
     if (!productId) {
-      setError("Please add products to your favorites to get outfit recommendations.");
+      // Don't set error if we have saved outfits - we can still show those
+      setError(null);
       setRecommendationData(null);
       return;
     }
@@ -213,7 +198,7 @@ const OutfitSuggestionsContent = () => {
   }, [currentUserId, favorites.length]);
 
   // Process outfit recommendations
-  const outfits = useMemo(() => {
+  const recommendedOutfits = useMemo(() => {
     if (!recommendationData || !recommendationData.outfit) return [];
 
     const processedOutfits = [];
@@ -242,11 +227,16 @@ const OutfitSuggestionsContent = () => {
         const product = categoryData.product;
         const variant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
 
+        const basePrice = variant?.price || product.price || 0;
+        const salePercent = variant?.sale || product.sale || 0;
+        const finalPrice = basePrice - (basePrice * salePercent / 100);
+
         outfit.products.push({
           _id: product.id || product._id,
           name: product.productDisplayName || product.name || "Product",
-          price: variant?.price || product.price || 0,
-          sale: variant?.sale || product.sale || 0,
+          price: basePrice,
+          sale: salePercent,
+          finalPrice: finalPrice,
           image: product.images?.[0] || product.image || "",
           images: product.images || [],
         });
@@ -262,11 +252,42 @@ const OutfitSuggestionsContent = () => {
     return processedOutfits;
   }, [recommendationData, user?.gender]);
 
+  // Process saved outfits to match the format
+  const processedSavedOutfits = useMemo(() => {
+    return savedOutfits.map((outfit) => ({
+      name: outfit.name,
+      products: (outfit.products || []).map((p) => {
+        const basePrice = p.price || 0;
+        const salePercent = p.sale || 0;
+        const finalPrice = basePrice - (basePrice * salePercent / 100);
+        return {
+          _id: p.product_id,
+          name: p.name,
+          price: basePrice,
+          sale: salePercent,
+          finalPrice: finalPrice,
+          image: p.images?.[0] || p.image || "",
+          images: p.images || [],
+        };
+      }),
+      totalPrice: outfit.totalPrice || 0,
+      compatibilityScore: outfit.compatibilityScore || 0,
+      gender: outfit.gender || user?.gender || "Unisex",
+      style: outfit.style || "Casual",
+      description: outfit.description || `Saved outfit`,
+    }));
+  }, [savedOutfits, user?.gender]);
+
+  // Combine saved outfits and recommended outfits
+  const outfits = useMemo(() => {
+    return [...processedSavedOutfits, ...recommendedOutfits];
+  }, [processedSavedOutfits, recommendedOutfits]);
+
   const handleViewProduct = (productId) => {
     history.push(`/product?id=${productId}`);
   };
 
-  if (isLoading) {
+  if (isLoading || isLoadingSavedOutfits) {
     return (
       <Paper className={classes.paper} elevation={0}>
         <Typography variant="h5" style={{ marginBottom: 24 }} className="tracking-widest">
@@ -277,7 +298,8 @@ const OutfitSuggestionsContent = () => {
     );
   }
 
-  if (error) {
+  // Only show error if we have no saved outfits and no recommendations
+  if (error && processedSavedOutfits.length === 0 && recommendedOutfits.length === 0) {
     return (
       <Paper className={classes.paper} elevation={0}>
         <Typography variant="h5" style={{ marginBottom: 24 }} className="tracking-widest">
@@ -348,9 +370,23 @@ const OutfitSuggestionsContent = () => {
                             <Typography variant="body2" className={classes.productName}>
                               {product.name}
                             </Typography>
-                            <Typography variant="body2" className={classes.productPrice}>
-                              {formatPriceDollar(product.price)}
-                            </Typography>
+                            <Box style={{ display: "flex", alignItems: "center", gap: 8, marginTop: "auto", flexWrap: "wrap" }}>
+                              <Typography variant="body2" className={classes.productPrice}>
+                                ${(product.finalPrice !== undefined ? product.finalPrice : (product.price || 0) - ((product.price || 0) * (product.sale || 0) / 100)).toFixed(2)}
+                              </Typography>
+                              {product.sale && product.sale > 0 && product.price && (
+                                <Typography
+                                  variant="caption"
+                                  style={{
+                                    textDecoration: "line-through",
+                                    color: "#999",
+                                    fontSize: "0.75rem",
+                                  }}
+                                >
+                                  ${(product.price || 0).toFixed(2)}
+                                </Typography>
+                              )}
+                            </Box>
                             <Button
                               size="small"
                               variant="outlined"
@@ -369,22 +405,6 @@ const OutfitSuggestionsContent = () => {
                   </Grid>
                 </Box>
 
-                <Box className={classes.outfitFooter}>
-                  <Box>
-                    <Typography variant="body2" color="textSecondary">
-                      Total Price:
-                    </Typography>
-                    <Typography variant="h6" className={classes.totalPrice}>
-                      {formatPriceDollar(outfit.totalPrice)}
-                    </Typography>
-                  </Box>
-                  <Box className={classes.compatibilityScore}>
-                    <StarIcon style={{ color: "#ffc107" }} />
-                    <Typography variant="body2" style={{ fontWeight: 500 }}>
-                      Compatibility: {(outfit.compatibilityScore * 100).toFixed(0)}%
-                    </Typography>
-                  </Box>
-                </Box>
               </Card>
             </Grid>
           ))}

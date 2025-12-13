@@ -80,12 +80,12 @@ const ShippingScreen = ({ history }) => {
     country,
     recipientPhoneNumber,
   }) => {
-    saveShippingAddress({
-      address,
-      city,
-      postalCode,
-      country,
-      recipientPhoneNumber,
+      saveShippingAddress({
+        address,
+        city,
+        postalCode,
+        country,
+        recipientPhoneNumber,
     });
     history.push("/payment");
   };

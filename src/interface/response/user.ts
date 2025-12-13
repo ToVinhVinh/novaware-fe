@@ -188,3 +188,35 @@ export interface ISaveOutfitResponse {
 	};
 }
 
+export interface IOutfitProduct {
+	product_id: string | number;
+	name: string;
+	category?: string;
+	price: number;
+	sale?: number;
+	images?: string[];
+	image?: string;
+}
+
+export interface ISavedOutfit {
+	name: string;
+	products: IOutfitProduct[];
+	totalPrice: number;
+	compatibilityScore: number;
+	gender: string;
+	style?: string;
+	description?: string;
+	timestamp?: string;
+}
+
+export interface IGetOutfitsResponse {
+	success?: boolean;
+	status?: string;
+	message: string;
+	data: {
+		outfits: ISavedOutfit[];
+		user_id: string;
+		total_outfits: number;
+	};
+}
+

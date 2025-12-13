@@ -14,6 +14,7 @@ import {
 	checkStylePreference,
 	getUsersForTesting,
 	saveOutfit,
+	getOutfits,
 } from '../../lib/api/user';
 import * as UserTypes from '../../interface/response/user';
 import * as UserRequestTypes from '../../interface/request/user';
@@ -153,8 +154,17 @@ export const useSaveOutfit = () => {
 	>({
 		mutationFn: ({ userId, body }) => saveOutfit(userId, body),
 		onSuccess: (data, variables) => {
+			queryClient.invalidateQueries({ queryKey: ['users', 'outfits', variables.userId] });
 			queryClient.invalidateQueries({ queryKey: ['users', 'detail', variables.userId] });
 		},
+	});
+};
+
+export const useGetOutfits = (userId: string) => {
+	return useQuery<UserTypes.IGetOutfitsResponse, Error>({
+		queryKey: ['users', 'outfits', userId],
+		queryFn: () => getOutfits(userId),
+		enabled: !!userId,
 	});
 };
 

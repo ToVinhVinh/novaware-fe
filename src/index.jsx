@@ -43,6 +43,7 @@ const Main = () => {
             draggable
             pauseOnHover
             theme="light"
+            style={{ zIndex: 10000 }}
           />
         </ThemeProvider>
       </QueryClientProvider>
