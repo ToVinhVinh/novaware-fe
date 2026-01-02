@@ -175,7 +175,7 @@ const YouMightAlsoLikeModal = ({ open, onClose, userId, productId }) => {
           user_id: userId,
           current_product_id: productId,
           top_k_personal: 5,
-          top_k_outfit: 5,
+          top_k_outfit: 10,
           alpha: 0.5, // Default alpha for hybrid model
         };
 

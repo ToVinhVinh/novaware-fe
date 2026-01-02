@@ -191,7 +191,7 @@ const OutfitSuggestionsContent = () => {
           user_id: currentUserId,
           current_product_id: productId,
           top_k_personal: 5,
-          top_k_outfit: 5,
+          top_k_outfit: 10,
         };
 
         const result = await getGNNRecommendations.mutateAsync(requestData);
@@ -256,7 +256,7 @@ const OutfitSuggestionsContent = () => {
 
       outfit.totalPrice = outfit.products.reduce((sum, p) => sum + (p.price || 0) * (1 - (p.sale || 0) / 100), 0);
 
-      if (outfit.products.length > 0) {
+      if (outfit.products.length >= 4) {
         processedOutfits.push(outfit);
       }
     });

@@ -675,7 +675,9 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
     const outfitData = useMemo(() => {
         if (!recommendationData || !Array.isArray(recommendationData.outfits)) return [];
 
-        return recommendationData.outfits.map((outfit) => {
+        return recommendationData.outfits
+            .filter(outfit => (outfit.products || []).length >= 4)
+            .map((outfit) => {
             const products = [];
 
             (outfit.products || []).forEach((item) => {
