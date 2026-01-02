@@ -220,3 +220,8 @@ export interface IGetOutfitsResponse {
 	};
 }
 
+export interface IDeleteOutfitResponse {
+	status?: string;
+	message: string;
+}
+

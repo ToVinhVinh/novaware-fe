@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
   container: {
     height: "auto",
     width: "450px",
-    border: "1px solid #f50057",
+    border: "1px solid #ccc",
     borderRadius: theme.spacing(2),
     backgroundColor: theme.palette.background.paper,
     overflow: "hidden",
@@ -383,7 +383,7 @@ const LoginModal = ({
                         variant="contained"
                         color="secondary"
                         fullWidth
-                        className="!rounded-none !h-10"
+                        className="!rounded-full !h-10"
                       >
                         Login
                       </Button>

@@ -30,13 +30,13 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    background: "linear-gradient(90deg, #fce7f3, #e0f2fe)",
+    background: "linear-gradient(90deg, #FEF5F7, #e0f2fe)",
   },
   titleText: {
     display: "flex",
     alignItems: "center",
     gap: theme.spacing(1.5),
-    fontWeight: 700,
+    fontWeight: 600,
     letterSpacing: 1,
   },
   titleIconWrapper: {

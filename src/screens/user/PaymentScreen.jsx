@@ -99,17 +99,12 @@ const PaymentScreen = ({ history }) => {
                 >
                   <Controller
                     name="paymentMethod"
-                    defaultValue={"PayPal"}
+                    defaultValue={"Stripe"}
                     control={control}
                     render={({ field, fieldState: { error } }) => (
                       <FormControl component="fieldset" error={error} fullWidth>
                         <FormLabel component="legend">Select method:</FormLabel>
                         <RadioGroup {...field}>
-                          <FormControlLabel
-                            value="PayPal"
-                            control={<Radio />}
-                            label="PayPal or Credit Card"
-                          />
                           <FormControlLabel
                             value="Stripe"
                             control={<Radio />}

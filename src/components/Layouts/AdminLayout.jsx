@@ -116,7 +116,7 @@ const useStyles = makeStyles((theme) => ({
     borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
   },
   dashboardTitle: {
-    fontWeight: 700,
+    fontWeight: 600,
     fontSize: '1.25rem',
     color: theme.palette.text.primary,
     letterSpacing: '0.5px',
@@ -205,11 +205,11 @@ const AdminLayout = ({ children }) => {
     //   icon: <RecommendIcon />,
     //   link: '/admin/products',
     // },
-    // {
-    //   text: 'Order Statistics',
-    //   icon: <AssessmentIcon />,
-    //   link: '/admin/orderstats',
-    // },
+    {
+      text: 'Statistics',
+      icon: <AssessmentIcon />,
+      link: '/admin/statistics',
+    },
     {
       text: 'Products Management',
       icon: <ShoppingBasketIcon />,

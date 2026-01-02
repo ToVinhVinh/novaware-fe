@@ -15,6 +15,7 @@ import {
 	IGetUsersForTestingResponse,
 	ISaveOutfitResponse,
 	IGetOutfitsResponse,
+	IDeleteOutfitResponse,
 } from "../../interface/response/user";
 import {
 	IUpdateProfileBody,
@@ -90,7 +91,6 @@ export const getUsersForTesting = async (query: IGetUsersForTestingQuery): Promi
 	return await sendGet(`/users/testing`, query);
 };
 
-// Save Outfit
 export const saveOutfit = async (userId: string, body: ISaveOutfitBody): Promise<ISaveOutfitResponse> => {
 	return await sendPost(`/users/${userId}/outfits`, body);
 };
@@ -98,5 +98,10 @@ export const saveOutfit = async (userId: string, body: ISaveOutfitBody): Promise
 // Get Outfits
 export const getOutfits = async (userId: string): Promise<IGetOutfitsResponse> => {
 	return await sendGet(`/users/${userId}/outfits`);
+};
+
+// Delete Outfit
+export const deleteOutfit = async (userId: string, outfitId: string): Promise<IDeleteOutfitResponse> => {
+	return await sendDelete(`/users/${userId}/outfits/${outfitId}`);
 };
 

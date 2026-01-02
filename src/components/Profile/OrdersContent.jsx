@@ -66,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
     padding: 4,
     height: 80,
     width: 80,
-    borderRadius: 8,
+    borderRadius: 6,
     border: "1px solid #ccc",
     objectFit: "cover",
   },
@@ -245,7 +245,7 @@ const OrdersContent = ({ orders, loadingOrders, errorOrders }) => {
                         color="secondary"
                         style={{
                           textTransform: "none",
-                          borderRadius: 8,
+                          borderRadius: 6,
                         }}
                       >
                         View

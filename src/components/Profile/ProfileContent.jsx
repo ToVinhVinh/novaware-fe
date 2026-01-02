@@ -91,7 +91,7 @@ const useStyles = makeStyles((theme) => ({
     padding: 20,
     marginTop: theme.spacing(4),
     minHeight: 180,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   form: {
     padding: theme.spacing(2),
@@ -119,7 +119,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "space-between",
     padding: theme.spacing(1.5),
     backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 8,
+    borderRadius: 6,
     backdropFilter: "blur(10px)",
   },
   interactionText: {

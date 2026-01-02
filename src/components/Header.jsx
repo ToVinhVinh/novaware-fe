@@ -161,7 +161,7 @@ const useStyles = makeStyles((theme) => ({
     minWidth: 0,
   },
   letterItem: {
-    fontWeight: 700,
+    fontWeight: 600,
     color: '#f50057',
     cursor: 'default',
     '&.Mui-disabled': {
@@ -176,7 +176,7 @@ const useStyles = makeStyles((theme) => ({
     padding: '8px 16px',
   },
   letterText: {
-    fontWeight: 700,
+    fontWeight: 600,
     color: '#f50057',
     whiteSpace: 'nowrap',
   },

@@ -70,7 +70,7 @@ const useStyles = makeStyles((theme) => ({
   card: {
     width: 320,
     height: "auto",
-    borderRadius: 8
+    borderRadius: 6
   },
   media: {
     height: 270,

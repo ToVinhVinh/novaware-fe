@@ -22,7 +22,7 @@ import {
     CircularProgress,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
-import { FaTshirt, FaChartLine, FaVenusMars, FaDollarSign, FaGem, FaFemale, FaShoePrints } from "react-icons/fa";
+import { FaTshirt, FaChartLine, FaVenusMars, FaDollarSign, FaGem, FaFemale, FaShoePrints, FaMagic } from "react-icons/fa";
 import { PiPants } from "react-icons/pi";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import LottieLoading from "../LottieLoading.jsx";
@@ -48,7 +48,7 @@ const useStyles = makeStyles((theme) => ({
         flexDirection: "column",
         height: "100%",
         overflow: "hidden",
-        backgroundColor: "#fce7f3",
+        backgroundColor: "#FEF5F7",
     },
     dialogTitle: {
         position: "relative",
@@ -169,7 +169,7 @@ const useStyles = makeStyles((theme) => ({
     tableRow: {
         borderTop: "none",
         borderBottom: "none",
-        backgroundColor: "#fce7f3",
+        backgroundColor: "#FEF5F7",
         "& .MuiTableCell-root": {
             borderBottom: "none",
             borderTop: "none",
@@ -759,17 +759,58 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
         }
 
         try {
+            // Group products by category
+            const categories = ["Tops", "Dresses", "Bottoms", "Shoes", "Accessories"];
+            const productsByCategory = {
+                Tops: [],
+                Dresses: [],
+                Bottoms: [],
+                Shoes: [],
+                Accessories: [],
+                Other: [],
+            };
+
+            outfit.products?.forEach((p) => {
+                const category = p.category || "Other";
+                if (productsByCategory[category]) {
+                    productsByCategory[category].push(p);
+                } else {
+                    productsByCategory.Other.push(p);
+                }
+            });
+
+            // Get only the currently displayed products based on carouselIndices
+            const displayedProducts = [];
+            categories.forEach((category) => {
+                const carouselKey = `${category}-${outfitIndex}`;
+                const currentIndex = carouselIndices[carouselKey] || 0;
+                const products = productsByCategory[category] || [];
+                const currentProduct = products[currentIndex];
+                
+                if (currentProduct) {
+                    displayedProducts.push({
+                        product_id: currentProduct._id || currentProduct.product_id,
+                        name: currentProduct.name,
+                        category: currentProduct.category,
+                        price: currentProduct.price,
+                        sale: currentProduct.sale,
+                        images: currentProduct.images || [],
+                    });
+                }
+            });
+
+            // Calculate total price for displayed products only
+            const totalPrice = displayedProducts.reduce((sum, p) => {
+                const basePrice = p.price || 0;
+                const salePercent = p.sale || 0;
+                const salePrice = salePercent ? basePrice * salePercent / 100 : basePrice;
+                return sum + salePrice;
+            }, 0);
+
             const outfitBody = {
                 name: outfit.name || `Outfit ${outfitIndex + 1}`,
-                products: outfit.products.map((p) => ({
-                    product_id: p._id || p.product_id,
-                    name: p.name,
-                    category: p.category,
-                    price: p.price,
-                    sale: p.sale,
-                    images: p.images || [],
-                })),
-                totalPrice: outfit.totalPrice,
+                products: displayedProducts,
+                totalPrice,
                 compatibilityScore: outfit.compatibilityScore,
                 gender: outfit.gender,
                 style: outfit.style,
@@ -829,7 +870,6 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                                 <Chip
                                     label={product.usage}
                                     variant="outlined"
-                                    color="primary"
                                     size="medium"
                                     style={{
                                         fontSize: "0.7rem",
@@ -838,6 +878,9 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                                         overflow: "hidden",
                                         textOverflow: "ellipsis",
                                         whiteSpace: "nowrap",
+                                        backgroundColor: "#FEF5F7",
+                                        borderColor: "#F50057",
+                                        color: "#F50057"
                                     }}
                                 />
                             )}
@@ -846,7 +889,6 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                                     label={product.season}
                                     variant="outlined"
                                     size="medium"
-                                    color="primary"
                                     style={{
                                         fontSize: "0.7rem",
                                         height: 20,
@@ -854,6 +896,9 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                                         overflow: "hidden",
                                         textOverflow: "ellipsis",
                                         whiteSpace: "nowrap",
+                                        backgroundColor: "#FEF5F7",
+                                        borderColor: "#F50057",
+                                        color: "#F50057"
                                     }}
                                 />
                             )}
@@ -891,9 +936,8 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                     )}
                     <Button
                         variant="outlined"
-                        color="primary"
                         size="medium"
-                        style={{ width: "100%", marginTop: 8 }}
+                        style={{ width: "100%", marginTop: 8, backgroundColor: "#FEF5F7", borderColor: "#F50057", color: "#F50057" }}
                         onClick={(e) => {
                             e.stopPropagation();
                             window.open(`/product?id=${product._id || product.product_id || ''}`, "_blank");
@@ -918,7 +962,12 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
             BackdropProps={{ style: { backgroundColor: "rgba(0,0,0,0.5)" } }}
         >
             <DialogTitle className={classes.dialogTitle}>
-                <Typography variant="h5" component="div" align="center" className="tracking-widest">Complete the Look</Typography>
+                <Box display="flex" alignItems="center" justifyContent="center" width="100%">
+                    <FaMagic style={{ color: ICON_COLOR, fontSize: "1.4rem", marginRight: 8 }} />
+                    <Typography variant="h5" component="div" className="tracking-widest" style={{ color: ICON_COLOR, fontWeight: 600 }}>
+                        Complete the Look
+                    </Typography>
+                </Box>
                 <IconButton
                     aria-label="close"
                     onClick={onClose}
@@ -1032,7 +1081,11 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                                                                             disabled={saveOutfitMutation.isLoading || isSaved}
                                                                             style={{
                                                                                 textTransform: "none",
-                                                                                borderRadius: 8,
+                                                                                borderRadius: 6,
+                                                                                backgroundColor: isSaved ? "#dcfce7" : "#FEF5F7",
+                                                                                borderColor: isSaved ? "#22c55e !important" : "#F50057 !important",
+                                                                                color: isSaved ? "#166534" : "#F50057",
+                                                                                border: isSaved ? "1px solid #22c55e" : "1px solid #F50057"
                                                                             }}
                                                                         >
                                                                             {isSaved ? "Saved" : "Save Outfit"}

@@ -51,7 +51,7 @@ const ProductImageGallery = memo(({ product }) => {
                   src={image}
                   alt={`${product.name} thumbnail ${i + 1}`}
                   style={{
-                    borderRadius: 8,
+                    borderRadius: 6,
                     width: 80,
                     height: 80,
                     objectFit: "cover",
@@ -87,7 +87,7 @@ const ProductImageGallery = memo(({ product }) => {
               view: ({ index: current }) => setIndex(current),
             }}
             thumbnails={{
-              border: "1px solid #f50057",
+              border: "1px solid #ccc",
               borderRadius: 4,
               padding: 4,
               gap: 18,

@@ -76,7 +76,7 @@ const useStyles = makeStyles((theme) => ({
   colorBox: {
     padding: 8,
     backgroundColor: "#f9f9f9",
-    borderRadius: 8,
+    borderRadius: 6,
     marginBottom: 8,
     display: "flex",
     alignItems: "center",

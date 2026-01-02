@@ -201,10 +201,10 @@ export default function HeaderUser({
                           <FaUser className={classes.menuItemIcon} />
                           View Profile
                         </MenuItem>
-                        <MenuItem onClick={handleChat}>
+                        {/* <MenuItem onClick={handleChat}>
                           <FaComments className={classes.menuItemIcon} />
                           Chat
-                        </MenuItem>
+                        </MenuItem> */}
                         <MenuItem onClick={handleLogout}>
                           <FaSignOutAlt className={classes.menuItemIcon} />
                           Logout

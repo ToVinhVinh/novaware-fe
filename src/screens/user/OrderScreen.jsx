@@ -73,7 +73,7 @@ const useStyles = makeStyles((theme) => ({
     padding: 4,
     height: 100,
     width: 100,
-    borderRadius: 8,
+    borderRadius: 6,
     border: "1px solid #ccc",
     objectFit: "cover",
   },

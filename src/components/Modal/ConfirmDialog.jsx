@@ -39,12 +39,12 @@ const useStyles = makeStyles((theme) => ({
         gap: 12,
     },
     cancelButton: {
-        borderRadius: 8,
+        borderRadius: 6,
         textTransform: "none",
         padding: "8px 24px",
     },
     confirmButton: {
-        borderRadius: 8,
+        borderRadius: 6,
         textTransform: "none",
         padding: "8px 24px",
     },

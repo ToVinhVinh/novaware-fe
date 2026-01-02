@@ -70,7 +70,7 @@ const App = () => {
             {userInfo && userInfo.isAdmin ? (
               <AdminLayout>
                 <Switch>
-                  <Route path="/admin/orderstats" component={StatisticsScreen} exact />
+                  <Route path="/admin/statistics" component={StatisticsScreen} exact />
                   <Route path="/admin/orders" component={OrderListScreen} />
                   <Route path="/admin/product/create" component={ProductCreateScreen} />
                   <Route path="/admin/product/:id" component={ProductEditScreen} />

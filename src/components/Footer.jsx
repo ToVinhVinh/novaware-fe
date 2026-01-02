@@ -81,7 +81,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   title: {
-    fontWeight: 700,
+    fontWeight: 600,
     fontSize: "1.6rem",
     marginBottom: theme.spacing(2),
   },

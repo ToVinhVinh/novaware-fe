@@ -15,6 +15,7 @@ import {
 	getUsersForTesting,
 	saveOutfit,
 	getOutfits,
+	deleteOutfit,
 } from '../../lib/api/user';
 import * as UserTypes from '../../interface/response/user';
 import * as UserRequestTypes from '../../interface/request/user';
@@ -165,6 +166,22 @@ export const useGetOutfits = (userId: string) => {
 		queryKey: ['users', 'outfits', userId],
 		queryFn: () => getOutfits(userId),
 		enabled: !!userId,
+	});
+};
+
+export const useDeleteOutfit = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation<
+		UserTypes.IDeleteOutfitResponse,
+		Error,
+		{ userId: string; outfitId: string }
+	>({
+		mutationFn: ({ userId, outfitId }) => deleteOutfit(userId, outfitId),
+		onSuccess: (data, variables) => {
+			queryClient.invalidateQueries({ queryKey: ['users', 'outfits', variables.userId] });
+			queryClient.invalidateQueries({ queryKey: ['users', 'detail', variables.userId] });
+		},
 	});
 };
 

@@ -40,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
   largeImage: {
     width: theme.spacing(12),
     height: theme.spacing(12),
-    borderRadius: 8,
+    borderRadius: 6,
     overflow: "hidden",
     marginRight: 10,
     border: `1px solid ${theme.palette.divider}`,
@@ -92,7 +92,7 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.text.primary,
   },
   totalPriceValue: {
-    fontWeight: 700,
+    fontWeight: 600,
     fontSize: "1.5rem",
     color: theme.palette.secondary.main,
   },

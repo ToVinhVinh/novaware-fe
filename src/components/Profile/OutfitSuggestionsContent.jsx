@@ -10,14 +10,21 @@ import {
   Box,
   Chip,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
 } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useGNNModelRecommendations } from "../../hooks/api/useRecommend";
-import { useGetUserById, useGetFavorites, useGetOutfits } from "../../hooks/api/useUser";
+import { useGetUserById, useGetFavorites, useGetOutfits, useDeleteOutfit } from "../../hooks/api/useUser";
 import Message from "../Message";
 import Loader from "../Loader";
 import VisibilityIcon from "@material-ui/icons/Visibility";
+import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
+import { toast } from "react-toastify";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -43,6 +50,13 @@ const useStyles = makeStyles((theme) => ({
   outfitName: {
     fontWeight: 600,
     marginBottom: theme.spacing(1),
+    flex: 1,
+  },
+  outfitHeaderTop: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: theme.spacing(1),
   },
   outfitInfo: {
     display: "flex",
@@ -58,7 +72,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
     border: `1px solid ${theme.palette.divider}`,
-    borderRadius: 8,
+    borderRadius: 6,
     overflow: "hidden",
     transition: "all 0.2s ease",
     "&:hover": {
@@ -98,6 +112,23 @@ const useStyles = makeStyles((theme) => ({
   emptyMessage: {
     textAlign: "center",
     padding: theme.spacing(4),
+  },
+  deleteDialog: {
+    "& .MuiDialog-paper": {
+      borderRadius: 12,
+      padding: theme.spacing(1),
+    },
+  },
+  dialogTitle: {
+    paddingBottom: theme.spacing(1),
+  },
+  dialogContent: {
+    paddingTop: theme.spacing(2),
+    paddingBottom: theme.spacing(3),
+  },
+  dialogActions: {
+    padding: theme.spacing(2),
+    gap: theme.spacing(1),
   },
 }));
 
@@ -149,10 +180,14 @@ const OutfitSuggestionsContent = () => {
   const { data: savedOutfitsResponse, isLoading: isLoadingSavedOutfits } = useGetOutfits(currentUserId);
   const savedOutfits = savedOutfitsResponse?.data?.outfits || [];
 
+  const deleteOutfitMutation = useDeleteOutfit();
+
   const getGNNRecommendations = useGNNModelRecommendations();
   const [recommendationData, setRecommendationData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [outfitToDelete, setOutfitToDelete] = useState(null);
 
   // Fetch recommendations when we have userId and a product ID
   useEffect(() => {
@@ -161,11 +196,9 @@ const OutfitSuggestionsContent = () => {
       return;
     }
 
-    // Get first favorite product ID, or use a default if no favorites
     const productId = favorites.length > 0 ? favorites[0]._id : null;
 
     if (!productId) {
-      // Don't set error if we have saved outfits - we can still show those
       setError(null);
       setRecommendationData(null);
       return;
@@ -252,9 +285,9 @@ const OutfitSuggestionsContent = () => {
     return processedOutfits;
   }, [recommendationData, user?.gender]);
 
-  // Process saved outfits to match the format
   const processedSavedOutfits = useMemo(() => {
-    return savedOutfits.map((outfit) => ({
+    return savedOutfits.map((outfit, index) => ({
+      _id: outfit._id || `saved-${index}`,
       name: outfit.name,
       products: (outfit.products || []).map((p) => {
         const basePrice = p.price || 0;
@@ -278,13 +311,45 @@ const OutfitSuggestionsContent = () => {
     }));
   }, [savedOutfits, user?.gender]);
 
-  // Combine saved outfits and recommended outfits
   const outfits = useMemo(() => {
     return [...processedSavedOutfits, ...recommendedOutfits];
   }, [processedSavedOutfits, recommendedOutfits]);
 
   const handleViewProduct = (productId) => {
     history.push(`/product?id=${productId}`);
+  };
+
+  const handleOpenDeleteDialog = (outfit, index) => {
+    setOutfitToDelete({ outfit, index });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setOutfitToDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!outfitToDelete) return;
+
+    try {
+      const outfitId = outfitToDelete.outfit._id;
+      if (!outfitId) {
+        toast.error("Cannot delete this outfit. Invalid outfit ID.");
+        return;
+      }
+
+      await deleteOutfitMutation.mutateAsync({
+        userId: currentUserId,
+        outfitId: outfitId,
+      });
+
+      toast.success(`"${outfitToDelete.outfit.name}" has been removed from your saved outfits.`);
+      handleCloseDeleteDialog();
+    } catch (error) {
+      console.error("Failed to delete outfit:", error);
+      toast.error(error?.message || "Failed to delete outfit. Please try again.");
+    }
   };
 
   if (isLoading || isLoadingSavedOutfits) {
@@ -298,7 +363,6 @@ const OutfitSuggestionsContent = () => {
     );
   }
 
-  // Only show error if we have no saved outfits and no recommendations
   if (error && processedSavedOutfits.length === 0 && recommendedOutfits.length === 0) {
     return (
       <Paper className={classes.paper} elevation={0}>
@@ -328,9 +392,29 @@ const OutfitSuggestionsContent = () => {
             <Grid item xs={12} key={index}>
               <Card className={classes.outfitCard} elevation={0}>
                 <Box className={classes.outfitHeader}>
-                  <Typography variant="h6" className={classes.outfitName}>
-                    {outfit.name}
-                  </Typography>
+                  <Box className={classes.outfitHeaderTop}>
+                    <Typography variant="h6" className={classes.outfitName}>
+                      {outfit.name}
+                    </Typography>
+                    {index < processedSavedOutfits.length && (
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<DeleteOutlineIcon />}
+                        onClick={() => handleOpenDeleteDialog(outfit, index)}
+                        style={{
+                          textTransform: "none",
+                          borderRadius: 6,
+                          backgroundColor: "#FEF5F7",
+                          borderColor: "#F50057",
+                          color: "#F50057",
+                          border: "1px solid #F50057",
+                        }}
+                      >
+                        Unsave
+                      </Button>
+                    )}
+                  </Box>
                   <Box className={classes.outfitInfo}>
                     <Chip
                       label={outfit.style}
@@ -345,11 +429,6 @@ const OutfitSuggestionsContent = () => {
                       variant="outlined"
                     />
                   </Box>
-                  {outfit.description && (
-                    <Typography variant="body2" color="textSecondary" style={{ marginTop: 8 }}>
-                      {outfit.description}
-                    </Typography>
-                  )}
                 </Box>
 
                 <Box className={classes.productsGrid}>
@@ -410,6 +489,60 @@ const OutfitSuggestionsContent = () => {
           ))}
         </Grid>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        maxWidth="xs"
+        fullWidth
+        className={classes.deleteDialog}
+      >
+        <DialogTitle className={classes.dialogTitle}>
+          <Typography variant="h6" style={{ fontWeight: 600, color: "#F50057" }}>
+            Confirm Delete
+          </Typography>
+        </DialogTitle>
+        <DialogContent className={classes.dialogContent}>
+          <Typography variant="body1" style={{ color: "#333" }}>
+            Are you sure you want to remove <strong>"{outfitToDelete?.outfit?.name}"</strong> from your saved outfits?
+          </Typography>
+          <Typography variant="body2" style={{ color: "#666", marginTop: 8 }}>
+            This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions className={classes.dialogActions}>
+          <Button
+            onClick={handleCloseDeleteDialog}
+            variant="outlined"
+            size="medium"
+            style={{
+              textTransform: "none",
+              borderRadius: 6,
+              backgroundColor: "#f5f5f5",
+              borderColor: "#ccc",
+              color: "#666",
+              border: "1px solid #ccc",
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            variant="contained"
+            size="medium"
+            startIcon={<DeleteOutlineIcon />}
+            style={{
+              textTransform: "none",
+              borderRadius: 6,
+              backgroundColor: "#F50057",
+              color: "#fff",
+            }}
+          >
+            Delete Outfit
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 };

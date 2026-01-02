@@ -668,14 +668,12 @@ const ProductInfo = memo(
                   render={({ field, fieldState: { error } }) => (
                     <>
                       <RadioGroup {...field} row>
-                        {sizeOptions.map((size, index) => {
+                        {sizeOptions.map((size) => {
                           const sizeAvailable = isSizeAvailable(size);
-                          const isLast = index === sizeOptions.length - 1;
                           return (
                             <FormControlLabel
                               key={size}
                               value={size}
-                              style={{ marginRight: isLast ? 0 : undefined }}
                               control={<Radio style={{ display: "none" }} />}
                               label={
                                 <Box
@@ -695,7 +693,6 @@ const ProductInfo = memo(
                                       ? "auto"
                                       : "none",
                                     borderColor: field.value === size ? "#DD8190" : "#ccc",
-                                    marginRight: 0,
                                   }}
                                   onClick={(e) => {
                                     e.preventDefault();

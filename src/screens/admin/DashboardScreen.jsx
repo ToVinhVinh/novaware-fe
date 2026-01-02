@@ -149,7 +149,7 @@ const DashboardScreen = () => {
               Statistics
             </Typography>
             <Button variant="contained" className={classes.button}>
-              <Link to="/admin/orderstats" className={classes.link}>
+              <Link to="/admin/statistics" className={classes.link}>
                 Go to Statistics
               </Link>
             </Button>

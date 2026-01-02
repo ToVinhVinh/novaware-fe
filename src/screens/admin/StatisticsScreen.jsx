@@ -1,446 +1,813 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useGetOrders } from "../../hooks/api/useOrder";
-import { useGetProducts } from "../../hooks/api/useProduct";
-import { Container, Grid } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import { Typography } from "@material-ui/core";
+import React, { useState } from 'react';
+import { Container, Grid, Paper, Typography, Box, Card, CardContent, Select, MenuItem, FormControl, InputLabel, Chip, CircularProgress } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import {
-  format,
-  startOfDay,
-  endOfDay,
-  startOfMonth,
-  endOfMonth,
-  subDays,
-  subMonths,
-  isSameDay,
-  parseISO,
-} from "date-fns";
-import ToggleButton from "@material-ui/lab/ToggleButton";
-import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
-import Meta from "../../components/Meta";
-import Loader from "../../components/Loader";
-import Message from "../../components/Message";
-import ProductStatistics from "../../components/Statistics/ProductStatistics";
-import OrderStatistics from "../../components/Statistics/OrderStatistics";
+	TrendingUp,
+	TrendingDown,
+	People,
+	ShoppingCart,
+	AttachMoney,
+	Store,
+	ArrowUpward,
+	ArrowDownward,
+	Assessment,
+} from '@material-ui/icons';
+import {
+	LineChart,
+	Line,
+	BarChart,
+	Bar,
+	PieChart,
+	Pie,
+	Cell,
+	XAxis,
+	YAxis,
+	CartesianGrid,
+	Tooltip,
+	Legend,
+	ResponsiveContainer,
+	Area,
+	AreaChart,
+} from 'recharts';
+import {
+	useGetOverviewStats,
+	useGetRevenueChart,
+	useGetTopProducts,
+	useGetUserDemographics,
+	useGetOrderStatus,
+	useGetRecentOrders,
+	useGetProductCategories,
+	useGetSalesByGender,
+} from '../../hooks/api/useAdminStats';
+import Meta from '../../components/Meta';
+import Message from '../../components/Message';
 
 const useStyles = makeStyles((theme) => ({
-  container: {
-    marginTop: theme.spacing(-10),
-    marginBottom: 24,
-  },
-  breadcrumbsContainer: {
-    ...theme.mixins.customize.breadcrumbs,
-    paddingBottom: 0,
-    "& .MuiBreadcrumbs-ol": {
-      justifyContent: "flex-start",
-    },
-  },
-  paper: {
-    padding: theme.spacing(3),
-    marginBottom: theme.spacing(3),
-  },
-  title: {
-    textAlign: "center",
-    marginBottom: theme.spacing(2),
-  },
-  statsContainer: {
-    marginBottom: theme.spacing(4),
-  },
-  chartContainer: {
-    width: "100%",
-    height: 300,
-  },
-  toggleButtonGroup: {
-    marginBottom: theme.spacing(2),
-  },
-  formControl: {
-    width: "150px",
-  },
-  datePicker: {
-    marginBottom: theme.spacing(2),
-  },
+	container: {
+		marginTop: 0,
+		marginBottom: theme.spacing(10),
+		maxWidth: '100%',
+		padding: 0,
+	},
+	pageTitle: {
+		marginBottom: theme.spacing(4),
+		fontWeight: 600,
+		fontSize: '1.75rem',
+		background: 'linear-gradient(135deg, #DD8190 0%, #B8606E 100%)',
+		WebkitBackgroundClip: 'text',
+		WebkitTextFillColor: 'transparent',
+		textAlign: 'center',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		gap: theme.spacing(1.5),
+	},
+	statsCard: {
+		height: '100%',
+		position: 'relative',
+		overflow: 'hidden',
+		background: 'linear-gradient(180deg, rgba(245, 0, 87, 0.05) 0%, #ffffff 100%)',
+		border: '1.5px solid rgba(245, 0, 87, 0.15)',
+		color: '#1a202c',
+		borderRadius: 16,
+		boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+		transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+		'&::before': {
+			content: '""',
+			position: 'absolute',
+			top: -20,
+			right: -20,
+			width: 120,
+			height: 120,
+			borderRadius: '50%',
+			background: 'rgba(245, 0, 87, 0.03)',
+			transition: 'all 0.6s ease',
+		},
+		'&::after': {
+			content: '""',
+			position: 'absolute',
+			bottom: -30,
+			left: -20,
+			width: 100,
+			height: 100,
+			borderRadius: '50%',
+			background: 'rgba(245, 0, 87, 0.03)',
+			transition: 'all 0.6s ease',
+		},
+		'&:hover': {
+			transform: 'translateY(-5px)',
+			borderColor: '#F50057',
+			boxShadow: '0 15px 30px -5px rgba(245, 0, 87, 0.12)',
+			'&::before': {
+				transform: 'scale(1.5) translate(-10%, 10%)',
+				background: 'rgba(245, 0, 87, 0.06)',
+			},
+			'&::after': {
+				transform: 'scale(1.3) translate(10%, -10%)',
+				background: 'rgba(245, 0, 87, 0.05)',
+			},
+			'& $iconWrapper': {
+				background: '#F50057',
+				boxShadow: '0 4px 12px rgba(245, 0, 87, 0.3)',
+				'& svg': {
+					color: '#ffffff',
+					transform: 'scale(1.1)',
+				},
+			},
+		},
+	},
+	iconWrapper: {
+		width: 48,
+		height: 48,
+		borderRadius: 12,
+		background: 'rgba(245, 0, 87, 0.08)',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		marginBottom: theme.spacing(2),
+		position: 'relative',
+		zIndex: 2,
+		transition: 'all 0.3s ease',
+		'& svg': {
+			color: '#F50057',
+			fontSize: 24,
+			transition: 'all 0.3s ease',
+		},
+	},
+	statValue: {
+		fontSize: '2rem',
+		fontWeight: 700,
+		letterSpacing: '-0.02em',
+		position: 'relative',
+		zIndex: 2,
+	},
+	statLabel: {
+		fontSize: '0.8125rem',
+		opacity: 0.6,
+		textTransform: 'uppercase',
+		letterSpacing: '0.05em',
+		fontWeight: 600,
+		position: 'relative',
+		zIndex: 2,
+	},
+	growthBadge: {
+		marginTop: theme.spacing(1),
+		padding: '4px 12px',
+		borderRadius: 12,
+		background: 'currentColor',
+		opacity: 0.15,
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 4,
+		fontSize: '0.75rem',
+		fontWeight: 600,
+	},
+	chartPaper: {
+		padding: theme.spacing(2),
+		borderRadius: 12,
+		boxShadow: 'none',
+		height: '100%',
+		border: '2px solid #eee',
+		background: '#ffffff',
+	},
+	chartHeader: {
+		display: 'flex',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		paddingBottom: theme.spacing(1),
+		marginBottom: theme.spacing(2),
+		borderBottom: '1px solid #e2e8f0',
+	},
+	chartTitle: {
+		fontWeight: 600,
+		color: '#2d3748',
+		marginBottom: 0,
+	},
+	periodSelector: {
+		minWidth: 120,
+	},
+	tableContainer: {
+		maxHeight: 400,
+		overflowY: 'auto',
+	},
+	orderRow: {
+		padding: theme.spacing(2),
+		borderBottom: '1px solid #e2e8f0',
+		display: 'flex',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		transition: 'background 0.2s',
+		'&:hover': {
+			background: '#f7fafc',
+		},
+	},
+	statusBadge: {
+		padding: '4px 12px',
+		borderRadius: 12,
+		fontSize: '0.75rem',
+		fontWeight: 600,
+	},
+	loadingContainer: {
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		minHeight: 400,
+	},
 }));
 
-const OrderStatsScreen = ({ history }) => {
-  const classes = useStyles();
-  const dispatch = useDispatch();
+const COLORS = ['#DD8190', '#DB2777', '#F50057', '#B8606E', '#FFB7C5', '#FF4D6D', '#C9184A', '#A4133C'];
 
-  const [dailyStats, setDailyStats] = useState({ count: 0, revenue: 0 });
-  const [monthlyStats, setMonthlyStats] = useState({ count: 0, revenue: 0 });
-  const [chartData, setChartData] = useState({
-    dailyOrderCount: [],
-    dailyRevenue: [],
-    monthlyOrderCount: [],
-    monthlyRevenue: [],
-  });
-  const [filterStatus, setFilterStatus] = useState("all");
+const StatisticsScreen = () => {
+	const classes = useStyles();
+	const [revenuePeriod, setRevenuePeriod] = useState('30d');
+	const [topProductsSort, setTopProductsSort] = useState('revenue');
+	const [topProductsLimit, setTopProductsLimit] = useState(10);
 
-  const [selectedView, setSelectedView] = useState("order");
-  const [totalProducts, setTotalProducts] = useState(0);
-  const [totalStock, setTotalStock] = useState(0);
-  const [totalStockSold, setTotalStockSold] = useState(0);
-  const [numProductsSold, setNumProductsSold] = useState(0);
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedDateOrderCount, setSelectedDateOrderCount] = useState(0);
-  const [selectedDateRevenue, setSelectedDateRevenue] = useState(0);
+	// Fetch all data using hooks
+	const { data: overviewData, isLoading: overviewLoading, error: overviewError } = useGetOverviewStats();
+	const { data: revenueData, isLoading: revenueLoading } = useGetRevenueChart({ period: revenuePeriod });
+	const { data: topProductsData, isLoading: topProductsLoading } = useGetTopProducts({ 
+		sort_by: topProductsSort, 
+		limit: topProductsLimit 
+	});
+	const { data: demographicsData, isLoading: demographicsLoading } = useGetUserDemographics();
+	const { data: orderStatusData, isLoading: orderStatusLoading } = useGetOrderStatus();
+	const { data: recentOrdersData, isLoading: recentOrdersLoading } = useGetRecentOrders({ limit: 10 });
+	const { data: categoriesData, isLoading: categoriesLoading } = useGetProductCategories();
+	const { data: salesByGenderData, isLoading: salesByGenderLoading } = useGetSalesByGender();
 
-  // States for Order Summary
-  const [totalOrders, setTotalOrders] = useState(0);
-  const [totalDeliveredOrders, setTotalDeliveredOrders] = useState(0);
-  const [totalCancelledOrders, setTotalCancelledOrders] = useState(0);
-  const [averageDailyRevenue, setAverageDailyRevenue] = useState(0);
+	// Console logs for debugging as requested
+	React.useEffect(() => {
+		if (revenueData) console.log('Revenue & Orders Trend:', revenueData.data);
+	}, [revenueData]);
 
-  // States for daily and monthly cancelled orders
-  const [dailyCancelled, setDailyCancelled] = useState(0);
-  const [monthlyCancelled, setMonthlyCancelled] = useState(0);
+	React.useEffect(() => {
+		if (topProductsData) console.log('Top Products:', topProductsData.data);
+	}, [topProductsData]);
 
-  const userInfo = useSelector((state) => state.userLogin?.userInfo);
-  
-  const { data: ordersResponse, isLoading: loadingOrders, error: errorOrders } = useGetOrders();
-  const orders = ordersResponse?.data?.orders || [];
-  
-  const { data: productsResponse, isLoading: loadingProducts } = useGetProducts({ option: 'all' });
-  const products = productsResponse?.data?.products || [];
-  
-  const loading = loadingOrders || loadingProducts;
-  const error = errorOrders;
+	React.useEffect(() => {
+		if (orderStatusData) console.log('Fulfillment Status:', orderStatusData.data);
+	}, [orderStatusData]);
 
-  const calculateOrderStats = useCallback(() => {
-    const today = new Date();
-    const startOfToday = startOfDay(today);
-    const endOfToday = endOfDay(today);
-    const startOfThisMonth = startOfMonth(today);
-    const endOfThisMonth = endOfMonth(today);
+	React.useEffect(() => {
+		if (salesByGenderData) console.log('Sales by Gender:', salesByGenderData.data);
+	}, [salesByGenderData]);
 
-    let dailyCount = 0;
-    let dailyRevenue = 0;
-    let monthlyCount = 0;
-    let monthlyRevenue = 0;
-    let dailyCancelledCount = 0;
-    let monthlyCancelledCount = 0;
+	const overview = overviewData?.data;
+	const isLoading = overviewLoading || revenueLoading;
 
-    const filteredOrders = orders.filter((order) => {
-      if (filterStatus === "all") return true;
-      if (filterStatus === "delivered") return order.isDelivered;
-      if (filterStatus === "pending") return !order.isDelivered;
-      return true;
-    });
+	// Format currency
+	const formatCurrency = (value) => {
+		return new Intl.NumberFormat('vi-VN', {
+			style: 'currency',
+			currency: 'VND',
+		}).format(value);
+	};
 
-    filteredOrders.forEach((order) => {
-      const orderDate = new Date(order.createdAt);
-      // Assuming you have a field to indicate cancelled orders, e.g., order.isCancelled
-      if (order.isCancelled) {
-        if (orderDate >= startOfToday && orderDate <= endOfToday) {
-          dailyCancelledCount++;
-        }
-        if (orderDate >= startOfThisMonth && orderDate <= endOfThisMonth) {
-          monthlyCancelledCount++;
-        }
-      } else {
-        if (orderDate >= startOfToday && orderDate <= endOfToday) {
-          dailyCount++;
-          dailyRevenue += order.totalPrice;
-        }
-        if (orderDate >= startOfThisMonth && orderDate <= endOfThisMonth) {
-          monthlyCount++;
-          monthlyRevenue += order.totalPrice;
-        }
-      }
-    });
+	// Format number
+	const formatNumber = (value) => {
+		return new Intl.NumberFormat('vi-VN').format(value);
+	};
 
-    setDailyStats({ count: dailyCount, revenue: dailyRevenue });
-    setMonthlyStats({ count: monthlyCount, revenue: monthlyRevenue });
-    setDailyCancelled(dailyCancelledCount);
-    setMonthlyCancelled(monthlyCancelledCount);
-  }, [orders, filterStatus]);
+	// Render Overview Stats Cards
+	const renderStatsCards = () => {
+		if (!overview) return null;
 
-  const prepareChartData = useCallback(() => {
-    const today = new Date();
-    const past7Days = Array.from({ length: 7 }, (_, i) => subDays(today, i));
-    const past6Months = Array.from({ length: 6 }, (_, i) =>
-      subMonths(today, i)
-    );
+		const stats = [
+			{
+				label: 'Total Users',
+				value: formatNumber(overview.totals.users),
+				icon: <People style={{ fontSize: 32 }} />,
+				growth: overview.growth.users_percent,
+				thisMonth: overview.this_month.new_users,
+			},
+			{
+				label: 'Total Products',
+				value: formatNumber(overview.totals.products),
+				icon: <Store style={{ fontSize: 32 }} />,
+				growth: 0,
+				thisMonth: null,
+			},
+			{
+				label: 'Total Orders',
+				value: formatNumber(overview.totals.orders),
+				icon: <ShoppingCart style={{ fontSize: 32 }} />,
+				growth: overview.growth.orders_percent,
+				thisMonth: overview.this_month.orders,
+			},
+			{
+				label: 'Total Revenue',
+				value: formatCurrency(overview.totals.revenue),
+				icon: <AttachMoney style={{ fontSize: 32 }} />,
+				growth: overview.growth.revenue_percent,
+				thisMonth: formatCurrency(overview.this_month.revenue),
+			},
+		];
 
-    const filteredOrders = orders.filter((order) => {
-      if (filterStatus === "all") return true;
-      if (filterStatus === "delivered") return order.isDelivered;
-      if (filterStatus === "pending") return !order.isDelivered;
-      return true;
-    });
+		return (
+			<Grid container spacing={3}>
+				{stats.map((stat, index) => (
+					<Grid item xs={12} sm={6} md={3} key={index}>
+						<Card className={classes.statsCard}>
+							<CardContent>
+								<Box className={classes.iconWrapper}>
+									{stat.icon}
+								</Box>
+								<Typography className={classes.statValue}>
+									{stat.value}
+								</Typography>
+								<Typography className={classes.statLabel}>
+									{stat.label}
+								</Typography>
+								{stat.thisMonth !== null && (
+									<Typography variant="body2" style={{ marginTop: 8, opacity: 0.9 }}>
+										This month: {typeof stat.thisMonth === 'number' ? formatNumber(stat.thisMonth) : stat.thisMonth}
+									</Typography>
+								)}
+							</CardContent>
+						</Card>
+					</Grid>
+				))}
+			</Grid>
+		);
+	};
 
-    const dailyOrderCountData = past7Days.map((day) => {
-      const start = startOfDay(day);
-      const end = endOfDay(day);
-      const count = filteredOrders.filter(
-        (order) =>
-          new Date(order.createdAt) >= start && new Date(order.createdAt) <= end
-      ).length;
-      return {
-        name: format(day, "dd/MM"),
-        "Order Count": count,
-      };
-    });
+	// Render Revenue Chart
+	const renderRevenueChart = () => {
+		if (!revenueData?.data) return null;
 
-    const dailyRevenueData = past7Days.map((day) => {
-      const start = startOfDay(day);
-      const end = endOfDay(day);
-      const revenue = filteredOrders
-        .filter(
-          (order) =>
-            new Date(order.createdAt) >= start &&
-            new Date(order.createdAt) <= end
-        )
-        .reduce((sum, order) => sum + order.totalPrice, 0);
-      return {
-        name: format(day, "dd/MM"),
-        Revenue: revenue,
-      };
-    });
+		const chartData = revenueData.data.labels.map((label, index) => ({
+			date: label,
+			revenue: revenueData.data.datasets[0].data[index],
+			orders: revenueData.data.datasets[1].data[index],
+		}));
 
-    const monthlyOrderCountData = past6Months.map((month) => {
-      const start = startOfMonth(month);
-      const end = endOfMonth(month);
-      const count = filteredOrders.filter(
-        (order) =>
-          new Date(order.createdAt) >= start && new Date(order.createdAt) <= end
-      ).length;
-      return {
-        name: format(month, "MM/yyyy"),
-        "Order Count": count,
-      };
-    });
+		return (
+			<Paper className={classes.chartPaper}>
+				<Box className={classes.chartHeader}>
+					<Typography variant="h6" className={classes.chartTitle}>
+						Revenue & Orders Trend
+					</Typography>
+					<FormControl className={classes.periodSelector}>
+						<Select
+							value={revenuePeriod}
+							onChange={(e) => setRevenuePeriod(e.target.value)}
+							variant="outlined"
+							size="small"
+						>
+							<MenuItem value="7d">Last 7 Days</MenuItem>
+							<MenuItem value="30d">Last 30 Days</MenuItem>
+							<MenuItem value="90d">Last 90 Days</MenuItem>
+							<MenuItem value="1y">Last Year</MenuItem>
+						</Select>
+					</FormControl>
+				</Box>
+				<ResponsiveContainer width="100%" height={350}>
+					<LineChart data={chartData}>
+						<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+						<XAxis dataKey="date" stroke="#718096" />
+						<YAxis yAxisId="left" stroke="#DD8190" />
+						<YAxis yAxisId="right" orientation="right" stroke="#DB2777" />
+						<Tooltip 
+							contentStyle={{ 
+								background: 'white', 
+								border: 'none', 
+								borderRadius: 8, 
+								boxShadow: '0 4px 12px rgba(0,0,0,0.1)' 
+							}}
+							formatter={(value, name) => {
+								if (name === 'revenue') return [formatCurrency(value), 'Revenue'];
+								return [formatNumber(value), 'Orders'];
+							}}
+						/>
+						<Legend />
+						<Line
+							yAxisId="left"
+							type="monotone"
+							dataKey="revenue"
+							stroke="#DD8190"
+							strokeWidth={3}
+							dot={{ fill: '#DD8190', r: 4 }}
+							activeDot={{ r: 6 }}
+						/>
+						<Line
+							yAxisId="right"
+							type="monotone"
+							dataKey="orders"
+							stroke="#DB2777"
+							strokeWidth={3}
+							dot={{ fill: '#DB2777', r: 4 }}
+							activeDot={{ r: 6 }}
+						/>
+					</LineChart>
+				</ResponsiveContainer>
+			</Paper>
+		);
+	};
 
-    const monthlyRevenueData = past6Months.map((month) => {
-      const start = startOfMonth(month);
-      const end = endOfMonth(month);
-      const revenue = filteredOrders
-        .filter(
-          (order) =>
-            new Date(order.createdAt) >= start &&
-            new Date(order.createdAt) <= end
-        )
-        .reduce((sum, order) => sum + order.totalPrice, 0);
-      return {
-        name: format(month, "MM/yyyy"),
-        Revenue: revenue,
-      };
-    });
+	// Render Top Products
+	const renderTopProducts = () => {
+		if (!topProductsData?.data) return null;
 
-    setChartData({
-      dailyOrderCount: dailyOrderCountData.reverse(),
-      dailyRevenue: dailyRevenueData.reverse(),
-      monthlyOrderCount: monthlyOrderCountData.reverse(),
-      monthlyRevenue: monthlyRevenueData.reverse(),
-    });
-  }, [orders, filterStatus]);
+		const products = topProductsData.data.products;
 
-  const calculateProductStats = useCallback(() => {
-    const calculatedTotalStockSold = orders.reduce(
-      (sum, order) =>
-        sum + order.orderItems.reduce((itemSum, item) => itemSum + item.qty, 0),
-      0
-    );
-    setTotalStockSold(calculatedTotalStockSold);
+		return (
+			<Paper className={classes.chartPaper}>
+				<Box className={classes.chartHeader}>
+					<Typography variant="h6" className={classes.chartTitle}>
+						Top Products
+					</Typography>
+					<Box display="flex" gap={1}>
+						<FormControl size="small" style={{ minWidth: 120 }}>
+							<Select
+								value={topProductsSort}
+								onChange={(e) => setTopProductsSort(e.target.value)}
+								variant="outlined"
+							>
+								<MenuItem value="revenue">By Revenue</MenuItem>
+								<MenuItem value="quantity">By Quantity</MenuItem>
+							</Select>
+						</FormControl>
+					</Box>
+				</Box>
+				<ResponsiveContainer width="100%" height={350}>
+					<BarChart data={products} layout="vertical">
+						<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+						<XAxis type="number" stroke="#718096" />
+						<YAxis 
+							dataKey="name" 
+							type="category" 
+							width={200} 
+							stroke="#718096"
+							tick={{ fontSize: 12 }}
+						/>
+						<Tooltip 
+							contentStyle={{ 
+								background: 'white', 
+								border: 'none', 
+								borderRadius: 8, 
+								boxShadow: '0 4px 12px rgba(0,0,0,0.1)' 
+							}}
+							formatter={(value, name) => {
+								if (name === 'revenue') return [formatCurrency(value), 'Revenue'];
+								return [formatNumber(value), 'Quantity'];
+							}}
+						/>
+						<Bar 
+							dataKey={topProductsSort === 'revenue' ? 'revenue' : 'quantity'} 
+							fill="#DD8190"
+							radius={[0, 8, 8, 0]}
+						/>
+					</BarChart>
+				</ResponsiveContainer>
+			</Paper>
+		);
+	};
 
-    let calculatedTotalProducts = 0;
-    let calculatedTotalStock = 0;
-    products.forEach((product) => {
-      calculatedTotalProducts++;
-      calculatedTotalStock += product.countInStock;
-    });
+	// Render User Demographics
+	const renderUserDemographics = () => {
+		if (!demographicsData?.data) return null;
 
-    setTotalProducts(calculatedTotalProducts);
-    setTotalStock(calculatedTotalStock);
+		const genderData = demographicsData.data.gender.labels.map((label, index) => ({
+			name: label,
+			value: demographicsData.data.gender.data[index],
+		}));
 
-    const uniqueProductIdsSold = new Set();
-    orders.forEach((order) => {
-      order.orderItems.forEach((item) => {
-        uniqueProductIdsSold.add(item.product);
-      });
-    });
-    setNumProductsSold(uniqueProductIdsSold.size);
-  }, [orders, products]);
+		const ageData = demographicsData.data.age_groups.labels.map((label, index) => ({
+			name: label,
+			value: demographicsData.data.age_groups.data[index],
+		}));
 
-  const calculateSelectedDateStats = useCallback(() => {
-    if (selectedDate) {
-      const startOfSelectedDate = startOfDay(selectedDate);
+		return (
+			<>
+				<Grid item xs={12} md={4}>
+					<Paper className={classes.chartPaper}>
+						<Box className={classes.chartHeader}>
+							<Typography variant="h6" className={classes.chartTitle}>
+								Users by Gender
+							</Typography>
+						</Box>
+						<ResponsiveContainer width="100%" height={300}>
+							<PieChart>
+								<Pie
+									data={genderData}
+									cx="50%"
+									cy="50%"
+									labelLine={false}
+									label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+									outerRadius={100}
+									fill="#8884d8"
+									dataKey="value"
+								>
+									{genderData.map((entry, index) => (
+										<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+									))}
+								</Pie>
+								<Tooltip />
+							</PieChart>
+						</ResponsiveContainer>
+					</Paper>
+				</Grid>
+				<Grid item xs={12} md={4}>
+					<Paper className={classes.chartPaper}>
+						<Box className={classes.chartHeader}>
+							<Typography variant="h6" className={classes.chartTitle}>
+								Users by Age Group
+							</Typography>
+						</Box>
+						<ResponsiveContainer width="100%" height={300}>
+							<BarChart data={ageData}>
+								<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+								<XAxis dataKey="name" stroke="#718096" />
+								<YAxis stroke="#718096" />
+								<Tooltip 
+									contentStyle={{ 
+										background: 'white', 
+										border: 'none', 
+										borderRadius: 8, 
+										boxShadow: '0 4px 12px rgba(0,0,0,0.1)' 
+									}}
+								/>
+								<Bar dataKey="value" fill="#DB2777" radius={[8, 8, 0, 0]} />
+							</BarChart>
+						</ResponsiveContainer>
+					</Paper>
+				</Grid>
+			</>
+		);
+	};
 
-      let selectedDateCount = 0;
-      let selectedDateRevenue = 0;
+	// Render Order Status
+	const renderOrderStatus = () => {
+		if (!orderStatusData?.data) return null;
 
-      const filteredOrders = orders.filter((order) => {
-        if (filterStatus === "all") return true;
-        if (filterStatus === "delivered") return order.isDelivered;
-        if (filterStatus === "pending") return !order.isDelivered;
-        return true;
-      });
+		const paymentData = orderStatusData.data.payment_status.labels.map((label, index) => ({
+			name: label,
+			value: orderStatusData.data.payment_status.data[index],
+		}));
 
-      filteredOrders.forEach((order) => {
-        const orderDate = new Date(order.createdAt);
-        if (isSameDay(orderDate, startOfSelectedDate)) {
-          selectedDateCount++;
-          selectedDateRevenue += order.totalPrice;
-        }
-      });
+		const fulfillmentData = orderStatusData.data.fulfillment_status.labels.map((label, index) => ({
+			name: label,
+			value: orderStatusData.data.fulfillment_status.data[index],
+		}));
 
-      setSelectedDateOrderCount(selectedDateCount);
-      setSelectedDateRevenue(selectedDateRevenue);
-    } else {
-      setSelectedDateOrderCount(0);
-      setSelectedDateRevenue(0);
-    }
-  }, [orders, filterStatus, selectedDate]);
+		return (
+			<>
+				<Grid item xs={12} md={4}>
+					<Paper className={classes.chartPaper}>
+						<Box className={classes.chartHeader}>
+							<Typography variant="h6" className={classes.chartTitle}>
+								Payment Status
+							</Typography>
+						</Box>
+						<ResponsiveContainer width="100%" height={300}>
+							<PieChart>
+								<Pie
+									data={paymentData}
+									cx="50%"
+									cy="50%"
+									innerRadius={60}
+									outerRadius={100}
+									fill="#8884d8"
+									paddingAngle={5}
+									dataKey="value"
+									label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+								>
+									{paymentData.map((entry, index) => (
+										<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+									))}
+								</Pie>
+								<Tooltip />
+							</PieChart>
+						</ResponsiveContainer>
+					</Paper>
+				</Grid>
+				<Grid item xs={12} md={4}>
+					<Paper className={classes.chartPaper}>
+						<Box className={classes.chartHeader}>
+							<Typography variant="h6" className={classes.chartTitle}>
+								Fulfillment Status
+							</Typography>
+						</Box>
+						<ResponsiveContainer width="100%" height={300}>
+							<PieChart>
+								<Pie
+									data={fulfillmentData}
+									cx="50%"
+									cy="50%"
+									innerRadius={60}
+									outerRadius={100}
+									fill="#8884d8"
+									paddingAngle={5}
+									dataKey="value"
+									label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+								>
+									{fulfillmentData.map((entry, index) => (
+										<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+									))}
+								</Pie>
+								<Tooltip />
+							</PieChart>
+						</ResponsiveContainer>
+					</Paper>
+				</Grid>
+			</>
+		);
+	};
 
-  const calculateTotalOrderStats = useCallback(() => {
-    setTotalOrders(orders.length);
-    setTotalDeliveredOrders(orders.filter((order) => order.isDelivered).length);
-    setTotalCancelledOrders(
-      orders.filter((order) => order.isCancelled).length
-    );
+	// Render Recent Orders
+	const renderRecentOrders = () => {
+		if (!recentOrdersData?.data) return null;
 
-    if (orders.length > 0) {
-      const totalRevenue = orders.reduce(
-        (sum, order) => sum + order.totalPrice,
-        0
-      );
-      const oldestOrderDate = new Date(
-        orders.reduce(
-          (minDate, order) =>
-            new Date(order.createdAt) < minDate
-              ? new Date(order.createdAt)
-              : minDate,
-          new Date()
-        )
-      );
-      const daysSinceStart = Math.max(
-        1,
-        Math.floor(
-          (new Date() - oldestOrderDate) / (1000 * 60 * 60 * 24)
-        ) + 1
-      );
-      setAverageDailyRevenue(totalRevenue / daysSinceStart);
-    } else {
-      setAverageDailyRevenue(0);
-    }
-  }, [orders]);
+		const orders = recentOrdersData.data.orders;
 
-  useEffect(() => {
-    if (userInfo && userInfo.isAdmin) {
-    } else {
-      history.push("/login");
-    }
-  }, [dispatch, history, userInfo]);
+		return (
+			<Paper className={classes.chartPaper}>
+				<Box className={classes.chartHeader}>
+					<Typography variant="h6" className={classes.chartTitle}>
+						Recent Orders
+					</Typography>
+				</Box>
+				<Box className={classes.tableContainer}>
+					{orders.map((order) => (
+						<Box key={order.id} className={classes.orderRow}>
+							<Box>
+								<Typography variant="body2" style={{ fontWeight: 600 }}>
+									#{order.id.slice(-8)}
+								</Typography>
+								<Typography variant="caption" color="textSecondary">
+									{new Date(order.created_at).toLocaleDateString('vi-VN')}
+								</Typography>
+							</Box>
+							<Box>
+								<Typography variant="body2" style={{ fontWeight: 600 }}>
+									{formatCurrency(order.total_price)}
+								</Typography>
+							</Box>
+							<Box display="flex" gap={1}>
+								<Chip
+									label={order.is_paid ? 'Paid' : 'Unpaid'}
+									size="small"
+									style={{
+										background: order.is_paid ? '#43e97b' : '#f5576c',
+										color: 'white',
+										fontWeight: 600,
+									}}
+								/>
+								<Chip
+									label={order.is_delivered ? 'Delivered' : 'Processing'}
+									size="small"
+									style={{
+										background: order.is_delivered ? '#4facfe' : '#ffa726',
+										color: 'white',
+										fontWeight: 600,
+									}}
+								/>
+							</Box>
+						</Box>
+					))}
+				</Box>
+			</Paper>
+		);
+	};
 
-  useEffect(() => {
-    if (orders.length > 0) {
-      calculateOrderStats();
-      prepareChartData();
-      calculateSelectedDateStats();
-      calculateTotalOrderStats();
-    }
-  }, [
-    orders,
-    calculateOrderStats,
-    prepareChartData,
-    calculateSelectedDateStats,
-    calculateTotalOrderStats,
-  ]);
+	// Render Product Categories & Sales by Gender
+	const renderAdditionalCharts = () => {
+		if (!categoriesData?.data || !salesByGenderData?.data) return null;
 
-  useEffect(() => {
-    if (orders.length > 0 && products.length > 0) {
-      calculateProductStats();
-    }
-  }, [orders, products, calculateProductStats]);
+		const categoryData = categoriesData.data.labels.map((label, index) => ({
+			name: label,
+			value: categoriesData.data.data[index],
+		}));
 
-  const handleViewChange = (event, newView) => {
-    if (newView !== null) {
-      setSelectedView(newView);
-    }
-  };
+		const salesData = salesByGenderData.data.labels.map((label, index) => ({
+			name: label,
+			value: salesByGenderData.data.data[index],
+		}));
 
-  const handleFilterChange = (event) => {
-    setFilterStatus(event.target.value);
-  };
+		return (
+			<>
+				<Grid item xs={12} md={4}>
+					<Paper className={classes.chartPaper}>
+						<Box className={classes.chartHeader}>
+							<Typography variant="h6" className={classes.chartTitle}>
+								Product Categories
+							</Typography>
+						</Box>
+						<ResponsiveContainer width="100%" height={300}>
+							<PieChart>
+								<Pie
+									data={categoryData}
+									cx="50%"
+									cy="50%"
+									labelLine={false}
+									label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+									outerRadius={100}
+									fill="#8884d8"
+									dataKey="value"
+								>
+									{categoryData.map((entry, index) => (
+										<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+									))}
+								</Pie>
+								<Tooltip />
+							</PieChart>
+						</ResponsiveContainer>
+					</Paper>
+				</Grid>
+				<Grid item xs={12} md={4}>
+					<Paper className={classes.chartPaper}>
+						<Box className={classes.chartHeader}>
+							<Typography variant="h6" className={classes.chartTitle}>
+								Sales by Gender
+							</Typography>
+						</Box>
+						<ResponsiveContainer width="100%" height={300}>
+							<BarChart data={salesData}>
+								<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+								<XAxis dataKey="name" stroke="#718096" />
+								<YAxis stroke="#718096" />
+								<Tooltip 
+									contentStyle={{ 
+										background: 'white', 
+										border: 'none', 
+										borderRadius: 8, 
+										boxShadow: '0 4px 12px rgba(0,0,0,0.1)' 
+									}}
+									formatter={(value) => formatCurrency(value)}
+								/>
+								<Bar dataKey="value" radius={[8, 8, 0, 0]}>
+									{salesData.map((entry, index) => (
+										<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+									))}
+								</Bar>
+							</BarChart>
+						</ResponsiveContainer>
+					</Paper>
+				</Grid>
+			</>
+		);
+	};
 
-  const handleDateChange = (event) => {
-    setSelectedDate(parseISO(event.target.value));
-  };
+	if (overviewError) {
+		return (
+			<Container className={classes.container} disableGutters>
+				<Message severity="error">
+					Error loading statistics: {overviewError.message}
+				</Message>
+			</Container>
+		);
+	}
 
-  return (
-    <Container style={{ marginBottom: 140, maxWidth: "100%" }}>
-      <Meta title="Dashboard | Statistics" />
-      <Grid container className={classes.breadcrumbsContainer}>
-        <Grid item xs={12}>
-          <Typography
-            variant="h5"
-            component="h1"
-            gutterBottom
-            style={{ textAlign: "center" }}
-          >
-            Statistics
-          </Typography>
+	if (isLoading) {
+		return (
+			<Container className={classes.container} disableGutters>
+				<Box className={classes.loadingContainer}>
+					<CircularProgress size={60} />
+				</Box>
+			</Container>
+		);
+	}
 
-          <ToggleButtonGroup
-            className={classes.toggleButtonGroup}
-            value={selectedView}
-            exclusive
-            onChange={handleViewChange}
-            aria-label="statistics view selection"
-          >
-            <ToggleButton value="order" aria-label="order statistics">
-              Order Statistics
-            </ToggleButton>
-            <ToggleButton value="product" aria-label="product statistics">
-              Product Statistics
-            </ToggleButton>
-          </ToggleButtonGroup>
-        </Grid>
-      </Grid>
+	return (
+		<Container className={classes.container} disableGutters>
+			<Meta title="Admin Statistics | Dashboard" />
+			{/* Overview Stats Cards */}
+			<Box mb={2}>
+				{renderStatsCards()}
+			</Box>
 
-      {loading ? (
-        <Loader />
-      ) : error ? (
-        <Message severity="error">{error}</Message>
-      ) : (
-        <Grid container spacing={3}>
-          {/* Order Statistics View */}
-          {selectedView === "order" && (
-            <OrderStatistics
-              dailyStats={dailyStats}
-              monthlyStats={monthlyStats}
-              chartData={chartData}
-              filterStatus={filterStatus}
-              handleFilterChange={handleFilterChange}
-              selectedDate={selectedDate}
-              handleDateChange={handleDateChange}
-              selectedDateOrderCount={selectedDateOrderCount}
-              selectedDateRevenue={selectedDateRevenue}
-              totalOrders={totalOrders}
-              totalDeliveredOrders={totalDeliveredOrders}
-              totalCancelledOrders={totalCancelledOrders}
-              averageDailyRevenue={averageDailyRevenue}
-              dailyCancelled={dailyCancelled}
-              monthlyCancelled={monthlyCancelled}
-              orders={orders}
-            />
-          )}
+			{/* Revenue Chart */}
+			<Box mb={2}>
+				<Grid container spacing={3}>
+					<Grid item xs={12}>
+						{renderRevenueChart()}
+					</Grid>
+				</Grid>
+			</Box>
 
-          {/* Product Statistics View */}
-          {selectedView === "product" && (
-            <ProductStatistics
-              totalProducts={totalProducts}
-              numProductsSold={numProductsSold}
-              totalStock={totalStock}
-              totalStockSold={totalStockSold}
-              products={products}
-              orders={orders}
-            />
-          )}
-        </Grid>
-      )}
-    </Container>
-  );
+			{/* Top Products & Recent Orders */}
+			<Box mb={2}>
+				<Grid container spacing={3}>
+					<Grid item xs={12} lg={6}>
+						{renderTopProducts()}
+					</Grid>
+					<Grid item xs={12} lg={6}>
+						{renderRecentOrders()}
+					</Grid>
+				</Grid>
+			</Box>
+
+			{/* User Demographics, Order Status & Product Categories */}
+			<Box mb={2}>
+				<Grid container spacing={3}>
+					{renderUserDemographics()}
+					{renderOrderStatus()}
+					{renderAdditionalCharts()}
+				</Grid>
+			</Box>
+		</Container>
+	);
 };
 
-export default OrderStatsScreen;
+export default StatisticsScreen;
