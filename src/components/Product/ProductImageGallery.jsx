@@ -42,9 +42,9 @@ const ProductImageGallery = memo(({ product }) => {
     <>
       {product.images?.length > 0 ? (
         <>
-          <Box display="flex">
+          <Box display="flex !important" flexDirection="row !important">
             {/* Left-side thumbnails */}
-            <Box mr={2} style={{ width: 90, display: "flex", flexDirection: "column", maxHeight: 500, overflowY: "auto" }}>
+            <Box mr={2} style={{ width: 90,  display: "flex", flexDirection: "column", maxHeight: 500, overflowY: "auto" }}>
               {product.images.map((image, i) => (
                 <img
                   key={i}
@@ -65,7 +65,7 @@ const ProductImageGallery = memo(({ product }) => {
             </Box>
 
             {/* Main image */}
-            <Box onClick={() => setOpen(true)} style={{ cursor: "pointer", position: "relative", flex: 1 }}>
+            <Box onClick={() => setOpen(true)} style={{ cursor: "pointer", backgroundColor: "#fff", position: "relative", flex: 1 }}>
               <img
                 src={product.images[index]}
                 alt={product.name}

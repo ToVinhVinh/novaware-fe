@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { motion } from "framer-motion";
-import AddShoppingCartOutlinedIcon from "@material-ui/icons/AddShoppingCartOutlined";
-import { RiShoppingBag3Fill } from "react-icons/ri";
+import LocalMallIcon from '@material-ui/icons/LocalMall';
 import Tooltip from "@material-ui/core/Tooltip";
 import ProductModalView from "./ProductModalView";
 import useCartStore from "../../store/cartStore";
@@ -44,7 +43,6 @@ const ProductCard = (props) => {
     const selectedColorHex = variant?.color || "";
     const selectedColorName = selectedColorHex || "";
 
-    // Sử dụng dữ liệu sản phẩm đã có sẵn, không cần gọi API
     const productData = {
       _id: productId,
       id: productId,
@@ -67,7 +65,7 @@ const ProductCard = (props) => {
   return (
     <>
       <motion.div
-        className="group shadow-md p-2 rounded-lg bg-primary h-full border border-pink-500 overflow-hidden transition-all duration-300"
+        className="group shadow-md p-2 rounded-xl bg-primary h-full border-2 border-white overflow-hidden transition-all duration-300"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -86,10 +84,6 @@ const ProductCard = (props) => {
                 -{Math.round(sale)}%
               </div>
             )}
-
-            {/* <div className="absolute top-2 rounded-lg left-16 z-20 border-[2px] border-blue-600 p-2 py-1 text-xs font-semibold uppercase text-blue-600">
-              {articleType}
-            </div> */}
             {images && images.length > 0 ? (
               <>
                 {images[1] && (
@@ -162,10 +156,10 @@ const ProductCard = (props) => {
               <div className="w-full md:hidden">
                 <button
                   onClick={(e) => handleAddToCart(e, productId)}
-                  className="mt-2 w-full bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-primary/90 active:scale-95"
+                  className="mt-2 w-full bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-primary/90 active:scale-95 !rounded-full"
                 >
                   <span className="flex items-center justify-center gap-2">
-                    <RiShoppingBag3Fill />
+                    <LocalMallIcon />
                     Add to Cart
                   </span>
                 </button>
@@ -173,9 +167,9 @@ const ProductCard = (props) => {
             </div>
             <button
               onClick={(e) => handleAddToCart(e, productId)}
-              className="h-10 rounded-lg mt-2 w-full flex items-center gap-2 justify-center border border-white text-white hover:bg-pink-600"
+              className="h-10 mt-2 w-full flex items-center gap-2 justify-center border border-white/80 text-white hover:bg-pink-600 hover:border-pink-600 !rounded-full"
             >
-              <AddShoppingCartOutlinedIcon fontSize="small" className="text-white" />
+              <LocalMallIcon fontSize="small" className="text-white" />
               Add to Cart
             </button>
           </div>

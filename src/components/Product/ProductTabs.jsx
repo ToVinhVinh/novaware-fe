@@ -13,6 +13,7 @@ import { Button, Typography } from '@material-ui/core';
 import LottieLoading from '../LottieLoading';
 import LottieEmpty from '../LottieEmpty';
 import Loader from '../Loader';
+import StorefrontIcon from "@material-ui/icons/Storefront";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -132,7 +133,7 @@ const ProductTabs = () => {
         ) : errorProductLatest ? (
           <LottieEmpty className="flex justify-center" />
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-3 gap-y-4 mb-6">
             {productsLatest &&
               productsLatest.map((product, index) => {
                 const key =
@@ -154,9 +155,10 @@ const ProductTabs = () => {
             color='secondary'
             component={Link}
             to='/shop?sort_by=latest'
-            className="!rounded-none"
+            className="!rounded-full"
           >
-            View more
+           <span className="mr-2">View more</span>
+            <StorefrontIcon fontSize="small" className="text-white" />
           </Button>
         </div>
       </TabPanel>
@@ -185,9 +187,10 @@ const ProductTabs = () => {
             color='secondary'
             component={Link}
             to='/shop?sort_by=sale'
-            className="!rounded-none"
+            className="!rounded-full"
           >
-            View more
+            <span className="mr-2">View more</span>
+            <StorefrontIcon fontSize="small" className="text-white" />
           </Button>
         </div>
       </TabPanel>

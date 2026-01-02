@@ -253,9 +253,9 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fce7f3",
+    backgroundColor: "#FDE7F0",
     marginRight: theme.spacing(2),
-    color: theme.palette.secondary.main,
+    color: "#DD8190",
   },
   policyText: {
     flex: 1,
@@ -366,8 +366,10 @@ const ProductInfo = memo(
       if (hasVariants && product.variants) {
         const sizes = [...new Set(product.variants.map((v) => v.size.toUpperCase()))];
         return sizes.sort((a, b) => {
-          const order = { S: 0, M: 1, L: 2, XL: 3 };
-          return (order[a] || 99) - (order[b] || 99);
+          const order = { S: 0, M: 1, L: 2, XL: 3, XXL: 4 };
+          const aIndex = order[a] !== undefined ? order[a] : 99;
+          const bIndex = order[b] !== undefined ? order[b] : 99;
+          return aIndex - bIndex;
         });
       }
       return [];
@@ -484,15 +486,21 @@ const ProductInfo = memo(
       };
 
       fetchRecommendations();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentUserId, productId]);
 
     const getAvailableSizesForColor = (colorHex) => {
       if (!product.variants || !colorHex) return sizeOptions;
-      return product.variants
+      const sizes = product.variants
         .filter((v) => v.color === colorHex && v.stock > 0)
         .map((v) => v.size.toUpperCase())
         .filter((size, index, self) => self.indexOf(size) === index);
+      
+      return sizes.sort((a, b) => {
+        const order = { S: 0, M: 1, L: 2, XL: 3, XXL: 4 };
+        const aIndex = order[a] !== undefined ? order[a] : 99;
+        const bIndex = order[b] !== undefined ? order[b] : 99;
+        return aIndex - bIndex;
+      });
     };
 
     const getAvailableColorsForSize = (size) => {
@@ -554,11 +562,9 @@ const ProductInfo = memo(
       if (selectedVariant) {
         return safeNumber(selectedVariant.stock);
       }
-      // If no variant selected but has variants, return 0
       if (hasVariants) {
         return 0;
       }
-      // If no variants at all, return 0
       return 0;
     }, [selectedVariant, hasVariants, safeNumber]);
     const totalInventory = useMemo(() => {
@@ -606,7 +612,7 @@ const ProductInfo = memo(
         <Typography variant="h5" component="h1" gutterBottom>
           {product.productDisplayName || product.name || "Product"}
         </Typography>
-        <Box display="flex" alignItems="center" mb={1}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
           {/* Price */}
           <Typography
             variant="h4"
@@ -614,6 +620,8 @@ const ProductInfo = memo(
             component="div"
             className={classes.price}
           >
+            ${(currentPrice * (1 - (product.sale || 0) / 100)).toFixed(2)}
+            {"  "}
             {product.sale && product.sale > 0 ? (
               <Typography
                 variant="h4"
@@ -624,14 +632,7 @@ const ProductInfo = memo(
                 ${currentPrice.toFixed(2)}
               </Typography>
             ) : null}
-            {"  "}${(currentPrice * (1 - (product.sale || 0) / 100)).toFixed(2)}
           </Typography>
-          {/* <Rating
-            name="read-only"
-            value={product.rating || 0}
-            precision={0.5}
-            readOnly
-          /> */}
           <Chip
             size="small"
             color={currentStock > 0 ? "primary" : "default"}
@@ -651,12 +652,12 @@ const ProductInfo = memo(
               component="fieldset"
               classes={{ root: classes.sizeFormControl }}
             >
-              <Box display="flex" alignItems="center">
+              <Box display="flex" alignItems="center" justifyContent="space-between">
                 <FormLabel
                   component="legend"
                   color="secondary"
                   className={classes.label1}
-                  style={{ marginRight: "16px", marginBottom: "14px" }}
+                  style={{ marginBottom: "14px" }}
                 >
                   Size:
                 </FormLabel>
@@ -667,13 +668,14 @@ const ProductInfo = memo(
                   render={({ field, fieldState: { error } }) => (
                     <>
                       <RadioGroup {...field} row>
-                        {sizeOptions.map((size) => {
+                        {sizeOptions.map((size, index) => {
                           const sizeAvailable = isSizeAvailable(size);
+                          const isLast = index === sizeOptions.length - 1;
                           return (
                             <FormControlLabel
-                              style={{ marginBottom: "15px" }}
                               key={size}
                               value={size}
+                              style={{ marginRight: isLast ? 0 : undefined }}
                               control={<Radio style={{ display: "none" }} />}
                               label={
                                 <Box
@@ -686,13 +688,14 @@ const ProductInfo = memo(
                                     borderRadius: 0,
                                     backgroundColor:
                                       field.value === size && sizeAvailable
-                                        ? "#f5005730"
+                                        ? "#F5005730"
                                         : "transparent",
                                     opacity: sizeAvailable ? 1 : 0.5,
                                     pointerEvents: sizeAvailable
                                       ? "auto"
                                       : "none",
                                     borderColor: field.value === size ? "#DD8190" : "#ccc",
+                                    marginRight: 0,
                                   }}
                                   onClick={(e) => {
                                     e.preventDefault();
@@ -897,12 +900,12 @@ const ProductInfo = memo(
                 setOutfitModalOpen(true);
               }}
               style={{
-                backgroundColor: "#00bcd4",
+                backgroundColor: "#DB2777",
                 color: "#fff",
                 whiteSpace: "nowrap",
                 width: "100%",
                 height: 48,
-                borderRadius: 0,
+                borderRadius: 6,
               }}
             >
               Recommendation
@@ -920,8 +923,8 @@ const ProductInfo = memo(
                 whiteSpace: "nowrap",
                 width: "100%",
                 height: 48,
-                borderRadius: 0,
-                backgroundColor: isFavorite ? "#f50057" : undefined,
+                borderRadius: 6,
+                backgroundColor: isFavorite ? "#F50057" : undefined,
               }}
             >
               {isFavorite ? (
@@ -947,7 +950,7 @@ const ProductInfo = memo(
               style={{
                 width: "100%",
                 height: 48,
-                borderRadius: 0,
+                borderRadius: 6,
               }}
             >
               Add to Cart
@@ -995,7 +998,6 @@ const ProductInfo = memo(
           >
             <Box
               className={classes.policyIconWrap}
-              style={{ backgroundColor: "#fee2e2", boxShadow: "0 4px 10px rgba(248,113,113,0.25)" }}
             >
               <ReplayIcon />
             </Box>

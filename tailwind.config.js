@@ -25,6 +25,9 @@ module.exports = {
       },
       colors: {
         primary: '#DD8190',
+        secondary: '#DB2777',
+        tertiary: '#F50057',
+        mainBackground: '#FEF5F7',
       },
       backgroundImage: {
         'primary-gradient': 'linear-gradient(135deg, #DD8190 0%, #B8606E 100%)',
