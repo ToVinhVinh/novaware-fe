@@ -96,7 +96,7 @@ const ProductRelated = ({ userId, productId }) => {
         <div className='h-[1px] bg-primary flex-1'></div>
       </div>
       <Paper
-        style={{ padding: "0px 20px", margin: "0", paddingX: "40px" }}
+        style={{ padding: "0px 40px", margin: "0" }}
         elevation={0}
       >
         {isLoading ? (
@@ -136,7 +136,8 @@ const ProductRelated = ({ userId, productId }) => {
 
             <style>{`
               .related-swiper {
-                padding-bottom: 32px;
+                padding-bottom: 80px !important;
+                overflow: visible !important;
               }
               .related-swiper .swiper-button-next,
               .related-swiper .swiper-button-prev {
@@ -147,7 +148,7 @@ const ProductRelated = ({ userId, productId }) => {
                 box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
                 color: #F50057 !important;
                 border: 1px solid rgba(245, 0, 87, 0.5) !important;
-                top: 45% !important;
+                top: 40% !important;
               }
               .related-swiper .swiper-button-next:after,
               .related-swiper .swiper-button-prev:after {
@@ -169,11 +170,15 @@ const ProductRelated = ({ userId, productId }) => {
                 cursor: default !important;
               }
               .related-swiper .swiper-pagination-bullets {
-                bottom: 0px !important;
+                position: relative !important;
+                bottom: auto !important;
+                margin-top: 40px !important;
                 display: flex;
                 justify-content: center;
                 align-items: center;
                 gap: 6px;
+                width: 100% !important;
+                left: 0 !important;
               }
               .related-swiper .swiper-pagination-bullet {
                 width: 36px !important;

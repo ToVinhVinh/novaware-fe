@@ -467,11 +467,11 @@ const Header = ({
           </IconButton>
 
           {/* Favorites */}
-          <IconButton color="inherit" onClick={handleFavoriteClick}>
+          {/* <IconButton color="inherit" onClick={handleFavoriteClick}>
             <Badge badgeContent={favoriteItems.length} color="secondary" overlap="rectangular">
               <FaHeart />
             </Badge>
-          </IconButton>
+          </IconButton> */}
 
           {/* User Section */}
           <Hidden smDown>
