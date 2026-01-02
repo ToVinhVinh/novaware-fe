@@ -10,11 +10,6 @@ import {
   Box,
   Chip,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  IconButton,
 } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -25,6 +20,7 @@ import Loader from "../Loader";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import { toast } from "react-toastify";
+import ConfirmDialog from "../Modal/ConfirmDialog";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -112,23 +108,6 @@ const useStyles = makeStyles((theme) => ({
   emptyMessage: {
     textAlign: "center",
     padding: theme.spacing(4),
-  },
-  deleteDialog: {
-    "& .MuiDialog-paper": {
-      borderRadius: 12,
-      padding: theme.spacing(1),
-    },
-  },
-  dialogTitle: {
-    paddingBottom: theme.spacing(1),
-  },
-  dialogContent: {
-    paddingTop: theme.spacing(2),
-    paddingBottom: theme.spacing(3),
-  },
-  dialogActions: {
-    padding: theme.spacing(2),
-    gap: theme.spacing(1),
   },
 }));
 
@@ -490,59 +469,26 @@ const OutfitSuggestionsContent = () => {
         </Grid>
       )}
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog
+      <ConfirmDialog
         open={deleteDialogOpen}
         onClose={handleCloseDeleteDialog}
-        maxWidth="xs"
-        fullWidth
-        className={classes.deleteDialog}
-      >
-        <DialogTitle className={classes.dialogTitle}>
-          <Typography variant="h6" style={{ fontWeight: 600, color: "#F50057" }}>
-            Confirm Delete
-          </Typography>
-        </DialogTitle>
-        <DialogContent className={classes.dialogContent}>
-          <Typography variant="body1" style={{ color: "#333" }}>
+        onConfirm={handleConfirmDelete}
+        title="Confirm Delete"
+        message={
+          <>
             Are you sure you want to remove <strong>"{outfitToDelete?.outfit?.name}"</strong> from your saved outfits?
-          </Typography>
-          <Typography variant="body2" style={{ color: "#666", marginTop: 8 }}>
-            This action cannot be undone.
-          </Typography>
-        </DialogContent>
-        <DialogActions className={classes.dialogActions}>
-          <Button
-            onClick={handleCloseDeleteDialog}
-            variant="outlined"
-            size="medium"
-            style={{
-              textTransform: "none",
-              borderRadius: 6,
-              backgroundColor: "#f5f5f5",
-              borderColor: "#ccc",
-              color: "#666",
-              border: "1px solid #ccc",
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirmDelete}
-            variant="contained"
-            size="medium"
-            startIcon={<DeleteOutlineIcon />}
-            style={{
-              textTransform: "none",
-              borderRadius: 6,
-              backgroundColor: "#F50057",
-              color: "#fff",
-            }}
-          >
-            Delete Outfit
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <br />
+            <Typography variant="body2" style={{ color: "#666", marginTop: 8 }}>
+              This action cannot be undone.
+            </Typography>
+          </>
+        }
+        confirmText="Delete Outfit"
+        cancelText="Cancel"
+        confirmColor="secondary"
+        loading={deleteOutfitMutation.isLoading}
+        icon={DeleteOutlineIcon}
+      />
     </Paper>
   );
 };

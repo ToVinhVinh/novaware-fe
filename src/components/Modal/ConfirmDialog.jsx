@@ -7,46 +7,59 @@ import {
     Button,
     Typography,
     makeStyles,
+    Box,
 } from "@material-ui/core";
-import WarningIcon from "@material-ui/icons/Warning";
 
 const useStyles = makeStyles((theme) => ({
     dialog: {
         "& .MuiDialog-paper": {
             borderRadius: 12,
             minWidth: 400,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
         },
     },
     dialogTitle: {
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        padding: "24px 24px 16px 24px",
+        padding: "16px 16px 12px 16px",
+        borderBottom: "1px solid #ccc",
         "& .MuiTypography-root": {
             fontWeight: 600,
             fontSize: "1.25rem",
+            color: "#F50057",
         },
     },
-    icon: {
-        color: theme.palette.warning.main,
-        fontSize: 28,
-    },
     dialogContent: {
-        padding: "0 24px 24px 24px",
+        padding: "8px 16px 24px 16px",
+    },
+    messageText: {
+        color: "#333",
+        fontSize: "1rem",
+        lineHeight: 1.5,
     },
     dialogActions: {
-        padding: "8px 24px 24px 24px",
-        gap: 12,
+        padding: "16px",
+        gap: theme.spacing(1),
     },
     cancelButton: {
-        borderRadius: 6,
         textTransform: "none",
+        borderRadius: 6,
         padding: "8px 24px",
+        backgroundColor: "#f5f5f5",
+        borderColor: "#ccc",
+        color: "#666",
+        border: "1px solid #ccc",
+        "&:hover": {
+            backgroundColor: "#eeeeee",
+            borderColor: "#bbb",
+        },
     },
     confirmButton: {
-        borderRadius: 6,
         textTransform: "none",
+        borderRadius: 6,
         padding: "8px 24px",
+        boxShadow: "none",
+        "&:hover": {
+            boxShadow: "0 4px 12px rgba(245, 0, 87, 0.2)",
+        },
     },
 }));
 
@@ -60,27 +73,23 @@ const ConfirmDialog = ({
     cancelText = "Cancel",
     confirmColor = "secondary",
     loading = false,
+    icon: Icon = null,
 }) => {
     const classes = useStyles();
-
-    const handleConfirm = () => {
-        onConfirm();
-    };
 
     return (
         <Dialog
             open={open}
             onClose={onClose}
             className={classes.dialog}
-            maxWidth="sm"
+            maxWidth="xs"
             fullWidth
         >
             <DialogTitle className={classes.dialogTitle}>
-                <WarningIcon className={classes.icon} />
                 <Typography variant="h6">{title}</Typography>
             </DialogTitle>
             <DialogContent className={classes.dialogContent}>
-                <Typography variant="body1" color="textSecondary">
+                <Typography variant="body1" className={classes.messageText}>
                     {message}
                 </Typography>
             </DialogContent>
@@ -94,11 +103,16 @@ const ConfirmDialog = ({
                     {cancelText}
                 </Button>
                 <Button
-                    onClick={handleConfirm}
+                    onClick={onConfirm}
                     variant="contained"
                     color={confirmColor}
                     className={classes.confirmButton}
                     disabled={loading}
+                    startIcon={Icon ? <Icon /> : null}
+                    style={{
+                        backgroundColor: confirmColor === "secondary" ? "#F50057" : undefined,
+                        color: confirmColor === "secondary" ? "#fff" : undefined,
+                    }}
                 >
                     {confirmText}
                 </Button>
