@@ -299,6 +299,7 @@ const OutfitSuggestionsContent = () => {
   };
 
   const handleOpenDeleteDialog = (outfit, index) => {
+    console.log("Unsaving outfit:", outfit);
     setOutfitToDelete({ outfit, index });
     setDeleteDialogOpen(true);
   };
