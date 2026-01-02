@@ -32,6 +32,10 @@ import {
   AiOutlineEye,
 } from "react-icons/ai";
 import NavigateNextIcon from "@material-ui/icons/NavigateNext";
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+import CancelIcon from "@material-ui/icons/Cancel";
+import InfoIcon from "@material-ui/icons/Info";
+import HourglassEmptyIcon from "@material-ui/icons/HourglassEmpty";
 import Meta from "../../components/Meta";
 import Loader from "../../components/Loader";
 import Message from "../../components/Message";
@@ -71,6 +75,18 @@ const useStyles = makeStyles((theme) => ({
   },
   statusChip: {
     margin: theme.spacing(0.5),
+    padding: "0 6px",
+    fontWeight: 600,
+    height: 24,
+    "& .MuiChip-label": {
+      paddingLeft: 4,
+      paddingRight: 4,
+    },
+    "& .MuiChip-icon": {
+      fontSize: 16,
+      marginLeft: 0,
+      marginRight: -2,
+    },
   },
   filterSection: {
     marginBottom: theme.spacing(2),
@@ -85,6 +101,38 @@ const useStyles = makeStyles((theme) => ({
     WebkitBoxOrient: "vertical",
     overflow: "hidden",
     textAlign: "left",
+  },
+  chipPaid: {
+    backgroundColor: "#dcfce7 !important",
+    color: "#166534 !important",
+  },
+  chipUnpaid: {
+    backgroundColor: "#fee2e2 !important",
+    color: "#991b1b !important",
+  },
+  chipConfirmed: {
+    backgroundColor: "#dbeafe !important",
+    color: "#1e40af !important",
+  },
+  chipWaiting: {
+    backgroundColor: "#f3f4f6 !important",
+    color: "#4b5563 !important",
+  },
+  chipDelivered: {
+    backgroundColor: "#d1fae5 !important",
+    color: "#065f46 !important",
+  },
+  chipPending: {
+    backgroundColor: "#ffedd5 !important",
+    color: "#ea580c !important",
+  },
+  chipCancelled: {
+    backgroundColor: "#fef2f2 !important",
+    color: "#991b1b !important",
+  },
+  chipActive: {
+    backgroundColor: "#f0fdf4 !important",
+    color: "#166534 !important",
   },
 }));
 
@@ -211,69 +259,65 @@ const OrderListScreen = ({ history }) => {
     },
     {
       field: "is_paid",
-      headerName: "Paid",
-      width: 100,
+      headerName: "Payment",
+      width: 120,
       sortable: false,
       align: "center",
       headerAlign: "center",
       renderCell: (params) => (
         <Chip
+          icon={params.value ? <CheckCircleIcon style={{ color: "#166534" }} /> : <CancelIcon style={{ color: "#991b1b" }} />}
           label={params.value ? "Paid" : "Unpaid"}
           size="small"
-          color={params.value ? "primary" : "default"}
-          style={{
-            backgroundColor: params.value ? "#dcfce7" : "#fee2e2",
-            color: params.value ? "#166534" : "#991b1b",
-            border: params.value ? "1px solid #22c55e" : "1px solid #ef4444",
-          }}
+          className={`${classes.statusChip} ${params.value ? classes.chipPaid : classes.chipUnpaid}`}
         />
       ),
     },
     {
       field: "is_processing",
       headerName: "Confirmed",
-      width: 120,
+      width: 140,
       sortable: false,
       align: "center",
       headerAlign: "center",
       renderCell: (params) => (
         <Chip
-          label={params.value ? "Yes" : "No"}
+          icon={params.value ? <CheckCircleIcon style={{ color: "#1e40af" }} /> : <InfoIcon style={{ color: "#4b5563" }} />}
+          label={params.value ? "Confirmed" : "Waiting"}
           size="small"
-          color={params.value ? "primary" : "default"}
-          variant="outlined"
+          className={`${classes.statusChip} ${params.value ? classes.chipConfirmed : classes.chipWaiting}`}
         />
       ),
     },
     {
       field: "is_delivered",
-      headerName: "Delivered",
-      width: 120,
+      headerName: "Delivery",
+      width: 140,
       sortable: false,
       align: "center",
       headerAlign: "center",
       renderCell: (params) => (
         <Chip
-          label={params.value ? "Yes" : "No"}
+          icon={params.value ? <CheckCircleIcon style={{ color: "#065f46" }} /> : <HourglassEmptyIcon style={{ color: "#ea580c" }} />}
+          label={params.value ? "Delivered" : "Pending"}
           size="small"
-          color={params.value ? "primary" : "default"}
-          variant="outlined"
+          className={`${classes.statusChip} ${params.value ? classes.chipDelivered : classes.chipPending}`}
         />
       ),
     },
     {
       field: "is_cancelled",
-      headerName: "Cancelled",
-      width: 120,
+      headerName: "Status",
+      width: 140,
       sortable: false,
       align: "center",
       headerAlign: "center",
       renderCell: (params) => (
         <Chip
-          label={params.value ? "Yes" : "No"}
+          icon={params.value ? <CancelIcon style={{ color: "#991b1b" }} /> : <CheckCircleIcon style={{ color: "#065f46" }} />}
+          label={params.value ? "Cancelled" : "Active"}
           size="small"
-          color={params.value ? "secondary" : "default"}
-          variant="outlined"
+          className={`${classes.statusChip} ${params.value ? classes.chipCancelled : classes.chipActive}`}
         />
       ),
     },
@@ -336,12 +380,12 @@ const OrderListScreen = ({ history }) => {
   }, [history, userInfo]);
 
   const statusOptions = [
-    { value: "paid", label: "Paid", color: "primary" },
-    { value: "unpaid", label: "Unpaid", color: "default" },
-    { value: "delivered", label: "Delivered", color: "primary" },
-    { value: "pending", label: "Pending", color: "default" },
-    { value: "processing", label: "Processing", color: "secondary" },
-    { value: "cancelled", label: "Cancelled", color: "secondary" },
+    { value: "paid", label: "Paid", bg: "#dcfce7", color: "#166534" },
+    { value: "unpaid", label: "Unpaid", bg: "#fee2e2", color: "#991b1b" },
+    { value: "delivered", label: "Delivered", bg: "#d1fae5", color: "#065f46" },
+    { value: "pending", label: "Pending", bg: "#ffedd5", color: "#9a3412" },
+    { value: "processing", label: "Processing", bg: "#dbeafe", color: "#1e40af" },
+    { value: "cancelled", label: "Cancelled", bg: "#fef2f2", color: "#991b1b" },
   ];
 
   const paymentMethods = ["Stripe", "COD", "PayPal"];
@@ -409,9 +453,13 @@ const OrderListScreen = ({ history }) => {
                           label={status.label}
                           className={classes.statusChip}
                           clickable
-                          color={isSelected ? status.color : "default"}
                           onClick={() => handleStatusToggle(status.value)}
                           onDelete={isSelected ? () => handleStatusToggle(status.value) : undefined}
+                          style={{
+                            backgroundColor: isSelected ? status.bg : "#f3f4f6",
+                            color: isSelected ? status.color : "#4b5563",
+                            transition: "all 0.2s ease"
+                          }}
                         />
                       );
                     })}
@@ -432,9 +480,12 @@ const OrderListScreen = ({ history }) => {
                           label={method}
                           className={classes.statusChip}
                           clickable
-                          color={isSelected ? "primary" : "default"}
                           onClick={() => handlePaymentMethodToggle(method)}
                           onDelete={isSelected ? () => handlePaymentMethodToggle(method) : undefined}
+                          style={{
+                            backgroundColor: isSelected ? "#e0e7ff" : "#f3f4f6",
+                            color: isSelected ? "#3730a3" : "#4b5563",
+                          }}
                         />
                       );
                     })}

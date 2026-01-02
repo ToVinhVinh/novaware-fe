@@ -17,7 +17,9 @@ import {
   Avatar,
   Hidden,
 } from "@material-ui/core";
-import { FaTimes, FaCheck } from "react-icons/fa";
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+import CancelIcon from "@material-ui/icons/Cancel";
+import HourglassEmptyIcon from "@material-ui/icons/HourglassEmpty";
 import Message from "../Message";
 import Loader from "../Loader";
 
@@ -49,6 +51,7 @@ const useStyles = makeStyles((theme) => ({
   statusChip: {
     fontWeight: 500,
     fontSize: "0.75rem",
+    padding: "2px 8px",
   },
   itemsCell: {
     maxWidth: 300,
@@ -97,6 +100,40 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 600,
     color: theme.palette.secondary.main,
     fontSize: "0.875rem",
+  },
+  statusChipBase: {
+    fontWeight: 600,
+    height: 24,
+    padding: "0 6px",
+    "& .MuiChip-label": {
+      paddingLeft: 4,
+      paddingRight: 4,
+    },
+    "& .MuiChip-icon": {
+      fontSize: 16,
+      marginLeft: 0,
+      marginRight: -2,
+    },
+  },
+  chipPaid: {
+    backgroundColor: "#dcfce7 !important",
+    color: "#166534 !important",
+  },
+  chipUnpaid: {
+    backgroundColor: "#fee2e2 !important",
+    color: "#991b1b !important",
+  },
+  chipDelivered: {
+    backgroundColor: "#d1fae5 !important",
+    color: "#065f46 !important",
+  },
+  chipPending: {
+    backgroundColor: "#ffedd5 !important",
+    color: "#ea580c !important",
+  },
+  chipCancelled: {
+    backgroundColor: "#fef2f2 !important",
+    color: "#991b1b !important",
   },
 }));
 
@@ -153,16 +190,21 @@ const OrdersContent = ({ orders, loadingOrders, errorOrders }) => {
 
                 // Determine status
                 let statusLabel = "Pending";
-                let statusColor = "default";
+                let statusIcon = <HourglassEmptyIcon style={{ color: "#ea580c" }} />;
+                let statusClass = classes.chipPending;
+                
                 if (isCancelled) {
                   statusLabel = "Cancelled";
-                  statusColor = "error";
+                  statusIcon = <CancelIcon style={{ color: "#991b1b" }} />;
+                  statusClass = classes.chipCancelled;
                 } else if (isDelivered) {
                   statusLabel = "Delivered";
-                  statusColor = "success";
+                  statusIcon = <CheckCircleIcon style={{ color: "#065f46" }} />;
+                  statusClass = classes.chipDelivered;
                 } else if (isPaid) {
                   statusLabel = "Paid";
-                  statusColor = "primary";
+                  statusIcon = <CheckCircleIcon style={{ color: "#166534" }} />;
+                  statusClass = classes.chipPaid;
                 }
 
                 return (
@@ -220,17 +262,10 @@ const OrdersContent = ({ orders, loadingOrders, errorOrders }) => {
                     </TableCell>
                     <TableCell align="right">
                       <Chip
+                        icon={statusIcon}
                         label={statusLabel}
                         size="small"
-                        color={statusColor}
-                        className={classes.statusChip}
-                        icon={
-                          isCancelled ? (
-                            <FaTimes size={12} />
-                          ) : isDelivered || isPaid ? (
-                            <FaCheck size={12} />
-                          ) : null
-                        }
+                        className={`${classes.statusChipBase} ${statusClass}`}
                       />
                     </TableCell>
                     <TableCell align="right" className={classes.priceCell}>
