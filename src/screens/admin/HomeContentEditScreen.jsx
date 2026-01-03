@@ -219,7 +219,6 @@ const HomeContentEditScreen = () => {
           images: [...oldImages, ...(uploadedImages || [])],
         };
         if (!updated._id) {
-          console.error("Missing _id for banner update");
           return;
         }
 
@@ -230,7 +229,6 @@ const HomeContentEditScreen = () => {
           });
           toast.success("Banner đã được cập nhật!");
         } catch (error) {
-          console.error("Failed to update banner:", error);
           toast.error("Cập nhật banner thất bại");
         }
       } else {
@@ -249,7 +247,6 @@ const HomeContentEditScreen = () => {
           });
           toast.success("Carousel đã được cập nhật!");
         } catch (error) {
-          console.error("Failed to update carousel:", error);
           toast.error("Cập nhật carousel thất bại");
         }
       }

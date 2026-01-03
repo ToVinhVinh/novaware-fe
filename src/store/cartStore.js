@@ -29,30 +29,65 @@ const useCartStore = create(
           }
         }
 
-        const normalizedSize = sizeSelected ? String(sizeSelected).toLowerCase() : "";
-        const normalizedColor = colorName || colorHex || "";
-
         const productId = productData._id || productData.id || "";
-        
-        // Calculate priceSale and round to 2 decimal places
         const salePercent = productData.sale || 0;
         const calculatedPriceSale = variantPrice * (1 - salePercent / 100);
         const roundedPriceSale = Math.round(calculatedPriceSale * 100) / 100;
-        
+
+        // Derive sizes and colors from variants if not provided
+        let derivedSize = productData.size || {};
+        let derivedColor = productData.colors || productData.color || [];
+
+        if (productData.variants && productData.variants.length > 0) {
+          // If size is an array or empty, convert to object {sizeName: stock} from variants
+          if (Array.isArray(derivedSize) || Object.keys(derivedSize).length === 0) {
+            const sizeObj = {};
+            productData.variants.forEach(v => {
+              const s = (v.size || "M").toUpperCase();
+              sizeObj[s] = (sizeObj[s] || 0) + (v.stock || 0);
+            });
+            derivedSize = sizeObj;
+          }
+
+          // If color is empty, derive from variants
+          if (!derivedColor || (Array.isArray(derivedColor) && derivedColor.length === 0)) {
+            const colorMap = new Map();
+            productData.variants.forEach(v => {
+              if (v.color && !colorMap.has(v.color)) {
+                colorMap.set(v.color, { name: v.color, hexCode: v.color });
+              }
+            });
+            derivedColor = Array.from(colorMap.values());
+          }
+        }
+
+        // Final fallbacks if still empty (common for products without variants like handbags)
+        if (Object.keys(derivedSize).length === 0) {
+          derivedSize = { "One Size": productData.countInStock || 1 };
+        }
+        if (!derivedColor || (Array.isArray(derivedColor) && derivedColor.length === 0)) {
+          const fallbackColor = productData.baseColour || "Standard";
+          derivedColor = [{ name: fallbackColor, hexCode: fallbackColor }];
+        }
+
+        const normalizedSize = sizeSelected ? String(sizeSelected).toUpperCase() : (Object.keys(derivedSize)[0] || "");
+        const normalizedColor = colorName || colorHex || (derivedColor[0]?.name || "");
+
         const newItem = {
           product: productId,
           name: productData.name || productData.productDisplayName || "Product",
           qty: Number(qty) || 1,
           sizeSelected: normalizedSize,
           colorSelected: normalizedColor,
-          size: productData.size,
-          color: productData.colors,
+          size: derivedSize,
+          color: derivedColor,
+          variants: productData.variants || [],
           images: productData.images || [],
           price: Math.round(variantPrice * 100) / 100,
           sale: salePercent,
           priceSale: roundedPriceSale,
           countInStock: variantStock,
-          selected: true, // Default to selected
+          selected: true,
         };
 
         const existItemIndex = cartItems.findIndex(

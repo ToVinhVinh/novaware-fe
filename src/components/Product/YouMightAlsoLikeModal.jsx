@@ -182,7 +182,6 @@ const YouMightAlsoLikeModal = ({ open, onClose, userId, productId }) => {
         const result = await getHybridRecommendations.mutateAsync(requestData);
         setRecommendationData(result);
       } catch (error) {
-        console.error("Failed to fetch recommendations:", error);
         toast.error("Failed to load recommendations.");
       }
     };
@@ -190,20 +189,15 @@ const YouMightAlsoLikeModal = ({ open, onClose, userId, productId }) => {
     fetchRecommendations();
   }, [open, userId, productId]);
 
-  // Transform recommendation data to match expected structure
   const likeData = useMemo(() => {
     if (!recommendationData) return null;
 
-    // Map personalized items to products format
-    // Note: API response only includes product_id, name, score, reason
-    // Full product details (images, price, etc.) would need to be fetched separately
     const products = recommendationData.personalized?.map((item) => ({
       _id: item.product_id,
       name: item.name || "Product",
       product_id: item.product_id,
       score: item.score,
       reason: item.reason,
-      // Default values for missing fields
       images: [],
       price: 0,
       sale: 0,
@@ -212,7 +206,6 @@ const YouMightAlsoLikeModal = ({ open, onClose, userId, productId }) => {
       countInStock: 0,
     })) || [];
 
-    // Build explanation from reasons
     const reasons = recommendationData.personalized
       ?.map((item) => item.reason)
       .filter((r) => r && r.trim().length > 0) || [];

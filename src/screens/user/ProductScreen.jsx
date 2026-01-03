@@ -165,9 +165,7 @@ const ProductScreen = ({ setLoginModalOpen }) => {
       });
       toast.info("Product removed from favorites successfully!");
     } catch (error) {
-      // Revert on error
       setIsFavorite(true);
-      console.error("Remove from favorites error:", error);
       toast.error("Failed to remove product from favorites");
     }
   };

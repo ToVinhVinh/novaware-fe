@@ -98,7 +98,6 @@ const FavoritePreview = () => {
         });
         toast.success("Đã xóa khỏi yêu thích!");
       } catch (error) {
-        console.error("Failed to remove favorite:", error);
         toast.error("Xóa khỏi yêu thích thất bại");
       }
     } else {

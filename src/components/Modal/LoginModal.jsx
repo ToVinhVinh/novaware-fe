@@ -158,7 +158,6 @@ const decodeJwtPayload = (token) => {
     );
     return JSON.parse(jsonPayload);
   } catch (error) {
-    console.error("Failed to decode JWT payload:", error);
     return null;
   }
 };

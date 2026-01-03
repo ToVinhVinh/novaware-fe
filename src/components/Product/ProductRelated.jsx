@@ -71,6 +71,8 @@ const ProductRelated = ({ userId, productId }) => {
         rating: product.rating || 0,
         baseColour: product.baseColour,
         articleType: product.articleType,
+        variants: product.variants || [],
+        countInStock: (product.variants || []).reduce((acc, v) => acc + (v.stock || 0), 0) || (product.countInStock || 0),
       };
     });
   }, [recommendationData]);

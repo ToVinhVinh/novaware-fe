@@ -62,7 +62,6 @@ const CheckoutForm = ({ totalPrice, handleStripePayment }) => {
       });
 
       if (result.error) {
-        console.error(result.error);
         setError(result.error.message);
       } else {
         if (result.paymentIntent.status === "succeeded") {
@@ -70,7 +69,6 @@ const CheckoutForm = ({ totalPrice, handleStripePayment }) => {
         }
       }
     } catch (error) {
-      console.error(error);
       setError("An unexpected error occurred.");
     } finally {
       setLoading(false);

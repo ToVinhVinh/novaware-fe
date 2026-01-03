@@ -62,7 +62,6 @@ export const login = (email, password) => async (dispatch) => {
     localStorage.setItem("userInfo", JSON.stringify(data));
     dispatch(listFavorites());
   } catch (error) {
-    console.log("Error response:", error.response);
     dispatch({
       type: USER_LOGIN_FAIL,
       payload:
@@ -108,11 +107,9 @@ export const handleSocialLoginCallback = (searchParams) => async (dispatch) => {
       localStorage.setItem("userInfo", JSON.stringify(userInfo));
       return { success: true, userInfo: userInfo };
     } else {
-      console.error("Failed to extract user info from URL");
       return { success: false, error: "Failed to extract user info" };
     }
   } catch (error) {
-    console.error("Error handling social login callback:", error);
     return { success: false, error: error.message || "An error occurred" };
   }
 };

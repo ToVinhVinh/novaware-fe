@@ -236,27 +236,9 @@ const StatisticsScreen = () => {
 	const { data: categoriesData, isLoading: categoriesLoading } = useGetProductCategories();
 	const { data: salesByGenderData, isLoading: salesByGenderLoading } = useGetSalesByGender();
 
-	// Console logs for debugging as requested
-	React.useEffect(() => {
-		if (revenueData) console.log('Revenue & Orders Trend:', revenueData.data);
-	}, [revenueData]);
-
-	React.useEffect(() => {
-		if (topProductsData) console.log('Top Products:', topProductsData.data);
-	}, [topProductsData]);
-
-	React.useEffect(() => {
-		if (orderStatusData) console.log('Fulfillment Status:', orderStatusData.data);
-	}, [orderStatusData]);
-
-	React.useEffect(() => {
-		if (salesByGenderData) console.log('Sales by Gender:', salesByGenderData.data);
-	}, [salesByGenderData]);
-
 	const overview = overviewData?.data;
 	const isLoading = overviewLoading || revenueLoading;
 
-	// Format currency
 	const formatCurrency = (value) => {
 		return new Intl.NumberFormat('vi-VN', {
 			style: 'currency',
@@ -264,12 +246,10 @@ const StatisticsScreen = () => {
 		}).format(value);
 	};
 
-	// Format number
 	const formatNumber = (value) => {
 		return new Intl.NumberFormat('vi-VN').format(value);
 	};
 
-	// Render Overview Stats Cards
 	const renderStatsCards = () => {
 		if (!overview) return null;
 

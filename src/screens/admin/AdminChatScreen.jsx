@@ -250,9 +250,6 @@ const AdminChatScreen = ({ setHasNewMessageRef }) => {
     fetchUsers();
   }, [userInfo, token, fetchLastMessage, users.length]);
 
-  // Lấy tin nhắn khi chọn user - Removed API call
-
-  // cuon xuong cuoi
   useEffect(() => {
     if (messageEndRef.current) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });

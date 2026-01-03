@@ -293,7 +293,7 @@ const CartScreen = ({ history }) => {
 
         <Grid item xs={12} lg={4}>
           <Paper elevation={0} className={classes.cartTotalWrapper}>
-            <Typography variant="h5" align="self-start" className="tracking-widest">Order Summary</Typography>
+            <Typography variant="h5" align="left" className="tracking-widest">Order Summary</Typography>
             <Divider className={classes.divider} />
             <Box
               display="flex"

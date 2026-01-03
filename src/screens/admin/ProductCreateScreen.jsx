@@ -236,7 +236,6 @@ const ProductCreateScreen = ({ history }) => {
         });
         uploadedImages = response.data.map((item) => item.url);
       } catch (error) {
-        console.error(error);
         setUploading(false);
         toast.error("Lỗi khi tải hình ảnh");
         return;

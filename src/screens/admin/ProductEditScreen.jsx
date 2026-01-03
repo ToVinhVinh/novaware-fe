@@ -230,7 +230,6 @@ const ProductEditScreen = ({ match, history }) => {
       toast.success("Product updated successfully!");
       history.push("/admin/products");
     } catch (error) {
-      console.error("Failed to update product:", error);
       toast.error("Update product failed!");
     } finally {
       setUploading(false);

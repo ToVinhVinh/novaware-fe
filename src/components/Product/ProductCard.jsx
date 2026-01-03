@@ -55,6 +55,7 @@ const ProductCard = (props) => {
       images: images || [],
       size: props.size || [],
       countInStock: variant?.stock || props.countInStock || 0,
+      baseColour: baseColour || "",
     };
 
     setDrawerOpen(true);

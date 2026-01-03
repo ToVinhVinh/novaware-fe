@@ -241,7 +241,6 @@ const ChatPreview = () => {
         setMessages((prevMessages) => [...prevMessages, aiResponse]);
       }
     } catch (error) {
-      console.error(error);
       toast.error("Đã xảy ra lỗi!");
       setMessages((prevMessages) => [
         ...prevMessages,

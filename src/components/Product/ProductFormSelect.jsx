@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import clsx from "clsx";
 import { toast } from "react-toastify";
 import useCartStore from "../../store/cartStore";
@@ -26,26 +26,45 @@ const useStyles = makeStyles((theme) => ({
 const ProductFormSelect = ({ item, className }) => {
   const classes = useStyles();
   const { addToCart, removeFromCart } = useCartStore();
-  const { control, handleSubmit, setValue } = useForm();
-  const [selectedColor, setSelectedColor] = useState(null);
+  const { control, handleSubmit, setValue, watch } = useForm();
+  const watchedSize = watch("size");
+  const watchedColor = watch("color");
+  const variants = item.variants || [];
+  const availableSizes = useMemo(() => {
+    if (!variants.length) return Object.keys(item.size || {});
+    if (!watchedColor) return [...new Set(variants.map(v => v.size.toUpperCase()))];
+    
+    return [...new Set(variants
+      .filter(v => v.color === watchedColor && v.stock > 0)
+      .map(v => v.size.toUpperCase())
+    )];
+  }, [variants, watchedColor, item.size]);
+
+  const availableColors = useMemo(() => {
+    if (!variants.length) return item.color || [];
+    if (!watchedSize) return item.color || [];
+    
+    const filteredColors = variants
+      .filter(v => v.size.toLowerCase() === watchedSize.toLowerCase() && v.stock > 0)
+      .map(v => v.color);
+      
+    return (item.color || []).filter(c => filteredColors.includes(c.hexCode));
+  }, [variants, watchedSize, item.color]);
 
   useEffect(() => {
+    setValue("size", item.sizeSelected?.toUpperCase());
+    
     if (item.color && item.color.length > 0) {
-      const newSelectedColor = item.colorSelected
-        ? item.color.find((c) => c.name === item.colorSelected) || item.color[0]
-        : item.color[0];
-      setSelectedColor(newSelectedColor);
-      setValue("color", newSelectedColor.hexCode);
+      const colorObj = item.color.find(c => c.name === item.colorSelected) || item.color[0];
+      setValue("color", colorObj?.hexCode);
     }
-    const defaultSize =
-      item.sizeSelected && Object.prototype.hasOwnProperty.call(item.size, item.sizeSelected)
-        ? item.sizeSelected
-        : Object.keys(item.size)[0];
-    setValue("size", defaultSize);
-  }, [item.color, item.colorSelected, item.sizeSelected, item.size, setValue]);
+    
+    setValue("qty", item.qty);
+  }, [item, setValue]);
 
   const updateCartHandler = (data, id) => {
-    const selectedColorName = selectedColor ? selectedColor.name : "";
+    const selectedColorObj = (item.color || []).find(c => c.hexCode === data.color);
+    const selectedColorName = selectedColorObj ? selectedColorObj.name : "";
 
     const oldSize = item.sizeSelected;
     const oldColor = item.colorSelected;
@@ -53,12 +72,11 @@ const ProductFormSelect = ({ item, className }) => {
     const newSize = data.size;
     const newColor = selectedColorName;
 
-    if (oldSize === newSize && oldColor === newColor && item.qty === data.qty) {
+    if (oldSize?.toLowerCase() === newSize?.toLowerCase() && oldColor === newColor && item.qty === data.qty) {
       toast.info("No changes");
       return;
     }
 
-    // Tạo productData từ item hiện tại
     const productData = {
       _id: item.product,
       id: item.product,
@@ -66,7 +84,7 @@ const ProductFormSelect = ({ item, className }) => {
       productDisplayName: item.name,
       price: item.price,
       sale: item.sale || 0,
-      variants: [], // Có thể cần thêm variants nếu có
+      variants: variants, // Pass full variants for correct price/stock lookup
       colors: item.color || [],
       images: item.images || [],
       size: item.size || {},
@@ -74,8 +92,9 @@ const ProductFormSelect = ({ item, className }) => {
     };
 
     removeFromCart(id, oldSize, oldColor);
+    // Note: addToCart will handle finding the correct price from variants
     addToCart(productData, data.qty, newSize, data.color, newColor);
-    toast.success("Product updated successfully!");
+    toast.success("Cart updated!");
   };
 
   return (
@@ -93,16 +112,14 @@ const ProductFormSelect = ({ item, className }) => {
         <Controller
           name="size"
           control={control}
-          defaultValue={item.sizeSelected}
+          defaultValue={item.sizeSelected?.toUpperCase()}
           render={({ field }) => (
             <Select {...field} label="Size" autoWidth>
-              {Object.keys(item.size).map((value) =>
-                item.size[value] > 0 ? (
-                  <MenuItem value={value} key={value}>
-                    {value.toUpperCase()}
-                  </MenuItem>
-                ) : null
-              )}
+              {availableSizes.map((value) => (
+                <MenuItem value={value} key={value}>
+                  {value.toUpperCase()}
+                </MenuItem>
+              ))}
             </Select>
           )}
         />
@@ -116,41 +133,33 @@ const ProductFormSelect = ({ item, className }) => {
         <Controller
           name="color"
           control={control}
-          defaultValue={selectedColor ? selectedColor.hexCode : ""}
+          defaultValue=""
           render={({ field }) => (
             <Select
               {...field}
               label="Color"
               autoWidth
-              onChange={(e) => {
-                const color = item.color.find(
-                  (c) => c.hexCode === e.target.value
-                );
-                setSelectedColor(color);
-                field.onChange(e);
-              }}
             >
-              {item.color &&
-                item.color.map((color) => (
-                  <MenuItem value={color.hexCode} key={color.name}>
+              {availableColors.map((color) => (
+                <MenuItem value={color.hexCode} key={color.name}>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="flex-start"
+                  >
                     <Box
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="flex-start"
-                    >
-                      <Box
-                        style={{
-                          width: 20,
-                          height: 20,
-                          backgroundColor: color.hexCode,
-                          borderRadius: "50%",
-                          marginRight: 8,
-                        }}
-                      />
-                      <span>{color.name}</span>
-                    </Box>
-                  </MenuItem>
-                ))}
+                      style={{
+                        width: 20,
+                        height: 20,
+                        backgroundColor: color.hexCode,
+                        borderRadius: "50%",
+                        marginRight: 8,
+                      }}
+                    />
+                    <span>{color.name}</span>
+                  </Box>
+                </MenuItem>
+              ))}
             </Select>
           )}
         />
@@ -159,23 +168,29 @@ const ProductFormSelect = ({ item, className }) => {
       {/* Dropdown chọn số lượng */}
       <FormControl variant="outlined" size="small">
         <InputLabel shrink id="quantity-select-label">
-          Quantity
+          Qty
         </InputLabel>
         <Controller
           name="qty"
           control={control}
           defaultValue={item.qty}
-          render={({ field }) => (
-            <Select {...field} label="Qty" autoWidth>
-              {Array(item.countInStock)
-                .fill()
-                .map((_, index) => (
-                  <MenuItem value={index + 1} key={index + 1}>
-                    {index + 1}
+          render={({ field }) => {
+            // Find stock for selected size/color
+            const matchingVariant = variants.find(
+              v => v.size?.toLowerCase() === watchedSize?.toLowerCase() && v.color === watchedColor
+            );
+            const maxStock = matchingVariant ? matchingVariant.stock : item.countInStock;
+            
+            return (
+              <Select {...field} label="Qty" autoWidth>
+                {Array.from({ length: maxStock || 1 }, (_, i) => i + 1).map((val) => (
+                  <MenuItem value={val} key={val}>
+                    {val}
                   </MenuItem>
                 ))}
-            </Select>
-          )}
+              </Select>
+            );
+          }}
         />
       </FormControl>
 

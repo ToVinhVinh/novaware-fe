@@ -218,10 +218,8 @@ const ProfileContent = ({ user, onItemClick }) => {
         payload.age = Number(data.age);
       }
 
-      console.log("Updating profile with payload:", payload);
       await updateProfileMutation.mutateAsync(payload);
     } catch (error) {
-      console.error("Failed to update profile:", error);
       toast.error(error?.response?.data?.message || "Failed to update profile. Please try again.");
     }
   };
@@ -279,7 +277,6 @@ const ProfileContent = ({ user, onItemClick }) => {
         <form
           className={classes.form}
           onSubmit={handleSubmit(submitHandler, (errors) => {
-            console.error("Form validation errors:", errors);
             toast.error("Please fill in all required fields correctly.");
           })}
         >

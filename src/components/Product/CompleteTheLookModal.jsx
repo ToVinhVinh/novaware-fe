@@ -827,7 +827,6 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
             setSavedOutfits((prev) => new Set([...prev, outfitKey]));
             toast.success("Outfit saved successfully!");
         } catch (error) {
-            console.error("Failed to save outfit:", error);
             toast.error(error?.message || "Failed to save outfit. Please try again.");
         }
     };

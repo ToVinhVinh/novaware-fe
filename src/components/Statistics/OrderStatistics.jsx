@@ -114,7 +114,6 @@ const OrderStatistics = ({
 
   return (
     <>
-      {/* order summary */}
       <OrderSummary
         totalOrders={totalOrders}
         totalDeliveredOrders={totalDeliveredOrders}

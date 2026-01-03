@@ -171,8 +171,6 @@ const Chat = ({ setHasNewMessageRef }) => {
     try {
       // Socket removed
     } catch (error) {
-      console.error("Error sending:", error);
-      // Nếu gửi lỗi, xóa tin nhắn vừa thêm khỏi state
       setMessages((prevMessages) =>
         prevMessages.filter((msg) => msg.timestamp !== newMessage.timestamp)
       );

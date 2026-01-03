@@ -197,7 +197,6 @@ const OutfitSuggestionsContent = () => {
         const result = await getGNNRecommendations.mutateAsync(requestData);
         setRecommendationData(result);
       } catch (err) {
-        console.error("Failed to fetch recommendations:", err);
         setError(err?.message || "Failed to load outfit recommendations.");
         setRecommendationData(null);
       } finally {
@@ -299,7 +298,6 @@ const OutfitSuggestionsContent = () => {
   };
 
   const handleOpenDeleteDialog = (outfit, index) => {
-    console.log("Unsaving outfit:", outfit);
     setOutfitToDelete({ outfit, index });
     setDeleteDialogOpen(true);
   };
@@ -327,7 +325,6 @@ const OutfitSuggestionsContent = () => {
       toast.success(`"${outfitToDelete.outfit.name}" has been removed from your saved outfits.`);
       handleCloseDeleteDialog();
     } catch (error) {
-      console.error("Failed to delete outfit:", error);
       toast.error(error?.message || "Failed to delete outfit. Please try again.");
     }
   };
