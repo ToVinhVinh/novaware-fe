@@ -240,7 +240,7 @@ const ProductScreen = ({ setLoginModalOpen }) => {
             </Grid>
           </Grid> */}
 
-          {userInfo && (
+          {userInfo && !userInfo.isAdmin && (
             <Grid container>
               <Grid item xs={12}>
                 {product && (

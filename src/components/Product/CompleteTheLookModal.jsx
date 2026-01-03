@@ -161,6 +161,7 @@ const useStyles = makeStyles((theme) => ({
         borderRadius: 0,
         verticalAlign: "top",
         width: "20%",
+        height: 1,
         "&:last-child": {
             borderRight: "none",
         },
@@ -177,6 +178,7 @@ const useStyles = makeStyles((theme) => ({
     },
     productCarouselContainer: {
         width: "100%",
+        height: "100%",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -212,6 +214,7 @@ const useStyles = makeStyles((theme) => ({
     carouselProductWrapper: {
         width: "100%",
         minHeight: 300,
+        height: "100%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -676,7 +679,6 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
         if (!recommendationData || !Array.isArray(recommendationData.outfits)) return [];
 
         return recommendationData.outfits
-            .filter(outfit => (outfit.products || []).length >= 4)
             .map((outfit) => {
             const products = [];
 
@@ -1097,25 +1099,6 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                                                                     const currentIndex = carouselIndices[carouselKey] || 0;
                                                                     const products = productsByCategory[category] || [];
                                                                     const currentProduct = products[currentIndex];
-
-                                                                    const handlePrev = () => {
-                                                                        if (currentIndex > 0) {
-                                                                            setCarouselIndices(prev => ({
-                                                                                ...prev,
-                                                                                [carouselKey]: currentIndex - 1
-                                                                            }));
-                                                                        }
-                                                                    };
-
-                                                                    const handleNext = () => {
-                                                                        if (currentIndex < products.length - 1) {
-                                                                            setCarouselIndices(prev => ({
-                                                                                ...prev,
-                                                                                [carouselKey]: currentIndex + 1
-                                                                            }));
-                                                                        }
-                                                                    };
-
                                                                     return (
                                                                         <TableCell key={category} className={classes.tableCell} align="center" style={{ verticalAlign: "top" }}>
                                                                             {products.length > 0 ? (
@@ -1123,12 +1106,30 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                                                                                     <Box className={classes.carouselProductWrapper}>
                                                                                         {currentProduct && renderProductCard(currentProduct)}
                                                                                     </Box>
-
                                                                                 </Box>
                                                                             ) : (
-                                                                                <Typography variant="body2" color="textSecondary" style={{ textAlign: "center", padding: "20px" }}>
-                                                                                    No items
-                                                                                </Typography>
+                                                                                <Box className={classes.productCarouselContainer} style={{ height: "100%" }}>
+                                                                                    <Box className={classes.carouselProductWrapper} style={{ height: "100%" }}>
+                                                                                        <Card 
+                                                                                            className={classes.productCard} 
+                                                                                            style={{ 
+                                                                                                height: "100%", 
+                                                                                                minHeight: "310px", 
+                                                                                                display: "flex", 
+                                                                                                alignItems: "center", 
+                                                                                                justifyContent: "center", 
+                                                                                                backgroundColor: "#fafafa", 
+                                                                                                borderStyle: "dashed",
+                                                                                                cursor: "default",
+                                                                                                boxShadow: "none"
+                                                                                            }}
+                                                                                        >
+                                                                                            <Typography variant="body2" color="textSecondary">
+                                                                                                No items
+                                                                                            </Typography>
+                                                                                        </Card>
+                                                                                    </Box>
+                                                                                </Box>
                                                                             )}
                                                                         </TableCell>
                                                                     );
