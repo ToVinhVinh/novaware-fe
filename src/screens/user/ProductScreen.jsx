@@ -235,12 +235,12 @@ const ProductScreen = ({ setLoginModalOpen }) => {
               />
             </Grid>
           </Box>
-
+{/* 
           <Grid container>
             <Grid item xs={12}>
               <ProductReview reviews={product.reviews} productId={productId} />
             </Grid>
-          </Grid>
+          </Grid> */}
 
           {userInfo && (
             <Grid container>

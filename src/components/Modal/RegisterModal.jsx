@@ -168,6 +168,18 @@ const RegisterModal = ({
                           name="password"
                           label="Password"
                           required
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                <IconButton
+                                  onClick={() => setShowPassword(!showPassword)}
+                                  onMouseDown={(e) => e.preventDefault()}
+                                >
+                                  {showPassword ? <VscEye /> : <VscEyeClosed />}
+                                </IconButton>
+                              </InputAdornment>
+                            ),
+                          }}
                           rules={{
                             minLength: {
                               value: 6,
