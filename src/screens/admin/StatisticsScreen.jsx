@@ -240,14 +240,14 @@ const StatisticsScreen = () => {
 	const isLoading = overviewLoading || revenueLoading;
 
 	const formatCurrency = (value) => {
-		return new Intl.NumberFormat('vi-VN', {
+		return new Intl.NumberFormat('en-US', {
 			style: 'currency',
-			currency: 'VND',
+			currency: 'USD',
 		}).format(value);
 	};
 
 	const formatNumber = (value) => {
-		return new Intl.NumberFormat('vi-VN').format(value);
+		return new Intl.NumberFormat('en-US').format(value);
 	};
 
 	const renderStatsCards = () => {
@@ -616,7 +616,7 @@ const StatisticsScreen = () => {
 									#{order.id.slice(-8)}
 								</Typography>
 								<Typography variant="caption" color="textSecondary">
-									{new Date(order.created_at).toLocaleDateString('vi-VN')}
+									{new Date(order.created_at).toLocaleDateString('en-US')}
 								</Typography>
 							</Box>
 							<Box>
