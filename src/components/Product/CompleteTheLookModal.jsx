@@ -696,7 +696,6 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                     name: product.productDisplayName || product.name || "Product",
                     product_id: item.product_id,
                     category,
-                    // Use the price from the first variant as base price
                     price: firstVariantPrice,
                     sale: product.sale || 0,
                     images,
@@ -706,7 +705,6 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                 });
             });
 
-            // Calculate total price using first variant price and sale%
             const totalPrice = products.reduce((sum, p) => {
                 const basePrice = p.price || 0;
                 const salePercent = p.sale || 0;
@@ -781,7 +779,6 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
                 }
             });
 
-            // Get only the currently displayed products based on carouselIndices
             const displayedProducts = [];
             categories.forEach((category) => {
                 const carouselKey = `${category}-${outfitIndex}`;
@@ -1064,13 +1061,12 @@ const CompleteTheLookModal = ({ open, onClose, userId, productId, user, recommen
 
                                                     return (
                                                         <React.Fragment key={outfitIndex}>
-                                                            {/* Row 0: Outfit header with save button */}
                                                             <TableRow className={classes.tableRow}>
                                                                 <TableCell colSpan={5} style={{ padding: "12px 16px", backgroundColor: "#fff" }}>
                                                                     <Box display="flex" justifyContent="space-between" alignItems="center">
                                                                         <Box>
                                                                             <Typography variant="h6" style={{ fontWeight: 600, marginBottom: 4 }}>
-                                                                                {outfit.name}
+                                                                                {"Outfit " + (outfitIndex + 1)}
                                                                             </Typography>
                                                                         </Box>
                                                                         <Button
