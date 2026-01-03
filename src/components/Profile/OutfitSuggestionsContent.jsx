@@ -370,9 +370,20 @@ const OutfitSuggestionsContent = () => {
               <Card className={classes.outfitCard} elevation={0}>
                 <Box className={classes.outfitHeader}>
                   <Box className={classes.outfitHeaderTop}>
-                    <Typography variant="h6" className={classes.outfitName}>
-                      {outfit.name}
-                    </Typography>
+                    <Box className={classes.outfitInfo}>
+                    <Chip
+                      label={outfit.style}
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                    />
+                    <Chip
+                      label={outfit.gender}
+                      size="small"
+                      color="secondary"
+                      variant="outlined"
+                    />
+                  </Box>
                     {index < processedSavedOutfits.length && (
                       <Button
                         variant="outlined"
@@ -392,20 +403,7 @@ const OutfitSuggestionsContent = () => {
                       </Button>
                     )}
                   </Box>
-                  <Box className={classes.outfitInfo}>
-                    <Chip
-                      label={outfit.style}
-                      size="small"
-                      color="primary"
-                      variant="outlined"
-                    />
-                    <Chip
-                      label={outfit.gender}
-                      size="small"
-                      color="secondary"
-                      variant="outlined"
-                    />
-                  </Box>
+                  
                 </Box>
 
                 <Box className={classes.productsGrid}>
